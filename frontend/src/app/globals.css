@@ -167,6 +167,11 @@
     letter-spacing: -0.025em;
     text-wrap: balance;
   }
+  /* The ported Environmental page sets its own heading tracking. */
+  .theme-env :where(h1, h2, h3, h4) {
+    letter-spacing: normal;
+    text-wrap: wrap;
+  }
   ::selection {
     background: oklch(85% 0.06 298);
   }
@@ -214,6 +219,9 @@
   }
 
   /* ── Environmental Filters page (1:1 port) ─────────────────────────── */
+  html:has(.theme-env) {
+    scroll-padding-top: 5rem;
+  }
   .theme-env {
     /* shadcn's inline tokens resolve through --muted / --border directly */
     --muted: #56696c;
@@ -221,6 +229,8 @@
     --font-display: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;
     --font-sans: var(--font-plex-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-mono: var(--font-plex-mono), ui-monospace, Menlo, Consolas, monospace;
+    /* Fraunces is loaded on this subtree, so resolve the serif stack here too. */
+    --font-serif: var(--font-fraunces), Georgia, serif;
     background: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);

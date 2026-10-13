@@ -21,9 +21,10 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       // Product images uploaded through the admin dashboard
-      new URL("https://res.cloudinary.com/dmaf8fdeu/**"),
-      // Photography used by the Environmental Filters page
-      new URL("https://images.unsplash.com/**"),
+      { protocol: "https", hostname: "res.cloudinary.com", pathname: "/dmaf8fdeu/**" },
+      // Photography used by the Environmental Filters page (URLs carry query params,
+      // so this pattern has no `search` restriction)
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],
   },
 };
