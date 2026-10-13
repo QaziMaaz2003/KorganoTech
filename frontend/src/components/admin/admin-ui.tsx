@@ -84,7 +84,12 @@ export function SearchInput({
   className?: string;
 }) {
   const [local, setLocal] = useState(value);
-  useEffect(() => setLocal(value), [value]);
+  const [synced, setSynced] = useState(value);
+  // Follow external resets of `value` (adjusting state during render, not in an effect).
+  if (value !== synced) {
+    setSynced(value);
+    setLocal(value);
+  }
   useEffect(() => {
     const t = setTimeout(() => {
       if (local !== value) onChange(local);

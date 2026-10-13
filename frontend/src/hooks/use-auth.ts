@@ -1,28 +1,29 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiError, get, post } from "@/lib/client-api";
+import { get, post } from "@/lib/client-api";
 import { useCartStore } from "@/lib/cart-store";
 import type { Cart, User } from "@/lib/types";
+import { useHydrated } from "./use-hydrated";
 
 export const ME_KEY = ["me"] as const;
 
-/** The signed-in user, or null for guests. */
+/** The signed-in user, or null for guests. Reports loading until hydrated. */
 export function useMe() {
-  return useQuery({
+  const hydrated = useHydrated();
+  const query = useQuery({
     queryKey: ME_KEY,
-    queryFn: async () => {
-      try {
-        const { user } = await get<{ user: User }>("/auth/me");
-        return user;
-      } catch (e) {
-        if (e instanceof ApiError && e.status === 401) return null;
-        throw e;
-      }
-    },
+    // /auth/session answers 200 with user: null for guests.
+    queryFn: async () => (await get<{ user: User | null }>("/auth/session")).user,
     staleTime: 60_000,
     retry: false,
   });
+  return {
+    data: hydrated ? query.data : undefined,
+    isLoading: !hydrated || query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 /** After sign-in: fold the localStorage cart into the account cart. */

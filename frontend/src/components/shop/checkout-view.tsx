@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Banknote, CreditCard, Loader2, Lock, MapPin, ShoppingBag } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
@@ -41,23 +41,21 @@ export function CheckoutView() {
     enabled: Boolean(user),
   });
 
-  const [addressId, setAddressId] = useState<string | "new" | null>(null);
+  const [chosenAddress, setAddressId] = useState<string | "new" | null>(null);
   const [address, setAddress] = useState<AddressInput>(emptyAddress);
+  const [prefilledFor, setPrefilledFor] = useState<string | null>(null);
   const [save, setSave] = useState(true);
   const [note, setNote] = useState("");
 
-  // Default to the saved default address, or a new one prefilled from the profile.
-  useEffect(() => {
-    if (!addresses.data || addressId !== null) return;
-    const def = addresses.data.find((a) => a.isDefault) ?? addresses.data[0];
-    setAddressId(def ? def.id : "new");
-  }, [addresses.data, addressId]);
-  useEffect(() => {
-    if (user && !address.fullName) {
-      setAddress((a) => ({ ...a, fullName: `${user.firstName} ${user.lastName}`, phone: user.phone ?? "" }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  // Default to the saved default address, or a new one when none are saved.
+  const defaultAddress = addresses.data?.find((a) => a.isDefault) ?? addresses.data?.[0];
+  const addressId = chosenAddress ?? (addresses.data ? (defaultAddress?.id ?? "new") : null);
+
+  // Prefill a new address from the profile once the user is known.
+  if (user && prefilledFor !== user.id) {
+    setPrefilledFor(user.id);
+    setAddress((a) => (a.fullName ? a : { ...a, fullName: `${user.firstName} ${user.lastName}`, phone: user.phone ?? "" }));
+  }
 
   const place = useMutation({
     mutationFn: () =>

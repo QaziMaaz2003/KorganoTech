@@ -98,10 +98,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  if (isLoading) {
-    return <div className="grid min-h-dvh place-items-center bg-background"><div className="size-10 animate-spin rounded-full border-4 border-lavender border-t-brand" /></div>;
-  }
-  if (!user || user.role !== "ADMIN") {
+  // The layout renders straight away (pages show their own skeletons); the
+  // proxy has already screened the role claim and the API enforces it.
+  if (!isLoading && (!user || user.role !== "ADMIN")) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-gradient-hero p-6 text-center">
         <ShieldAlert className="size-12 text-brand" />
@@ -114,8 +113,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-[oklch(97.5%_0.008_300)] lg:grid lg:grid-cols-[260px_1fr]">
-      <aside className="sticky top-0 hidden h-dvh lg:block">
-        <Sidebar />
+      <aside className="hidden bg-night lg:block">
+        <div className="sticky top-0 h-dvh">
+          <Sidebar />
+        </div>
       </aside>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-72 border-0 p-0" showCloseButton={false}>
@@ -130,9 +131,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <button type="button" aria-label="Open navigation" onClick={() => setOpen(true)} className="grid size-10 place-items-center rounded-lg hover:bg-accent lg:hidden">
             <Menu className="size-5" />
           </button>
-          <p className="text-sm text-muted-foreground">
-            Signed in as <span className="font-semibold text-foreground">{user.firstName} {user.lastName}</span>
-          </p>
+          {user ? (
+            <p className="text-sm text-muted-foreground">
+              Signed in as <span className="font-semibold text-foreground">{user.firstName} {user.lastName}</span>
+            </p>
+          ) : (
+            <span className="h-4 w-40 animate-pulse rounded bg-muted" aria-hidden />
+          )}
           <button
             type="button"
             onClick={() =>

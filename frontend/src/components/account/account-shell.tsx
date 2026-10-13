@@ -44,10 +44,8 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const openCart = useCartStore((s) => s.setDrawerOpen);
 
-  if (isLoading) {
-    return <div className="container-page py-10"><div className="h-96 animate-pulse rounded-2xl bg-white" /></div>;
-  }
-  if (!user) {
+  // Render the layout immediately; pages show their own skeletons while loading.
+  if (!isLoading && !user) {
     return (
       <div className="container-page flex flex-col items-center py-20 text-center">
         <h1 className="text-2xl font-extrabold text-primary">Please sign in</h1>
@@ -62,16 +60,25 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
       <aside className="lg:sticky lg:top-36 lg:self-start">
         <div className="surface-card p-4">
           <div className="flex items-center gap-3 border-b border-lavender px-1 pb-4">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-brand font-bold text-white">
-              {user.firstName[0]}
-              {user.lastName[0]}
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate font-bold text-primary">
-                {user.firstName} {user.lastName}
-              </span>
-              <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
-            </span>
+            {user ? (
+              <>
+                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-brand font-bold text-white">
+                  {user.firstName[0]}
+                  {user.lastName[0]}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate font-bold text-primary">
+                    {user.firstName} {user.lastName}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="size-11 shrink-0 animate-pulse rounded-full bg-muted" aria-hidden />
+                <span className="h-4 w-32 animate-pulse rounded bg-muted" aria-hidden />
+              </>
+            )}
           </div>
           <nav aria-label="Account" className="mt-3 flex gap-1 overflow-x-auto lg:flex-col">
             <Suspense
@@ -86,7 +93,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
             <button type="button" onClick={() => openCart(true)} className={linkCls(false)}>
               <ShoppingCart className="size-4.5" /> My cart
             </button>
-            {user.role === "ADMIN" ? (
+            {user?.role === "ADMIN" ? (
               <Link href="/admin" className={linkCls(false)}>
                 <LayoutDashboard className="size-4.5" /> Admin dashboard
               </Link>

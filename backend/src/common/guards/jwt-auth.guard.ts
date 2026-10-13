@@ -7,7 +7,10 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import type { AuthedRequest } from '../decorators/current-user.decorator.js';
+import type {
+  AuthedRequest,
+  AuthUser,
+} from '../decorators/current-user.decorator.js';
 
 export const SESSION_COOKIE = 'kt_session';
 
@@ -43,12 +46,21 @@ export class JwtAuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<AuthedRequest>();
     const token = readToken(req);
     if (!token) throw new UnauthorizedException('Please sign in to continue.');
+    const user = await this.userFromToken(token);
+    if (!user) {
+      throw new UnauthorizedException('Your session has expired. Please sign in again.');
+    }
+    req.user = user;
+    return true;
+  }
 
+  /** The active user behind a token, or null if it is invalid or revoked. */
+  async userFromToken(token: string): Promise<AuthUser | null> {
     let payload: JwtPayload;
     try {
       payload = await this.jwt.verifyAsync<JwtPayload>(token);
     } catch {
-      throw new UnauthorizedException('Your session has expired. Please sign in again.');
+      return null;
     }
 
     const user = await this.prisma.user.findUnique({
@@ -63,17 +75,14 @@ export class JwtAuthGuard implements CanActivate {
         tokenVersion: true,
       },
     });
-    if (!user || !user.isActive || user.tokenVersion !== payload.tv) {
-      throw new UnauthorizedException('Your session has expired. Please sign in again.');
-    }
+    if (!user || !user.isActive || user.tokenVersion !== payload.tv) return null;
 
-    req.user = {
+    return {
       id: user.id,
       email: user.email,
       role: user.role,
       firstName: user.firstName,
       lastName: user.lastName,
     };
-    return true;
   }
 }

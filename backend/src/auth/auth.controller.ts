@@ -4,18 +4,20 @@ import {
   Get,
   HttpCode,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
-import type { CookieOptions, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 import {
   CurrentUser,
   type AuthUser,
 } from '../common/decorators/current-user.decorator.js';
 import {
   JwtAuthGuard,
+  readToken,
   SESSION_COOKIE,
 } from '../common/guards/jwt-auth.guard.js';
 import { AuthService } from './auth.service.js';
@@ -26,6 +28,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly config: ConfigService,
+    private readonly jwtGuard: JwtAuthGuard,
   ) {}
 
   private cookieOptions(): CookieOptions {
@@ -78,5 +81,13 @@ export class AuthController {
   @Get('me')
   async me(@CurrentUser() user: AuthUser) {
     return { user: await this.auth.me(user.id) };
+  }
+
+  /** Like /me, but answers 200 with `user: null` for guests (no console noise). */
+  @Get('session')
+  async session(@Req() req: Request) {
+    const token = readToken(req);
+    const user = token ? await this.jwtGuard.userFromToken(token) : null;
+    return { user: user ? await this.auth.me(user.id) : null };
   }
 }
