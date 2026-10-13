@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Banknote,
@@ -326,6 +326,36 @@ function ProductsPanel() {
   );
 }
 
+/** Calls onChange after client-side navigations. Isolated so usePathname stays inside Suspense. */
+function RouteChangeListener({ onChange }: { onChange: () => void }) {
+  const pathname = usePathname();
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    onChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+  return null;
+}
+
+const navLinkCls = (active: boolean) =>
+  cn(
+    "inline-flex rounded-lg px-2.5 py-2 text-sm font-semibold whitespace-nowrap transition xl:px-3 xl:text-[15px]",
+    active ? "text-brand" : "text-foreground hover:text-primary",
+  );
+
+function ActiveNavLink({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname();
+  return (
+    <Link href={href} className={navLinkCls(pathname.startsWith(href))}>
+      {label}
+    </Link>
+  );
+}
+
 const menus: { key: Exclude<MenuKey, null>; label: string }[] = [
   { key: "sizes", label: "Shop by size" },
   { key: "merv", label: "Shop by MERV" },
@@ -333,16 +363,10 @@ const menus: { key: Exclude<MenuKey, null>; label: string }[] = [
 ];
 
 export function Header() {
-  const pathname = usePathname();
   const [menu, setMenu] = useState<MenuKey>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: settings } = useStoreSettings();
-
-  useEffect(() => {
-    setMenu(null);
-    setMobileOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(null);
@@ -363,6 +387,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 shadow-nav backdrop-blur-xl">
+      <Suspense fallback={null}>
+        <RouteChangeListener
+          onChange={() => {
+            setMenu(null);
+            setMobileOpen(false);
+          }}
+        />
+      </Suspense>
       {/* Row 1: logo · search · utilities */}
       <div className="container-page flex h-16 items-center gap-3 sm:h-[4.5rem] lg:gap-6">
         <button
@@ -425,15 +457,15 @@ export function Header() {
             ))}
             {mainNav.map((n) => (
               <li key={n.href} onMouseEnter={scheduleClose}>
-                <Link
-                  href={n.href}
-                  className={cn(
-                    "inline-flex rounded-lg px-2.5 py-2 text-sm font-semibold whitespace-nowrap transition xl:px-3 xl:text-[15px]",
-                    pathname.startsWith(n.href) ? "text-brand" : "text-foreground hover:text-primary",
-                  )}
+                <Suspense
+                  fallback={
+                    <Link href={n.href} className={navLinkCls(false)}>
+                      {n.label}
+                    </Link>
+                  }
                 >
-                  {n.label}
-                </Link>
+                  <ActiveNavLink href={n.href} label={n.label} />
+                </Suspense>
               </li>
             ))}
           </ul>

@@ -36,7 +36,7 @@ export class CheckoutDto {
   paymentMethod: 'COD';
 }
 
-export const ORDER_FILTERS = ['all', 'active', 'delivered', 'cancelled'] as const;
+export const ORDER_FILTERS = ['all', 'active', 'delivered', 'cancelled', 'paid'] as const;
 
 export class MyOrdersQueryDto {
   @IsOptional()

@@ -222,6 +222,7 @@ export class OrdersService {
     if (query.status === 'active') where.status = { in: ACTIVE_STATUSES };
     if (query.status === 'delivered') where.status = 'DELIVERED';
     if (query.status === 'cancelled') where.status = 'CANCELLED';
+    if (query.status === 'paid') where.paymentStatus = 'PAID';
     const orders = await this.prisma.order.findMany({
       where,
       orderBy: { placedAt: 'desc' },
