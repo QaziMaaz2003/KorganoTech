@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# builds
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# env files (secrets) — only the examples are committed
+.env
+.env.*
+!.env.example
+
+# prisma generated client
+backend/src/generated/
+
+# logs & os
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+coverage/
+.vercel
