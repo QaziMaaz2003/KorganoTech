@@ -14,6 +14,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHero
+        fullScreen
         crumbs={[{ label: "Home", href: "/" }, { label: "About Us" }]}
         eyebrow="About Us"
         title="Advancing air filtration for"

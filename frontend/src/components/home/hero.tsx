@@ -11,8 +11,8 @@ const trust = [
 
 export function Hero() {
   return (
-    <section aria-labelledby="hero-title" className="container-page pt-4 sm:pt-6">
-      <div className="relative isolate overflow-hidden rounded-[1.75rem] bg-night">
+    <section aria-labelledby="hero-title" className="container-page flex min-h-[calc(100svh-10rem)] flex-col pt-4 pb-6 sm:pt-6 md:min-h-[calc(100svh-7rem)] lg:min-h-[calc(100svh-10rem)]">
+      <div className="relative isolate flex flex-1 items-center overflow-hidden rounded-[1.75rem] bg-night">
         <Image
           src="/images/hero-filter.jpg"
           alt="KorganoTech pleated air filter with flowing air"
@@ -26,7 +26,7 @@ export function Hero() {
           aria-hidden
           className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,oklch(22%_0.07_296/0.96)_0%,oklch(26%_0.08_296/0.86)_38%,oklch(30%_0.08_296/0.25)_70%,transparent_100%)]"
         />
-        <div className="max-w-2xl px-6 py-14 sm:px-12 sm:py-20 lg:py-24">
+        <div className="max-w-2xl px-6 py-14 sm:px-12 sm:py-16 lg:py-14">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur sm:text-sm">
             <BadgeCheck className="size-4 text-[oklch(80%_0.1_298)]" aria-hidden />
             America&apos;s #1 Pleated HVAC Air Filter
@@ -50,11 +50,11 @@ export function Hero() {
         </div>
       </div>
 
-      <ul className="relative z-10 mx-auto -mt-7 grid max-w-5xl grid-cols-2 gap-3 px-2 lg:grid-cols-4">
+      <ul className="relative z-10 mx-auto -mt-7 shrink-0 grid max-w-5xl grid-cols-2 gap-3 px-2 lg:grid-cols-4">
         {trust.map(({ icon: Icon, label }) => (
           <li
             key={label}
-            className="flex items-center justify-center gap-3 rounded-xl border border-lavender bg-white px-4 py-4 text-center text-sm font-semibold text-primary shadow-card"
+            className="flex items-center justify-center gap-3 rounded-xl border-2 border-navy bg-white px-4 py-4 text-center text-sm font-semibold text-primary shadow-card"
           >
             <Icon className="size-5 shrink-0 text-brand" />
             {label}

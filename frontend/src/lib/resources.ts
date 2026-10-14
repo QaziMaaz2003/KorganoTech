@@ -167,6 +167,96 @@ export const articles: Article[] = [
       },
     ],
   },
+  {
+    slug: "merv-ratings-explained",
+    category: "HVAC Basics",
+    title: "MERV Ratings Explained",
+    excerpt: "What the MERV scale measures, and how MERV 11 and MERV 13 compare.",
+    minutes: 5,
+    image: "/images/unsplash/hvac-living.jpg",
+    sections: [
+      {
+        paragraphs: [
+          "MERV stands for Minimum Efficiency Reporting Value. It is a single number, from 1 to 16, that summarizes how well a filter captures particles of different sizes. The scale comes from ASHRAE Standard 52.2, and a higher number means the filter captures a larger share of smaller particles.",
+        ],
+      },
+      {
+        heading: "How the rating is built",
+        paragraphs: [
+          "Test labs measure how much of each particle size a filter removes, grouped into three ranges: 3–10 microns (pollen, dust mites, mold spores), 1–3 microns (fine dust, pet dander) and 0.3–1 micron (smoke and smog particles). A filter's MERV value is set by its performance across those ranges.",
+        ],
+      },
+      {
+        heading: "MERV 11 and MERV 13 at a glance",
+        list: [
+          "MERV 11: at least 85% of 3–10 µm particles, 65% of 1–3 µm particles and 20% of 0.3–1 µm particles",
+          "MERV 13: at least 90% of 3–10 µm particles, 85% of 1–3 µm particles and 50% of 0.3–1 µm particles",
+          "Both are pleated, melt blown filters made by KorganoTech for furnaces, air conditioners and HVAC systems",
+        ],
+      },
+      {
+        heading: "Which one should you choose?",
+        paragraphs: [
+          "MERV 11 is a strong everyday choice for homes with pets, children or mild allergies. MERV 13 captures more of the smaller particles, which makes it a good fit for households with allergies or sensitivities and for higher-occupancy buildings such as schools and offices.",
+          "Higher-efficiency filters create a little more resistance to airflow. Before moving up a MERV level, check your equipment manufacturer's guidance to make sure your system is designed for it.",
+        ],
+      },
+      {
+        heading: "What MERV does not tell you",
+        paragraphs: [
+          "MERV measures particle capture, not whether captured microorganisms are deactivated. Air filters and air purifiers cannot fully prevent the transmission of airborne diseases, so follow guidance from the Centers for Disease Control and other government authorities.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "improving-indoor-air-quality",
+    category: "Indoor Air",
+    title: "Simple Ways to Improve Indoor Air Quality",
+    excerpt: "Practical habits that work alongside a good HVAC filter.",
+    minutes: 4,
+    image: "/images/unsplash/window-clean.jpg",
+    sections: [
+      {
+        paragraphs: [
+          "A good filter does a lot of the work, but indoor air quality also depends on what happens inside your building. These habits make any HVAC filter more effective.",
+        ],
+      },
+      {
+        heading: "Keep the filter fresh",
+        paragraphs: [
+          "A loaded filter restricts airflow and holds less. Put a reminder in your calendar for every 60–90 days, and change sooner if you have pets, allergies or a dusty environment.",
+        ],
+      },
+      {
+        heading: "Reduce what gets in",
+        list: [
+          "Use doormats and take shoes off at the door to cut tracked-in dust",
+          "Vacuum regularly, ideally with a vacuum that has its own filter",
+          "Keep pets groomed and wash their bedding often",
+          "Run exhaust fans when cooking and bathing to move moisture and odors outdoors",
+        ],
+      },
+      {
+        heading: "Control moisture",
+        paragraphs: [
+          "Damp conditions encourage mold growth. Fix leaks promptly, and keep indoor humidity in a comfortable range so surfaces stay dry.",
+        ],
+      },
+      {
+        heading: "Pay attention to the system itself",
+        paragraphs: [
+          "Keep supply and return vents clear of furniture, and have your heating and cooling equipment serviced on the schedule your manufacturer recommends. A properly fitted filter matters too: if air can slip around the edges, it skips the filter entirely.",
+        ],
+      },
+      {
+        heading: "Buildings with higher needs",
+        paragraphs: [
+          "Schools, senior centers, farms and other high-risk environments often benefit from higher-efficiency filters and a firm replacement schedule. KorganoTech takes bulk and custom-size orders for these settings.",
+        ],
+      },
+    ],
+  },
 ];
 
 export const findArticle = (slug: string) => articles.find((a) => a.slug === slug);

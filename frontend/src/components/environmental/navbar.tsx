@@ -9,7 +9,21 @@ import { useEffect, useState } from "react";
 import { navLinks } from "@/lib/env-data";
 import { Logo } from "@/components/environmental/ui/logo";
 
-export function Navbar() {
+type NavbarProps = {
+  links?: { label: string; href: string }[];
+  ctaLabel?: string;
+  ctaHref?: string;
+  logoTitle?: string;
+  logoSubtitle?: string;
+};
+
+export function Navbar({
+  links = navLinks,
+  ctaLabel = "Contact us",
+  ctaHref = "#contact",
+  logoTitle,
+  logoSubtitle,
+}: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
@@ -26,7 +40,7 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    const hrefs = navLinks.map((link) => link.href);
+    const hrefs = links.map((link) => link.href);
     const sections = ["#top", "#overview", ...hrefs]
       .map((href) => document.querySelector(href))
       .filter((el): el is Element => el !== null);
@@ -42,7 +56,7 @@ export function Navbar() {
     );
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
-  }, []);
+  }, [links]);
 
   const solid = scrolled || open;
 
@@ -56,12 +70,12 @@ export function Navbar() {
         }`}
       >
         <nav className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 sm:px-8">
-          <a href="#top" aria-label="Environmental Filters home" onClick={() => setOpen(false)}>
-            <Logo light={!solid} />
+          <a href="#top" aria-label={`${logoTitle ?? "Environmental Filters"} home`} onClick={() => setOpen(false)}>
+            <Logo light={!solid} title={logoTitle} subtitle={logoSubtitle} />
           </a>
 
           <ul className="hidden items-center gap-1 lg:flex">
-            {navLinks.map((link) => {
+            {links.map((link) => {
               const isActive = active === link.href;
               return (
                 <li key={link.href}>
@@ -127,10 +141,10 @@ export function Navbar() {
               ) : null}
             </button>
             <a
-              href="#contact"
+              href={ctaHref}
               className="group hidden items-center gap-2 rounded-full bg-flare px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-flare/25 transition-all hover:bg-[#c2561a] hover:shadow-flare/40 sm:inline-flex"
             >
-              Contact us
+              {ctaLabel}
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
             <button
@@ -157,7 +171,7 @@ export function Navbar() {
               className="overflow-hidden border-t border-line lg:hidden"
             >
               <ul className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-4 sm:px-8">
-                {navLinks.map((link, i) => (
+                {links.map((link, i) => (
                   <motion.li
                     key={link.href}
                     initial={{ opacity: 0, x: -12 }}
@@ -184,11 +198,11 @@ export function Navbar() {
                 </li>
                 <li className="pt-2">
                   <a
-                    href="#contact"
+                    href={ctaHref}
                     onClick={() => setOpen(false)}
                     className="flex items-center justify-center gap-2 rounded-full bg-flare px-5 py-3 font-semibold text-white"
                   >
-                    Contact us <ArrowUpRight className="h-4 w-4" />
+                    {ctaLabel} <ArrowUpRight className="h-4 w-4" />
                   </a>
                 </li>
               </ul>

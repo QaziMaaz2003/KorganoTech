@@ -1,8 +1,10 @@
 type LogoProps = {
   light?: boolean;
+  title?: string;
+  subtitle?: string;
 };
 
-export function Logo({ light = false }: LogoProps) {
+export function Logo({ light = false, title = "Environmental Filters", subtitle = "by KorganoTech" }: LogoProps) {
   return (
     <span className="flex items-center gap-3">
       <svg viewBox="0 0 40 40" className="h-9 w-9 shrink-0" aria-hidden>
@@ -28,14 +30,14 @@ export function Logo({ light = false }: LogoProps) {
             light ? "text-white" : "text-ink"
           }`}
         >
-          Environmental Filters
+          {title}
         </span>
         <span
           className={`mt-1 font-mono text-[0.62rem] tracking-[0.22em] uppercase ${
             light ? "text-white/60" : "text-muted"
           }`}
         >
-          by KorganoTech
+          {subtitle}
         </span>
       </span>
     </span>

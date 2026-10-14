@@ -22,6 +22,8 @@ export default function FranchisePage() {
         title="Franchise"
         accent="Opportunity"
         body={franchiseCopy.vision}
+        image="/images/unsplash/franchise-handshake.jpg"
+        imageAlt="Two people shaking hands to seal a business partnership"
       >
         <ButtonLink href="#apply" size="lg">Fill out the Franchise Form</ButtonLink>
       </PageHero>

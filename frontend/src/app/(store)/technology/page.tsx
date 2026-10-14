@@ -54,6 +54,7 @@ export default function TechnologyPage() {
   return (
     <>
       <PageHero
+        fullScreen
         crumbs={[{ label: "Home", href: "/" }, { label: "Technology" }]}
         eyebrow="Technology"
         title="Technology Built Around"

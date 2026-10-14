@@ -3,22 +3,37 @@ import { ArrowUp } from "lucide-react";
 import { footerNote, navLinks, site } from "@/lib/env-data";
 import { Logo } from "@/components/environmental/ui/logo";
 
-export function Footer() {
+type FooterProps = {
+  logoTitle?: string;
+  logoSubtitle?: string;
+  description?: React.ReactNode;
+  links?: { label: string; href: string }[];
+  note?: string;
+  /** Name shown in the visit block and copyright line. */
+  programName?: string;
+  address?: string;
+};
+
+export function Footer({ logoTitle, logoSubtitle, description, links = navLinks, note = footerNote, programName, address }: FooterProps) {
   return (
     <footer className="relative bg-abyss text-white">
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-4">
-            <Logo light />
+            <Logo light title={logoTitle} subtitle={logoSubtitle} />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/60">
-              Turning landfill gas into renewable methane and captured carbon. Developed in
-              collaboration with {site.partner}.
+              {description ?? (
+                <>
+                  Turning landfill gas into renewable methane and captured carbon. Developed in
+                  collaboration with {site.partner}.
+                </>
+              )}
             </p>
           </div>
           <nav aria-label="Footer" className="md:col-span-2">
             <p className="eyebrow text-white/40">Explore</p>
             <ul className="mt-4 space-y-2.5 text-sm">
-              {navLinks.map((link) => (
+              {links.map((link) => (
                 <li key={link.href}>
                   <a href={link.href} className="text-white/70 transition-colors hover:text-leaf">
                     {link.label}
@@ -37,8 +52,10 @@ export function Footer() {
             <ul className="mt-4 space-y-2.5 text-sm">
               {[
                 { label: "KorganoTech home", href: "/" },
-                { label: "Shop HVAC air filters", href: "/hvac-air-filters" },
+                { label: "Shop all air filters", href: "/shop" },
+                { label: "Traditional HVAC air filters", href: "/hvac-air-filters" },
                 { label: "Pathogen air filters", href: "/pathogen-air-filters" },
+                { label: "Environmental air filters", href: "/environmental-air-filters" },
                 { label: "About KorganoTech", href: "/about" },
               ].map((l) => (
                 <li key={l.href}>
@@ -52,9 +69,9 @@ export function Footer() {
           <div className="md:col-span-3">
             <p className="eyebrow text-white/40">Visit</p>
             <p className="mt-4 text-sm leading-relaxed text-white/70">
-              {site.company} · {site.name}
+              {site.company} · {programName ?? site.name}
               <br />
-              {site.address}
+              {address ?? site.address}
             </p>
             <a
               href="#top"
@@ -69,9 +86,9 @@ export function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 text-xs leading-relaxed text-white/45 md:flex-row md:justify-between">
-          <p className="max-w-2xl">{footerNote}</p>
+          <p className="max-w-2xl">{note}</p>
           <p className="shrink-0">
-            © 2026 {site.company} · {site.name}
+            © 2026 {site.company} · {programName ?? site.name}
           </p>
         </div>
       </div>

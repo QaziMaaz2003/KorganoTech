@@ -6,6 +6,7 @@ import { ArrowDown, ArrowRight, Check, Play } from "lucide-react";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { heroFeatures, heroSlides, heroStats } from "@/lib/env-data";
 import { toneBg, toneText } from "@/lib/env-tones";
+import type { HeroContent } from "@/lib/program-types";
 
 const SLIDE_INTERVAL_MS = 2000;
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -32,22 +33,34 @@ const bubbles = [
   { left: "93%", size: 22, delay: 8, duration: 11, drift: -24, label: "" },
 ];
 
-const headline: { text: string; accent?: boolean }[] = [
-  { text: "Turn" },
-  { text: "landfill" },
-  { text: "gas" },
-  { text: "into" },
-  { text: "renewable", accent: true },
-  { text: "methane", accent: true },
-  { text: "and" },
-  { text: "captured" },
-  { text: "carbon." },
-];
+const envHeroContent: HeroContent = {
+  label: "Environmental Filters highlights",
+  pill: "For landfill operators · Developed with LLNL",
+  headline: [
+    { text: "Turn" },
+    { text: "landfill" },
+    { text: "gas" },
+    { text: "into" },
+    { text: "renewable", accent: true },
+    { text: "methane", accent: true },
+    { text: "and" },
+    { text: "captured" },
+    { text: "carbon." },
+  ],
+  body: "Environmental Filters is an automated carbon-capture and methane-recovery system developed by KorganoTech with Lawrence Livermore National Laboratory. It separates CO₂ from landfill gas using a reusable filter media, leaving methane you can put to work.",
+  primary: { label: "Host a demonstration", href: "#contact" },
+  secondary: { label: "See how it works", href: "#solution" },
+  features: heroFeatures,
+  stats: [...heroStats],
+  slides: heroSlides,
+};
 
-export function Hero() {
+export function Hero({ content }: { content?: HeroContent }) {
+  const c = content ?? envHeroContent;
+  const slides = c.slides;
   const [[index, dir], setSlide] = useState<[number, number]>([0, 1]);
   const [paused, setPaused] = useState(false);
-  const slide = heroSlides[index];
+  const slide = slides[index];
 
   const goTo = useCallback((next: number) => {
     setSlide(([current]) => {
@@ -60,10 +73,10 @@ export function Hero() {
   useEffect(() => {
     if (paused) return;
     const timer = window.setTimeout(() => {
-      setSlide(([current]) => [(current + 1) % heroSlides.length, 1]);
+      setSlide(([current]) => [(current + 1) % slides.length, 1]);
     }, SLIDE_INTERVAL_MS);
     return () => window.clearTimeout(timer);
-  }, [index, paused]);
+  }, [index, paused, slides.length]);
 
   // Don't burn through slides in a background tab.
   useEffect(() => {
@@ -76,7 +89,7 @@ export function Hero() {
     <section
       id="top"
       aria-roledescription="carousel"
-      aria-label="Environmental Filters highlights"
+      aria-label={c.label}
       className="relative isolate flex min-h-svh flex-col overflow-hidden bg-abyss text-white"
     >
       {/* Slides */}
@@ -111,7 +124,7 @@ export function Hero() {
 
         {/* Warm every slide in the cache so each 2-second change lands instantly. */}
         <div className="hidden" aria-hidden>
-          {heroSlides.slice(1).map((s) => (
+          {slides.slice(1).map((s) => (
             <Image
               key={s.image}
               src={s.image}
@@ -154,7 +167,7 @@ export function Hero() {
               } as CSSProperties
             }
           >
-            {b.label}
+            {c.bubbleLabels ? (c.bubbleLabels[i] ?? "") : b.label}
           </span>
         ))}
       </div>
@@ -172,11 +185,11 @@ export function Hero() {
               <span className="animate-pulse-ring absolute inset-0 rounded-full bg-leaf/60" />
               <span className="relative h-2 w-2 rounded-full bg-leaf" />
             </span>
-            For landfill operators · Developed with LLNL
+            {c.pill}
           </motion.p>
 
           <h1 className="mt-6 font-display text-[2.6rem] leading-[1.02] font-semibold tracking-tight text-balance sm:text-6xl xl:text-[4.25rem]">
-            {headline.map((word, i) => (
+            {c.headline.map((word, i) => (
               <span key={i} className="inline-block overflow-hidden pb-[0.12em] align-bottom">
                 <motion.span
                   className={`inline-block ${
@@ -188,7 +201,7 @@ export function Hero() {
                 >
                   {word.text}
                 </motion.span>
-                {i < headline.length - 1 ? " " : null}
+                {i < c.headline.length - 1 ? " " : null}
               </span>
             ))}
           </h1>
@@ -199,10 +212,7 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.85, ease: EASE }}
             className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 text-pretty"
           >
-            Environmental Filters is an automated carbon-capture and methane-recovery system
-            developed by KorganoTech with Lawrence Livermore National Laboratory. It separates
-            CO₂ from landfill gas using a reusable filter media, leaving methane you can put to
-            work.
+            {c.body}
           </motion.p>
 
           <motion.div
@@ -212,20 +222,20 @@ export function Hero() {
             className="mt-8 flex flex-wrap items-center gap-4"
           >
             <a
-              href="#contact"
+              href={c.primary.href}
               className="group inline-flex items-center gap-2 rounded-full bg-flare px-7 py-4 font-semibold text-white shadow-xl shadow-flare/30 transition-all hover:-translate-y-0.5 hover:bg-[#c2561a]"
             >
-              Host a demonstration
+              {c.primary.label}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
-              href="#solution"
+              href={c.secondary.href}
               className="group inline-flex items-center gap-3 rounded-full border border-white/25 bg-white/5 py-2 pr-6 pl-2 font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/15"
             >
               <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-deep transition-transform group-hover:scale-110">
                 <Play className="h-4 w-4 fill-current" />
               </span>
-              See how it works
+              {c.secondary.label}
             </a>
           </motion.div>
 
@@ -235,7 +245,7 @@ export function Hero() {
             variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 1.15 } } }}
             className="mt-8 flex flex-wrap gap-x-6 gap-y-3"
           >
-            {heroFeatures.map((feature) => (
+            {c.features.map((feature) => (
               <motion.li
                 key={feature}
                 variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }}
@@ -281,7 +291,7 @@ export function Hero() {
           </div>
 
           <div className="animate-float-slow grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/15 bg-white/15 backdrop-blur-xl">
-            {heroStats.map((stat) => (
+            {c.stats.map((stat) => (
               <div key={stat.label} className="bg-abyss/60 p-5">
                 <span className={`block h-1 w-8 rounded-full ${toneBg[stat.tone]}`} />
                 <span
@@ -300,7 +310,7 @@ export function Hero() {
       <div className="relative mx-auto w-full max-w-7xl px-5 pb-7 sm:px-8">
         <div className="flex items-end justify-between gap-6">
           <div className="grid flex-1 grid-cols-5 gap-2 sm:gap-3" role="tablist" aria-label="Choose slide">
-            {heroSlides.map((s, i) => (
+            {slides.map((s, i) => (
               <button
                 key={s.tag}
                 type="button"
@@ -334,7 +344,7 @@ export function Hero() {
             ))}
           </div>
           <a
-            href="#overview"
+            href={c.scrollHref ?? "#overview"}
             className="hidden shrink-0 items-center gap-2 font-mono text-xs tracking-[0.14em] text-white/60 uppercase transition-colors hover:text-white md:flex"
           >
             Scroll

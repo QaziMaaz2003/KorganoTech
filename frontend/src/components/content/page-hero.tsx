@@ -31,6 +31,7 @@ export function PageHero({
   imageAlt = "",
   crumbs,
   children,
+  fullScreen = false,
   className,
 }: {
   eyebrow?: string;
@@ -41,11 +42,19 @@ export function PageHero({
   imageAlt?: string;
   crumbs?: { label: string; href?: string }[];
   children?: React.ReactNode;
+  /** Fill the viewport below the sticky site header. */
+  fullScreen?: boolean;
   className?: string;
 }) {
   return (
-    <section className={cn("bg-gradient-hero", className)}>
-      <div className="container-page py-12 sm:py-16">
+    <section
+      className={cn(
+        "bg-gradient-hero",
+        fullScreen && "flex min-h-[calc(100svh-10rem)] flex-col md:min-h-[calc(100svh-7rem)] lg:min-h-[calc(100svh-10rem)]",
+        className,
+      )}
+    >
+      <div className={cn("container-page w-full py-12 sm:py-16", fullScreen && "my-auto")}>
         {crumbs ? <Breadcrumbs items={crumbs} /> : null}
         <div className={cn("mt-6 grid items-center gap-10", image && "lg:grid-cols-[1.1fr_1fr]")}>
           <div>
