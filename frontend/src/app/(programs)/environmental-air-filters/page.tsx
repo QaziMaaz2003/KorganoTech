@@ -25,7 +25,7 @@ export default function EnvironmentalPage() {
   return (
     <>
       <Navbar />
-      <main>
+      <main id="main">
         <Hero />
         <Ticker />
         <Overview />

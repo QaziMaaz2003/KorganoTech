@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={jakarta.variable}>
+    <html lang="en" data-scroll-behavior="smooth" className={jakarta.variable}>
       <body className="min-h-dvh">
         <Providers>{children}</Providers>
       </body>

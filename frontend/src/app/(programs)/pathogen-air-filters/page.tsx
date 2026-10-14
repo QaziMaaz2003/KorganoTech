@@ -156,7 +156,7 @@ export default function PathogenPage() {
   return (
     <>
       <Navbar links={navLinks} ctaLabel="Request info" logoTitle="Pathogen Air Filters" logoSubtitle="by KorganoTech" />
-      <main>
+      <main id="main">
         <Hero content={hero} />
         <Ticker
           items={[

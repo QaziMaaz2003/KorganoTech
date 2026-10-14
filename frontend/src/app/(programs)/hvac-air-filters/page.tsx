@@ -125,7 +125,7 @@ export default function HvacPage() {
   return (
     <>
       <Navbar links={navLinks} ctaLabel="Bulk orders" logoTitle="HVAC Air Filters" logoSubtitle="by KorganoTech" />
-      <main>
+      <main id="main">
         <Hero content={hero} />
         <Ticker
           items={[

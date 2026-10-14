@@ -16,11 +16,27 @@ export const viewport: Viewport = {
 
 export default function ProgramsLayout({ children }: LayoutProps<"/">) {
   return (
-    <div
-      className={`theme-env min-h-dvh antialiased ${bricolage.variable} ${fraunces.variable} ${plexSans.variable} ${plexMono.variable}`}
-    >
-      {children}
-      <CartDrawer />
-    </div>
+    <>
+      {/*
+        Keep a tiny element first. After a client navigation Next.js scrolls to the
+        first element of the new page, but skips it if it is already on screen, and
+        the page-tall themed wrapper below always is, so the new page would open
+        wherever the previous one was scrolled. This skip link scrolls out of view
+        like any small element, so navigation lands at the top (and it helps
+        keyboard users).
+      */}
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-lg bg-white px-4 py-2 font-semibold text-deep focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      >
+        Skip to content
+      </a>
+      <div
+        className={`theme-env min-h-dvh antialiased ${bricolage.variable} ${fraunces.variable} ${plexSans.variable} ${plexMono.variable}`}
+      >
+        {children}
+        <CartDrawer />
+      </div>
+    </>
   );
 }
