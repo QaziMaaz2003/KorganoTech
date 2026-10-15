@@ -34,6 +34,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -122,10 +123,12 @@ function AccountMenu() {
         <ChevronDown className="size-3.5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="truncate">
-          {user.firstName} {user.lastName}
-          <span className="block truncate text-xs font-normal text-muted-foreground">{user.email}</span>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="truncate">
+            {user.firstName} {user.lastName}
+            <span className="block truncate text-xs font-normal text-muted-foreground">{user.email}</span>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {user.role === "ADMIN" ? (
           <DropdownMenuItem onClick={() => router.push("/admin")}>

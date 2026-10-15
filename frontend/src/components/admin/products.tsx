@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Package, Plus } from "lucide-react";
+import { Package, Plus, Trash2 } from "lucide-react";
 import { get, patch, qs } from "@/lib/client-api";
 import type { AdminProductRow, Paged } from "@/lib/admin-types";
 import type { Category, ProductStatus } from "@/lib/types";
@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ProductImage } from "@/components/shop/product-image";
 import { EmptyState, PageHeader, Pagination, Panel, SearchInput, TableSkeleton, btn, td, th } from "./admin-ui";
+import { DeleteProductDialog, useDeleteProduct } from "./product-delete";
 
 export const PRODUCT_STATUS_TONE: Record<ProductStatus, string> = {
   ACTIVE: "bg-emerald-50 text-emerald-800 ring-emerald-200",
@@ -40,6 +41,8 @@ export function AdminProducts() {
   const [status, setStatus] = useState<"" | ProductStatus>("");
   const [page, setPage] = useState(1);
   const { data: categories = [] } = useAdminCategories();
+  const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
+  const remove = useDeleteProduct(() => setToDelete(null));
 
   const key = ["admin", "products", q, category, status, page];
   const { data, isLoading } = useQuery({
@@ -99,6 +102,7 @@ export function AdminProducts() {
                     <th className={th}>Price</th>
                     <th className={th}>For sale</th>
                     <th className={th}>Featured</th>
+                    <th className={cn(th, "text-right")}><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-lavender">
@@ -136,6 +140,16 @@ export function AdminProducts() {
                           aria-label={`${p.name} featured`}
                         />
                       </td>
+                      <td className={cn(td, "text-right")}>
+                        <button
+                          type="button"
+                          className={cn(btn.ghost, "hover:bg-destructive/10 hover:text-destructive")}
+                          aria-label={`Delete ${p.name}`}
+                          onClick={() => setToDelete({ id: p.id, name: p.name })}
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -152,6 +166,14 @@ export function AdminProducts() {
           />
         )}
       </Panel>
+
+      <DeleteProductDialog
+        name={toDelete?.name ?? ""}
+        open={toDelete !== null}
+        onOpenChange={(o) => { if (!o) setToDelete(null); }}
+        pending={remove.isPending}
+        onConfirm={() => toDelete && remove.mutate(toDelete.id)}
+      />
     </div>
   );
 }

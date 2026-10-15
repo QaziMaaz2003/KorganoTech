@@ -220,6 +220,14 @@
     .container-page { padding-inline: 2.5rem; }
   }
 
+  /* Height of the sticky store header (announcement bar + logo row + search
+     row on small screens / nav row on large ones). Full-screen heroes subtract
+     it from the viewport so they fit exactly. */
+  :root { --header-h: 9.75rem; }
+  @media (min-width: 640px) { :root { --header-h: 10.25rem; } }
+  @media (min-width: 768px) { :root { --header-h: 6.75rem; } }
+  @media (min-width: 1024px) { :root { --header-h: 9.8125rem; } }
+
   /* ── Environmental Filters page (1:1 port) ─────────────────────────── */
   html:has(.theme-env) {
     scroll-padding-top: 5rem;

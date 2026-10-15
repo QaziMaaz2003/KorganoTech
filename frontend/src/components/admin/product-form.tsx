@@ -78,11 +78,14 @@ export function ProductForm({
   submitLabel,
   busy,
   onSubmit,
+  extra,
 }: {
   initial: ProductInput;
   submitLabel: string;
   busy?: boolean;
   onSubmit: (v: ProductInput) => void;
+  /** Rendered after the Basics panel (used for the image picker on new products). */
+  extra?: React.ReactNode;
 }) {
   const [v, setV] = useState<ProductInput>(initial);
   const { data: categories = [] } = useAdminCategories();
@@ -146,6 +149,8 @@ export function ProductForm({
             </label>
           </div>
         </Panel>
+
+        {extra}
 
         <Panel
           title="Specifications"

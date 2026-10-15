@@ -50,7 +50,7 @@ export function PageHero({
     <section
       className={cn(
         "bg-gradient-hero",
-        fullScreen && "flex min-h-[calc(100svh-10rem)] flex-col md:min-h-[calc(100svh-7rem)] lg:min-h-[calc(100svh-10rem)]",
+        fullScreen && "flex min-h-[calc(100svh-var(--header-h))] flex-col",
         className,
       )}
     >

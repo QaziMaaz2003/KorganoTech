@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 import { ProductImage } from "@/components/shop/product-image";
 import { Panel, btn, inputCls } from "./admin-ui";
 
-const ACCEPT = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const MAX = 5 * 1024 * 1024;
+export const ACCEPT = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+export const MAX = 5 * 1024 * 1024;
 
 /**
  * Upload → NestJS → Cloudinary. The API stores the returned secure URL and

@@ -180,9 +180,9 @@ export class AdminProductsService {
   }
 
   /**
-   * Products that appear on any order are archived (hidden from the store,
-   * order history intact). Others are deleted along with their Cloudinary
-   * images.
+   * Permanently deletes the product, its variants and its Cloudinary images.
+   * Order history is unaffected: order items keep their own name/price/image
+   * snapshot (variantId is set to null, productId is a plain column).
    */
   async remove(id: string) {
     const product = await this.prisma.product.findUnique({
@@ -190,17 +190,9 @@ export class AdminProductsService {
       include: { images: true },
     });
     if (!product) throw new NotFoundException('Product not found.');
-    const ordered = await this.prisma.orderItem.count({ where: { productId: id } });
-    if (ordered > 0) {
-      await this.prisma.product.update({
-        where: { id },
-        data: { status: 'ARCHIVED', isFeatured: false },
-      });
-      return { archived: true, deleted: false };
-    }
     await this.prisma.product.delete({ where: { id } });
     await Promise.all(product.images.map((img) => this.cloudinary.destroy(img.publicId)));
-    return { archived: false, deleted: true };
+    return { deleted: true };
   }
 
   // ─── Images ──────────────────────────────────────────────────────────────
