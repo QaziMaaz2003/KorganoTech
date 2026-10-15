@@ -41,12 +41,19 @@ export class PrismaService
     });
   }
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     this.logger.log(`Connecting to ${describeDatabase(process.env.DATABASE_URL)}`);
-    await this.$connect();
-    // $connect() may connect lazily, so run a real query to surface problems now.
-    await this.$queryRaw`SELECT 1`;
-    this.logger.log('Database connected');
+    // Deliberately not awaited. The server must start listening right away:
+    // serverless hosts only route traffic once the server is up, so waiting on
+    // the database here turned a slow or failing connection into a silent hang.
+    // Each query connects on demand; a failure here is logged and surfaces on
+    // /api/health.
+    void this.$connect()
+      .then(() => this.$queryRaw`SELECT 1`)
+      .then(() => this.logger.log('Database connected'))
+      .catch((e: Error) =>
+        this.logger.error(`Database connection failed: ${e.message}`),
+      );
   }
 
   async onModuleDestroy(): Promise<void> {

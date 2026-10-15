@@ -55,6 +55,7 @@ async function bootstrap() {
   }
 
   const port = Number(process.env.PORT ?? 3001);
+  new Logger('Bootstrap').log(`Starting on Node ${process.version}, port ${port}`);
   await app.listen(port);
   new Logger('Bootstrap').log(`KorganoTech API listening on http://localhost:${port}/api`);
 }
