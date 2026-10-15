@@ -4,8 +4,16 @@ import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
+import type { RequestHandler } from 'express';
+import helmetImport from 'helmet';
 import { AppModule } from './app.module.js';
+
+// helmet ships both ESM and CommonJS typings. Depending on which one the build
+// environment resolves (Vercel's build picked the CommonJS ones), the default
+// import is typed either as the function or as the module namespace. Cast so
+// the build passes in both cases; at runtime it is always the function.
+const helmet = ((helmetImport as unknown as { default?: unknown }).default ??
+  helmetImport) as unknown as (options?: object) => RequestHandler;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
