@@ -9,12 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Throttle } from '@nestjs/throttler';
 import type { CookieOptions, Request, Response } from 'express';
 import {
   CurrentUser,
   type AuthUser,
 } from '../common/decorators/current-user.decorator.js';
+import { RateLimit } from '../common/decorators/rate-limit.decorator.js';
 import {
   JwtAuthGuard,
   readToken,
@@ -42,9 +42,8 @@ export class AuthController {
     };
   }
 
-  // 10 attempts per 10 minutes per IP. The key must match the 'default'
-  // throttler configured in AppModule or the override is ignored.
-  @Throttle({ default: { limit: 10, ttl: 600_000 } })
+  // 10 attempts per 10 minutes per IP.
+  @RateLimit({ limit: 10, ttl: 600_000 })
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -55,7 +54,7 @@ export class AuthController {
     return { user };
   }
 
-  @Throttle({ default: { limit: 10, ttl: 600_000 } })
+  @RateLimit({ limit: 10, ttl: 600_000 })
   @Post('login')
   @HttpCode(200)
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {

@@ -8,7 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit } from '../common/decorators/rate-limit.decorator.js';
 import {
   CurrentUser,
   type AuthUser,
@@ -22,7 +22,7 @@ import { OrdersService } from './orders.service.js';
 export class OrdersController {
   constructor(private readonly orders: OrdersService) {}
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @RateLimit({ limit: 10, ttl: 60_000 })
   @Post()
   place(@CurrentUser() user: AuthUser, @Body() dto: CheckoutDto) {
     return this.orders.placeOrder(user.id, user.email, dto);
