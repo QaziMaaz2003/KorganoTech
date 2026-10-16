@@ -459,7 +459,9 @@ Earlier attempts used Vercel's NestJS auto-detection, which runs `main.ts` and w
 | File (all under `backend/`) | Role |
 |---|---|
 | `vercel.json` | `framework: null` (Vercel's "Other"), `npm run build`, output folder `public`, region `bom1` (Mumbai, next to Supabase), function `maxDuration` 30 s, and a rewrite that sends every path to `/api` |
-| `api/index.js` | The one Vercel Function. Imports the compiled app, builds it on the first request of each instance, then reuses it while warm. A failed build is not cached, so the next request retries |
+| `api/index.js` | The one Vercel Function. Loads the compiled app lazily on the first request of each instance (25 s limit), then reuses it while warm. If start-up fails or stalls it answers `503` with the reason instead of hanging; a failure is not cached, so the next request retries |
+| `api/ping.js` | Dependency-free test function: `/api/ping` answering proves Vercel runs functions for this project |
+| `api/diag.js` | Start-up self-test at `/api/diag`: DNS, a direct database query, loading the app and creating it, each with timings and errors. Reports only whether variables are set, never their values |
 | `src/vercel.ts` → `dist/vercel.js` | `createApp()`: creates the Nest app without `listen()` and returns its Express handler |
 | `src/app.setup.ts` | `configureApp()`: prefix `/api`, helmet, cookies, CORS, validation. Shared with `main.ts` |
 | `public/robots.txt` | Placeholder static folder, so Vercel does not treat the project root as static files. Disallows crawlers |
