@@ -50,11 +50,12 @@ export function PageHero({
     <section
       className={cn(
         "bg-gradient-hero",
-        fullScreen && "flex min-h-[calc(100svh-var(--header-h))] flex-col",
+        fullScreen &&
+          "flex min-h-[calc(100svh-var(--header-h))] flex-col lg:h-[calc(100svh-var(--header-h))] lg:min-h-[30rem]",
         className,
       )}
     >
-      <div className={cn("container-page w-full py-12 sm:py-16", fullScreen && "my-auto")}>
+      <div className={cn("container-page w-full py-12 sm:py-16", fullScreen && "my-auto lg:py-6")}>
         {crumbs ? <Breadcrumbs items={crumbs} /> : null}
         <div className={cn("mt-6 grid items-center gap-10", image && "lg:grid-cols-[1.1fr_1fr]")}>
           <div>
@@ -70,7 +71,12 @@ export function PageHero({
             {children ? <div className="mt-8 flex flex-wrap gap-3">{children}</div> : null}
           </div>
           {image ? (
-            <div className="relative aspect-[5/4] overflow-hidden rounded-[1.75rem] border border-white bg-gradient-card shadow-lift">
+            <div
+              className={cn(
+                "relative aspect-[5/4] overflow-hidden rounded-[1.75rem] border border-white bg-gradient-card shadow-lift",
+                fullScreen && "aspect-[16/10] lg:aspect-auto lg:h-[clamp(16rem,calc(100svh-var(--header-h)-8rem),34rem)]",
+              )}
+            >
               <Image src={image} alt={imageAlt} fill sizes="(min-width: 1024px) 45vw, 100vw" loading="eager" className="object-cover" />
             </div>
           ) : null}

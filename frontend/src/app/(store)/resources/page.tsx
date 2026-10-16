@@ -34,6 +34,7 @@ export default function ResourcesPage() {
   return (
     <>
       <PageHero
+        fullScreen
         crumbs={[{ label: "Home", href: "/" }, { label: "Resources" }]}
         eyebrow="Resources"
         title="Learn More About"
