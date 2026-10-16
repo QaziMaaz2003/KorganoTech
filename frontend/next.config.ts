@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3001";
+// Cloudinary account that hosts product images (the "cloud name" in its console).
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "dmaf8fdeu";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -21,7 +23,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       // Product images uploaded through the admin dashboard
-      { protocol: "https", hostname: "res.cloudinary.com", pathname: "/dmaf8fdeu/**" },
+      { protocol: "https", hostname: "res.cloudinary.com", pathname: `/${CLOUDINARY_CLOUD_NAME}/**` },
       // Photography used by the Environmental Filters page (URLs carry query params,
       // so this pattern has no `search` restriction)
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },

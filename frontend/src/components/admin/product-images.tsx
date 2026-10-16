@@ -12,7 +12,7 @@ import { ProductImage } from "@/components/shop/product-image";
 import { Panel, btn, inputCls } from "./admin-ui";
 
 export const ACCEPT = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-export const MAX = 5 * 1024 * 1024;
+export const MAX = 4 * 1024 * 1024;
 
 /**
  * Upload → NestJS → Cloudinary. The API stores the returned secure URL and
@@ -35,7 +35,7 @@ export function ProductImages({ product }: { product: AdminProduct }) {
         return false;
       }
       if (f.size > MAX) {
-        toast.error(`${f.name}: images must be 5 MB or smaller.`);
+        toast.error(`${f.name}: images must be 4 MB or smaller.`);
         return false;
       }
       return true;
@@ -112,7 +112,7 @@ export function ProductImages({ product }: { product: AdminProduct }) {
           <button type="button" className={cn(btn.primary, "mt-3")} onClick={() => input.current?.click()}>
             <ImagePlus className="size-4" /> Choose files
           </button>
-          <p className="mt-3 text-xs text-muted-foreground">JPG, PNG, WebP or AVIF · up to 5 MB each · stored on Cloudinary</p>
+          <p className="mt-3 text-xs text-muted-foreground">JPG, PNG, WebP or AVIF · up to 4 MB each · stored on Cloudinary</p>
           <input
             ref={input}
             type="file"

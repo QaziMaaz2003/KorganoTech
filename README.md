@@ -91,6 +91,22 @@ Open the site at **http://localhost:3000**. Sign in with the seeded admin accoun
 
 Copy from the original korganotech.com lives in `frontend/src/lib/site.ts`. Content for the Environmental page lives in `frontend/src/lib/env-data.ts`.
 
+## Deploying to Vercel
+
+Two Vercel projects from this one repository. Details and reasoning are in [design.md](design.md#10-deploying-on-vercel).
+
+| | Backend | Frontend |
+|---|---|---|
+| Root Directory | `backend` | `frontend` |
+| Framework Preset | **Other** | Next.js |
+| Configuration | `backend/vercel.json` (already in the repo) | defaults |
+
+**Backend variables:** `NODE_ENV=production`, `DATABASE_URL` (Supabase **Transaction pooler**, port 6543), `JWT_SECRET`, `JWT_EXPIRES_IN_DAYS`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `FRONTEND_URL`.
+
+**Frontend variables:** `API_URL` (the backend's production address, no trailing slash), `NEXT_PUBLIC_SITE_URL`.
+
+Run `npm run db:deploy` and `npm run db:seed` from your own machine using the **session pooler / direct** connection (port 5432), not the transaction pooler. Deploy the backend first and check `https://<backend>/api/health`, then deploy the frontend. Product images are limited to 4 MB because Vercel rejects larger request bodies.
+
 ## Scripts
 
 | Backend | |

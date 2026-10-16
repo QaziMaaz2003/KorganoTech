@@ -20,7 +20,8 @@ export const IMAGE_MIME_TYPES = [
   'image/webp',
   'image/avif',
 ];
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+// 4 MB: Vercel functions reject request bodies over about 4.5 MB.
+export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 /**
  * Product image flow: the admin uploads through the API, the file streams to
@@ -49,7 +50,7 @@ export class CloudinaryService {
     }
     if (file.size > MAX_IMAGE_BYTES) {
       throw new BadRequestException(
-        `${file.originalname}: images must be 5 MB or smaller.`,
+        `${file.originalname}: images must be 4 MB or smaller.`,
       );
     }
   }

@@ -33,7 +33,10 @@ export class PrismaService
       adapter: new PrismaPg({
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false },
-        max: 10,
+        // Each serverless instance keeps its own small pool; many instances can
+        // run at once, so a big pool per instance would exhaust the database.
+        max: Number(process.env.DB_POOL_MAX ?? (process.env.VERCEL ? 3 : 10)),
+        idleTimeoutMillis: 10_000,
         // Without a limit, an unreachable database makes every request hang until
         // the host kills it, with nothing in the logs. Fail fast and say why.
         connectionTimeoutMillis: 10_000,

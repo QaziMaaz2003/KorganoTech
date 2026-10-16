@@ -33,7 +33,7 @@ export function ProductImagePicker({
         return false;
       }
       if (f.size > MAX) {
-        toast.error(`${f.name}: images must be 5 MB or smaller.`);
+        toast.error(`${f.name}: images must be 4 MB or smaller.`);
         return false;
       }
       return true;
@@ -65,7 +65,7 @@ export function ProductImagePicker({
           <ImagePlus className="size-4" /> Choose files
         </button>
         <p className="mt-3 text-xs text-muted-foreground">
-          JPG, PNG, WebP or AVIF · up to 5 MB each · uploaded to Cloudinary when you create the product
+          JPG, PNG, WebP or AVIF · up to 4 MB each · uploaded to Cloudinary when you create the product
         </p>
         <input
           ref={input}
