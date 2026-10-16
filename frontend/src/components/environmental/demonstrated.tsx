@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { ArrowRight, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -168,6 +169,59 @@ export function Demonstrated() {
             <p className="mt-6 text-center text-sm leading-relaxed text-muted">{demonstrated.caption}</p>
           </div>
         </Reveal>
+      </div>
+
+      <div id="how-it-works" className="mx-auto mt-24 max-w-7xl scroll-mt-24 px-5 sm:mt-32 sm:px-8">
+        <SectionHeading eyebrow={demonstrated.gallery.eyebrow} title={demonstrated.gallery.title} />
+        <div className="mt-12 grid items-start gap-10 lg:grid-cols-12 lg:gap-14">
+          <Reveal className="lg:col-span-7">
+            <figure className="overflow-hidden rounded-[1.75rem] border border-line bg-white p-3 shadow-[0_30px_80px_-50px_rgb(15_59_68/0.35)] sm:p-4">
+              <Image
+                src={demonstrated.gallery.prototype.image}
+                alt={demonstrated.gallery.prototype.alt}
+                width={demonstrated.gallery.prototype.width}
+                height={demonstrated.gallery.prototype.height}
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                className="h-auto w-full rounded-2xl"
+              />
+              <figcaption className="px-2 pt-3 text-xs text-muted italic">
+                Prototype cartridge photos, labeled A–D.
+              </figcaption>
+            </figure>
+          </Reveal>
+
+          <div className="lg:col-span-5">
+            <Stagger className="space-y-3" stagger={0.1}>
+              {demonstrated.gallery.labels.map((item) => (
+                <StaggerItem
+                  key={item.key}
+                  className="flex items-center gap-4 rounded-2xl border border-line bg-white p-4"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-deep font-display text-lg font-semibold text-white">
+                    {item.key}
+                  </span>
+                  <span className="text-sm leading-relaxed text-ink">{item.text}</span>
+                </StaggerItem>
+              ))}
+            </Stagger>
+
+            <Reveal delay={0.15} className="mt-6">
+              <figure className="overflow-hidden rounded-2xl border border-line bg-white p-3">
+                <Image
+                  src={demonstrated.gallery.beads.image}
+                  alt={demonstrated.gallery.beads.alt}
+                  width={demonstrated.gallery.beads.width}
+                  height={demonstrated.gallery.beads.height}
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                  className="h-auto w-full rounded-xl"
+                />
+                <figcaption className="pt-3 text-center font-mono text-xs text-muted">
+                  {demonstrated.gallery.beads.caption}
+                </figcaption>
+              </figure>
+            </Reveal>
+          </div>
+        </div>
       </div>
     </section>
   );

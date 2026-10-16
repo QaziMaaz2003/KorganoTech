@@ -6,10 +6,9 @@ export const site = {
   company: "KorganoTech",
   partner: "Lawrence Livermore National Laboratory",
   partnerShort: "LLNL",
-  address: "69 E Airway Blvd, Livermore, CA 94551",
-  // Placeholders carried over from the source site until real details are supplied.
-  email: "[add email address]",
-  phone: "[add phone number]",
+  address: "71 E Airway Blvd, Livermore, CA 94551",
+  email: "CO2@KorganoTech.com",
+  phone: "925-989-8726",
 };
 
 export const navLinks = [
@@ -67,8 +66,8 @@ export const heroFeatures = [
 ];
 
 export const heroStats = [
-  { value: "≈50%", label: "CH₄ in typical landfill gas", tone: "leaf" },
-  { value: "≈50%", label: "CO₂ in typical landfill gas", tone: "sky" },
+  { value: "14.4%", label: "of U.S. human-related methane emissions came from landfills (2022)", tone: "leaf" },
+  { value: "≥28×", label: "more heat trapped by methane than CO₂ over 100 years", tone: "sky" },
   { value: "~10×", label: "faster CO₂ absorption (LLNL lab data)", tone: "sun" },
   { value: "TRL 6", label: "technology readiness level", tone: "white" },
 ] as const;
@@ -99,9 +98,9 @@ export const overview = {
 };
 
 export const problem = {
-  eyebrow: "The problem",
-  title: "Landfills turn organic waste into two climate liabilities",
-  body: "As buried organic waste breaks down, it produces landfill gas that is roughly half methane and half carbon dioxide. Both add to the greenhouse-gas burden our children will inherit.",
+  eyebrow: "The problem · Addressing a climate urgency",
+  title: "Your waste is destroying this beautiful planet",
+  body: "Landfills turn organic waste into a gas that is two climate liabilities at once: roughly half methane and half carbon dioxide. Both add to the greenhouse-gas burden our children will inherit.",
   image: unsplash("1674321576323-82be6b715ebd", 2000),
   imageAlt: "Open landfill with scattered waste beneath distant mountains",
   gases: [
@@ -111,17 +110,22 @@ export const problem = {
       formula: "CH₄",
       name: "Methane",
       title: "High-impact methane",
-      body: "Methane is at least 28 times more effective than CO₂ at trapping heat over 100 years, so near-term capture has an outsized effect.",
+      body: "Methane traps at least 28× more heat than CO₂ over 100 years, so near-term capture is especially valuable. Captured, it is a renewable energy source.",
     },
     {
       tone: "co2",
       share: 50,
       formula: "CO₂",
       name: "Carbon dioxide",
-      title: "Cumulative emissions",
-      body: "CO₂ released from landfill gas adds directly to the long-term greenhouse-gas burden.",
+      title: "Cumulative CO₂",
+      body: "Released CO₂ adds directly to the long-term greenhouse-gas burden. Flaring the methane only adds more.",
     },
   ],
+  flaring: {
+    lead: "Today's default is flaring.",
+    body: "High mitigation costs mean most landfill gas is simply burned off, and its value with it.",
+    source: "Landfill gas composition and methane impact: U.S. EPA, Basic Information about Landfill Gas.",
+  },
   headlineStat: {
     value: 14.4,
     decimals: 1,
@@ -157,31 +161,38 @@ export const problem = {
 } as const;
 
 export const solution = {
-  eyebrow: "Our solution",
-  title: "An automated filter system that separates CO₂ from methane",
-  body: "Working with LLNL, we have designed a system that combines a selective CO₂ media filter, optical sensing, automated cartridge exchange and low-energy regeneration.",
+  eyebrow: "Our technology",
+  title: "One automated platform, two valuable outputs",
+  body: "Landfill gas passes through a selective CO₂ filter media. CO₂ is held in the media and methane passes through for recovery. Working with LLNL, we have designed a system that combines a selective CO₂ media filter, optical sensing, automated cartridge exchange and low-energy regeneration.",
   steps: [
     {
       tone: "co2",
-      title: "CO₂ capture + methane recovery",
-      body: "Raw landfill gas (CH₄ + CO₂) flows through the filter cartridge. The capture media absorbs CO₂, and the remaining methane-rich gas is recovered.",
+      title: "Selective CO₂ media filter",
+      body: "Captures CO₂ as landfill gas flows through.",
     },
     {
       tone: "flare",
-      title: "Automated regeneration",
-      body: "When optical sensors show the media is loaded, the system exchanges the cartridge and applies low-energy heat to release the CO₂.",
+      title: "Optical sensing",
+      body: "Detects when the cartridge is saturated.",
     },
     {
       tone: "ch4",
-      title: "CO₂ collection + compression",
-      body: "Released CO₂ is collected and compressed for storage or reuse.",
+      title: "Automated cartridge exchange",
+      body: "Swaps cartridges without stopping flow.",
     },
     {
       tone: "deep",
-      title: "Media reuse",
-      body: "Regenerated media returns to service, so the sorbent is used again rather than replaced.",
+      title: "Low-energy regeneration",
+      body: "Releases CO₂ for collection; media is reused.",
     },
   ],
+  schematic: {
+    image: "/images/environmental/platform-schematic.jpg",
+    alt: "Schematic: landfill gas enters a CO₂ capture and methane recovery unit; CO₂ moves to automated, solar-assisted regeneration, then to CO₂ collection and compression, with the media reused.",
+    width: 1672,
+    height: 941,
+    caption: "Illustrative schematic (AI-generated)",
+  },
 } as const;
 
 export const demonstrated = {
@@ -200,6 +211,29 @@ export const demonstrated = {
   ],
   caption:
     "The media changes color as it absorbs CO₂ and returns to its original color after regeneration. After Vericella et al., Nature Communications (2015).",
+  gallery: {
+    eyebrow: "How it works",
+    title: "Our platform captures, senses and regenerates",
+    prototype: {
+      image: "/images/environmental/prototype-photos.jpg",
+      alt: "Four photos of the prototype cartridge: A, front view of the capture media in its frame; B, the cartridge sliding into a pleated MERV 13 filter; C, sensor window showing the response after CO₂ absorption; D, sensor window restored after heat-assisted CO₂ removal.",
+      width: 1180,
+      height: 860,
+    },
+    beads: {
+      image: "/images/environmental/sorbent-beads.jpg",
+      alt: "Sorbent beads shown in three states: purple with no CO₂, amber after absorbing CO₂, and purple again after regeneration.",
+      width: 636,
+      height: 147,
+      caption: "No CO₂ → CO₂ absorbed → Regenerated",
+    },
+    labels: [
+      { key: "A", text: "CO₂ capture media integrated with a MERV 13 particulate layer" },
+      { key: "B", text: "Gas-entry and gas-exit cartridge architecture" },
+      { key: "C", text: "Visible sensor response after CO₂ absorption" },
+      { key: "D", text: "Sensor restored after heat-assisted CO₂ removal" },
+    ],
+  },
 };
 
 export const technology = {
@@ -234,7 +268,7 @@ export const technology = {
     groups: [
       { label: "0 mM catalyst", neat: 80, capsules: 790 },
       { label: "25 mM catalyst", neat: 95, capsules: 900 },
-      { label: "60 mM catalyst", neat: 105, capsules: 960 },
+      { label: "50 mM catalyst", neat: 105, capsules: 960 },
     ],
     note: "Values approximate, reproduced from Fig. 3i, Vericella et al., Nature Communications 6:6124 (2015), LLNL. Gram-scale lab data; pilot and commercial testing are required for deployment.",
   },
@@ -308,7 +342,7 @@ export const caseStudy = {
   closing:
     "At this scale, separating CO₂ from landfill gas turns a large emissions source into a steady supply of renewable methane and a collectable CO₂ stream.",
   disclaimer:
-    "All outcome figures are countywide screening-model estimates assuming successful validation and scale-up. They are not expected output from an initial demonstration.",
+    "Countywide screening-model estimates after successful validation and scale-up — not expected output from the initial demonstration.",
 } as const;
 
 export const products = {
@@ -372,8 +406,9 @@ export const partner = {
 
 export const contact = {
   eyebrow: "Landfill operators",
-  title: "Contact us for more information",
+  title: "Let's talk about turning your gas into renewable methane and captured carbon",
   body: "We are looking for landfill operators interested in learning more about Environmental Filters and in hosting demonstration projects. Reach out and our team will follow up.",
+  closing: { from: "Clean air is where we started", to: "Climate is where we're going" },
   share: [
     "Landfill name and location",
     "Approximate landfill-gas flow (CFM) and CH₄/CO₂ mix, if known",

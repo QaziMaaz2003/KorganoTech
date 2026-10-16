@@ -14,7 +14,7 @@ A full-stack e-commerce site for KorganoTech, a maker of MERV 11 / MERV 13 pleat
 |---|---|
 | Public storefront: home, shop with size and MERV filters, product pages, cart, checkout | Built |
 | Three program pages (HVAC, Pathogen, Environmental) in one shared theme | Built |
-| Company and info pages (About, Technology, Franchise, Resources, FAQ, Contact, policies) | Built |
+| Company and info pages (About, Technology, Resources, FAQ, Contact, policies) | Built |
 | Customer accounts: register, login, addresses, order history with live status and tracking | Built |
 | Admin dashboard: products, sizes and prices, stock, images, orders, customers, inquiries, settings | Built |
 | Payment | **Cash on Delivery only.** The data model is ready for a gateway (Stripe is the likely choice) |
@@ -293,7 +293,7 @@ erDiagram
 - **Deletes cascade down the catalog:** deleting a product removes its images and variants, and carts lose those lines. A category cannot be deleted while it has products (`Restrict`).
 - **Order history survives** because `OrderItem` carries its own copy of every displayed value.
 - **Row Level Security** is enabled on every table with no policies, and grants are revoked from Supabase's `anon` and `authenticated` roles. Supabase's public REST endpoint therefore cannot read store data. Only the backend (connecting as `postgres`) can.
-- **Inquiries** cover Contact Sales, Franchise, "Notify me" product interest and General; each has a status (New, Read, Archived).
+- **Inquiries** cover Contact Sales, "Notify me" product interest and General; each has a status (New, Read, Archived).
 
 ---
 
@@ -303,7 +303,7 @@ erDiagram
 
 | Group | Routes |
 |---|---|
-| `(store)` shell | `/`, `/shop`, `/shop/sizes`, `/products/[slug]`, `/cart`, `/checkout`, `/order-confirmation/[number]`, `/login`, `/register`, `/account` (profile, addresses, orders, order detail, settings), `/about`, `/technology`, `/franchise`, `/resources` and `/resources/[slug]`, `/faq`, `/contact`, `/privacy`, `/terms`, `/shipping-returns` |
+| `(store)` shell | `/`, `/shop`, `/shop/sizes`, `/products/[slug]`, `/cart`, `/checkout`, `/order-confirmation/[number]`, `/login`, `/register`, `/account` (profile, addresses, orders, order detail, settings), `/about`, `/technology`, `/resources` and `/resources/[slug]`, `/faq`, `/contact`, `/privacy`, `/terms`, `/shipping-returns` |
 | `(programs)` shared theme | `/hvac-air-filters`, `/pathogen-air-filters`, `/environmental-air-filters` |
 | `admin` | `/admin` (dashboard), `orders` (+ detail), `products` (+ new, edit), `inventory`, `categories`, `customers` (+ detail), `inquiries`, `newsletter`, `settings` |
 

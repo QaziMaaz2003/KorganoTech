@@ -137,19 +137,18 @@ export function Contact() {
                 </button>
               </span>
             </div>
-            {/* Shown once real details replace the source site's placeholders. */}
-            {!site.email.startsWith("[") ? (
-              <p className="flex items-center gap-3 text-white/80">
-                <Mail className="h-5 w-5 shrink-0 text-sun" />
+            <p className="flex items-center gap-3 text-white/80">
+              <Mail className="h-5 w-5 shrink-0 text-sun" />
+              <a href={`mailto:${site.email}`} className="transition-colors hover:text-white hover:underline">
                 {site.email}
-              </p>
-            ) : null}
-            {!site.phone.startsWith("[") ? (
-              <p className="flex items-center gap-3 text-white/80">
-                <Phone className="h-5 w-5 shrink-0 text-sun" />
+              </a>
+            </p>
+            <p className="flex items-center gap-3 text-white/80">
+              <Phone className="h-5 w-5 shrink-0 text-sun" />
+              <a href={`tel:+1${site.phone.replace(/\D/g, "")}`} className="transition-colors hover:text-white hover:underline">
                 {site.phone}
-              </p>
-            ) : null}
+              </a>
+            </p>
           </Reveal>
 
           <Reveal delay={0.15} className="mt-10">
@@ -162,6 +161,14 @@ export function Contact() {
                 </StaggerItem>
               ))}
             </Stagger>
+          </Reveal>
+
+          <Reveal delay={0.2} className="mt-10 border-t border-white/10 pt-8">
+            <p className="flex flex-wrap items-center gap-x-4 gap-y-2 font-display text-xl font-medium text-white sm:text-2xl">
+              {contact.closing.from}
+              <ArrowRight className="h-6 w-6 shrink-0 text-leaf" aria-hidden />
+              <span className="text-leaf">{contact.closing.to}</span>
+            </p>
           </Reveal>
         </div>
 

@@ -7,11 +7,11 @@ export function Logo({ className, href = "/" }: { className?: string; href?: str
     <Link href={href} aria-label="KorganoTech home" className={cn("inline-flex shrink-0", className)}>
       <Image
         src="/images/korganotech-logo.png"
-        alt="KorganoTech — Air filters for healthy living"
-        width={387}
-        height={100}
+        alt="KorganoTech — Clean Air is Our Passion"
+        width={912}
+        height={200}
         loading="eager"
-        className="h-9 w-auto sm:h-11"
+        className="h-11 w-auto sm:h-14"
       />
     </Link>
   );

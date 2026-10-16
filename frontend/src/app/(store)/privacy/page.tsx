@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       <ul>
         <li>Account details you provide: name, email address, phone number and password (stored only as a secure hash).</li>
         <li>Order details: delivery addresses, the products you order and your order history.</li>
-        <li>Messages you send through our contact, franchise and notify-me forms, and newsletter sign-ups.</li>
+        <li>Messages you send through our contact and notify-me forms, and newsletter sign-ups.</li>
         <li>Basic technical data such as your IP address, used to protect our forms from abuse.</li>
       </ul>
       <h2>How we use it</h2>

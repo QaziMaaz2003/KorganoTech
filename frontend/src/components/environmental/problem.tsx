@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "motion/react";
+import { Flame } from "lucide-react";
 import { useRef } from "react";
 import { problem } from "@/lib/env-data";
 import { toneBg, toneText } from "@/lib/env-tones";
@@ -74,6 +75,19 @@ export function Problem() {
             </StaggerItem>
           ))}
         </Stagger>
+
+        <Reveal delay={0.1} className="mt-6">
+          <div className="flex flex-col gap-5 rounded-[1.75rem] bg-deep p-7 text-white sm:flex-row sm:items-center sm:p-9">
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-flare/20 text-sun">
+              <Flame className="h-7 w-7" />
+            </span>
+            <p className="font-display text-xl leading-snug text-balance sm:text-2xl">
+              <strong className="font-semibold text-sun">{problem.flaring.lead}</strong>{" "}
+              <span className="text-white/90">{problem.flaring.body}</span>
+            </p>
+          </div>
+          <p className="mt-3 text-xs text-muted">{problem.flaring.source}</p>
+        </Reveal>
       </div>
 
       {/* Why act now */}

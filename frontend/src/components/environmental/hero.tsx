@@ -35,7 +35,7 @@ const bubbles = [
 
 const envHeroContent: HeroContent = {
   label: "Environmental Filters highlights",
-  pill: "For landfill operators · Developed with LLNL",
+  pill: "Technology in development · Built on LLNL science",
   headline: [
     { text: "Turn" },
     { text: "landfill" },

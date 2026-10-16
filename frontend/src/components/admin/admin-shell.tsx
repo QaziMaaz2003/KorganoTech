@@ -71,7 +71,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col bg-night p-4 text-white">
       <Link href="/admin" className="mb-6 flex items-center gap-3 rounded-xl bg-white px-3 py-2" onClick={onNavigate}>
-        <Image src="/images/korganotech-logo.png" alt="KorganoTech" width={387} height={100} className="h-8 w-auto" />
+        <Image src="/images/korganotech-logo.png" alt="KorganoTech" width={912} height={200} className="h-10 w-auto" />
       </Link>
       <p className="mb-2 px-3 text-[11px] font-bold tracking-[0.18em] text-white/40 uppercase">Store admin</p>
       <nav aria-label="Admin" className="flex flex-1 flex-col gap-1">

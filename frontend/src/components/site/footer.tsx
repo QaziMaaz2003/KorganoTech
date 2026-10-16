@@ -11,7 +11,7 @@ export function Footer() {
           <div>
             <div className="inline-flex rounded-xl bg-white px-3 py-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/korganotech-logo.png" alt="KorganoTech" className="h-10 w-auto" />
+              <img src="/images/korganotech-logo.png" alt="KorganoTech" className="h-14 w-auto" />
             </div>
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/70">
               {brand.tagline}. Engineered air filtration for HVAC systems, pathogen capture research, and emerging

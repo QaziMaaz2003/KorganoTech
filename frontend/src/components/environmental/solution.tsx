@@ -1,14 +1,14 @@
 "use client";
 
-import { motion } from "motion/react";
-import { Filter, Recycle, ScanEye, Warehouse } from "lucide-react";
+import Image from "next/image";
+import { Filter, Flame, Repeat, ScanEye } from "lucide-react";
 import { solution } from "@/lib/env-data";
-import { toneBg, toneSoftBg, toneText } from "@/lib/env-tones";
+import { toneBg, toneText } from "@/lib/env-tones";
 import { ProcessDiagram } from "./process-diagram";
 import { Reveal, Stagger, StaggerItem } from "@/components/environmental/ui/reveal";
 import { SectionHeading } from "@/components/environmental/ui/section-heading";
 
-const stepIcons = [Filter, ScanEye, Warehouse, Recycle];
+const stepIcons = [Filter, ScanEye, Repeat, Flame];
 
 export function Solution() {
   return (
@@ -41,48 +41,52 @@ export function Solution() {
           </div>
         </Reveal>
 
-        <div className="mt-24">
-          <Reveal className="max-w-2xl">
-            <p className="eyebrow flex items-center gap-3 text-flare">
-              <span className="h-px w-8 bg-flare" aria-hidden />
-              How the process works
-            </p>
-            <h3 className="mt-4 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-              Four automated steps, one reusable media
-            </h3>
+        <div className="mt-24 grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+          <Reveal className="lg:col-span-7">
+            <figure className="overflow-hidden rounded-[1.75rem] border border-line bg-white p-3 shadow-[0_30px_80px_-50px_rgb(15_59_68/0.35)] sm:p-4">
+              <Image
+                src={solution.schematic.image}
+                alt={solution.schematic.alt}
+                width={solution.schematic.width}
+                height={solution.schematic.height}
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                className="h-auto w-full rounded-2xl"
+              />
+              <figcaption className="px-2 pt-3 text-xs text-muted italic">{solution.schematic.caption}</figcaption>
+            </figure>
           </Reveal>
 
-          <div className="relative mt-12">
-            {/* Connector line that draws itself across the steps */}
-            <motion.div
-              aria-hidden
-              className="absolute top-8 right-[12%] left-[12%] hidden h-0.5 origin-left bg-linear-to-r from-co2 via-flare to-ch4 lg:block"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, margin: "0px 0px -20% 0px" }}
-              transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-            />
-            <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" stagger={0.15}>
+          <div className="lg:col-span-5">
+            <Reveal>
+              <p className="eyebrow flex items-center gap-3 text-flare">
+                <span className="h-px w-8 bg-flare" aria-hidden />
+                How the process works
+              </p>
+              <h3 className="mt-4 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+                Four automated steps, one reusable media
+              </h3>
+            </Reveal>
+            <Stagger className="mt-8 space-y-3" stagger={0.12}>
               {solution.steps.map((step, i) => {
                 const Icon = stepIcons[i];
                 return (
-                  <StaggerItem key={step.title} className="group relative">
-                    <div className="relative z-10 mx-auto mb-6 hidden h-16 w-16 place-items-center lg:grid">
+                  <StaggerItem
+                    key={step.title}
+                    className="group flex items-start gap-4 rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-deep/10"
+                  >
+                    <span className="relative grid h-12 w-12 shrink-0 place-items-center">
                       <span className={`hex absolute inset-0 ${toneBg[step.tone]} transition-transform duration-500 group-hover:rotate-60`} />
-                      <Icon className="relative h-6 w-6 text-white" />
-                    </div>
-                    <div className="h-full rounded-[1.5rem] border border-line bg-white p-7 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-deep/10">
-                      <div className="flex items-center justify-between">
-                        <span className={`font-display text-5xl font-semibold ${toneText[step.tone]}`}>
+                      <Icon className="relative h-5 w-5 text-white" />
+                    </span>
+                    <span>
+                      <span className="flex items-baseline gap-2">
+                        <span className={`font-mono text-xs font-medium ${toneText[step.tone]}`}>
                           {String(i + 1).padStart(2, "0")}
                         </span>
-                        <span className={`grid h-11 w-11 place-items-center rounded-xl lg:hidden ${toneSoftBg[step.tone]} ${toneText[step.tone]}`}>
-                          <Icon className="h-5 w-5" />
-                        </span>
-                      </div>
-                      <h4 className="mt-5 font-display text-xl font-semibold text-ink">{step.title}</h4>
-                      <p className="mt-3 text-sm leading-relaxed text-muted">{step.body}</p>
-                    </div>
+                        <span className="font-display text-lg font-semibold text-ink">{step.title}</span>
+                      </span>
+                      <span className="mt-1 block text-sm leading-relaxed text-muted">{step.body}</span>
+                    </span>
                   </StaggerItem>
                 );
               })}

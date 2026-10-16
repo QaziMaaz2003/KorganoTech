@@ -6,13 +6,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
-  Banknote,
   Building2,
   ChevronDown,
-  Headphones,
   LayoutDashboard,
   LogOut,
   MapPin,
+  Mail,
   Menu,
   Package,
   Search,
@@ -26,7 +25,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useLogout, useMe } from "@/hooks/use-auth";
 import { useFilterSizes, useStoreSettings } from "@/hooks/use-store-data";
 import { DEPTHS, groupByWidth, shopSizeHref, sizesForDepth } from "@/lib/sizes";
-import { mainNav, programs } from "@/lib/site";
+import { brand, mainNav, technologyNav } from "@/lib/site";
 import { money } from "@/lib/format";
 import { useCartStore } from "@/lib/cart-store";
 import { cn } from "@/lib/utils";
@@ -41,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-type MenuKey = "sizes" | "merv" | "products" | null;
+type MenuKey = "sizes" | "merv" | "technology" | null;
 
 export function AnnouncementBar() {
   const { data } = useStoreSettings();
@@ -303,10 +302,10 @@ function MervPanel() {
   );
 }
 
-function ProductsPanel() {
+function TechnologyPanel() {
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      {programs.map((p) => (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto]">
+      {technologyNav.map((p) => (
         <Link key={p.slug} href={p.href} className="group surface-card flex gap-4 p-3 hover:-translate-y-0.5 hover:shadow-lift">
           <div className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-gradient-card">
             <Image src={p.image} alt="" fill sizes="96px" className="object-cover transition duration-500 group-hover:scale-105" />
@@ -320,11 +319,17 @@ function ProductsPanel() {
             >
               {p.status}
             </span>
-            <p className="mt-1.5 font-bold leading-snug text-primary">{p.name}</p>
+            <p className="mt-1.5 font-bold leading-snug text-primary">{p.navLabel}</p>
             <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{p.blurb}</p>
           </div>
         </Link>
       ))}
+      <Link
+        href="/technology"
+        className="flex items-center gap-1.5 self-center px-4 py-2 text-sm font-semibold text-brand hover:underline"
+      >
+        Our technology <ArrowRight className="size-4" />
+      </Link>
     </div>
   );
 }
@@ -359,11 +364,17 @@ function ActiveNavLink({ href, label }: { href: string; label: string }) {
   );
 }
 
-const menus: { key: Exclude<MenuKey, null>; label: string }[] = [
-  { key: "sizes", label: "Shop by size" },
-  { key: "merv", label: "Shop by MERV" },
-  { key: "products", label: "Our products" },
+const primaryNav: (
+  | { type: "menu"; key: Exclude<MenuKey, null>; label: string }
+  | { type: "link"; href: string; label: string }
+)[] = [
+  { type: "menu", key: "sizes", label: "Shop by size" },
+  { type: "menu", key: "merv", label: "Shop by MERV" },
+  { type: "link", href: "/contact", label: "Custom Filters" },
+  { type: "menu", key: "technology", label: "Clean Air Technology" },
 ];
+
+const supportHref = brand.supportEmail ? `mailto:${brand.supportEmail}` : "/contact";
 
 export function Header() {
   const [menu, setMenu] = useState<MenuKey>(null);
@@ -415,14 +426,14 @@ export function Header() {
             href="/contact"
             className="hidden items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-primary transition hover:bg-accent lg:inline-flex"
           >
-            <Building2 className="size-4.5" /> Bulk orders
+            <Building2 className="size-4.5" /> Business Account
           </Link>
-          <Link
-            href="/faq"
+          <a
+            href={supportHref}
             className="hidden items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-primary transition hover:bg-accent lg:inline-flex"
           >
-            <Headphones className="size-4.5" /> Support
-          </Link>
+            <Mail className="size-4.5" /> {brand.supportEmail || "Support"}
+          </a>
           <AccountMenu />
           <div className="hidden sm:block">
             <CartButton />
@@ -441,23 +452,31 @@ export function Header() {
       <div className="relative hidden border-t border-lavender lg:block" onMouseLeave={scheduleClose}>
         <div className="container-page flex h-12 items-center justify-between gap-6">
           <ul className="flex items-center gap-1">
-            {menus.map((m) => (
-              <li key={m.key}>
-                <button
-                  type="button"
-                  aria-expanded={menu === m.key}
-                  onMouseEnter={() => openMenu(m.key)}
-                  onClick={() => setMenu(menu === m.key ? null : m.key)}
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-sm font-semibold whitespace-nowrap transition xl:px-3 xl:text-[15px]",
-                    menu === m.key ? "bg-accent text-primary" : "text-foreground hover:text-primary",
-                  )}
-                >
-                  {m.label}
-                  <ChevronDown className={cn("size-4 transition", menu === m.key && "rotate-180")} />
-                </button>
-              </li>
-            ))}
+            {primaryNav.map((m) =>
+              m.type === "link" ? (
+                <li key={m.href} onMouseEnter={scheduleClose}>
+                  <Link href={m.href} className={navLinkCls(false)}>
+                    {m.label}
+                  </Link>
+                </li>
+              ) : (
+                <li key={m.key}>
+                  <button
+                    type="button"
+                    aria-expanded={menu === m.key}
+                    onMouseEnter={() => openMenu(m.key)}
+                    onClick={() => setMenu(menu === m.key ? null : m.key)}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-sm font-semibold whitespace-nowrap transition xl:px-3 xl:text-[15px]",
+                      menu === m.key ? "bg-accent text-primary" : "text-foreground hover:text-primary",
+                    )}
+                  >
+                    {m.label}
+                    <ChevronDown className={cn("size-4 transition", menu === m.key && "rotate-180")} />
+                  </button>
+                </li>
+              ),
+            )}
             {mainNav.map((n) => (
               <li key={n.href} onMouseEnter={scheduleClose}>
                 <Suspense
@@ -477,10 +496,7 @@ export function Header() {
               <Truck className="size-4.5 text-brand" />
               {threshold ? `Free shipping over ${money(threshold).replace(".00", "")}` : "Fast shipping"}
             </li>
-            <li className="inline-flex items-center gap-1.5">
-              <Banknote className="size-4.5 text-brand" /> Cash on Delivery
-            </li>
-            <li className="hidden items-center gap-1.5 2xl:inline-flex">
+            <li className="hidden items-center gap-1.5 lg:inline-flex">
               <MapPin className="size-4.5 text-brand" /> Livermore, CA
             </li>
           </ul>
@@ -492,7 +508,7 @@ export function Header() {
             onMouseEnter={() => openMenu(menu)}
           >
             <div className="container-page py-8">
-              {menu === "sizes" ? <SizesPanel /> : menu === "merv" ? <MervPanel /> : <ProductsPanel />}
+              {menu === "sizes" ? <SizesPanel /> : menu === "merv" ? <MervPanel /> : <TechnologyPanel />}
             </div>
           </div>
         ) : null}
@@ -517,12 +533,12 @@ function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange: (o: bo
         <div className="space-y-6 p-4">
           <SearchBox onDone={() => onOpenChange(false)} />
           <div>
-            <p className="eyebrow mb-2">Our products</p>
+            <p className="eyebrow mb-2">Clean Air Technology</p>
             <ul className="space-y-1">
-              {programs.map((p) => (
+              {technologyNav.map((p) => (
                 <li key={p.slug}>
                   <Link href={p.href} className="flex items-center justify-between rounded-xl px-3 py-2.5 font-semibold text-primary hover:bg-accent">
-                    {p.short}
+                    {p.navLabel}
                     <span className="text-xs font-medium text-muted-foreground">{p.status}</span>
                   </Link>
                 </li>
@@ -550,7 +566,7 @@ function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange: (o: bo
             </div>
           </div>
           <ul className="space-y-1 border-t border-lavender pt-4">
-            {[{ label: "Shop all filters", href: "/shop" }, ...mainNav, { label: "Bulk orders & contact", href: "/contact" }, { label: "FAQ", href: "/faq" }].map((n) => (
+            {[{ label: "Shop all filters", href: "/shop" }, { label: "Custom Filters", href: "/contact" }, { label: "Technology", href: "/technology" }, ...mainNav, { label: "Business Account", href: "/contact" }, { label: "Support", href: supportHref }].map((n) => (
               <li key={n.href}>
                 <Link href={n.href} className="block rounded-xl px-3 py-2.5 font-semibold text-foreground hover:bg-accent">
                   {n.label}

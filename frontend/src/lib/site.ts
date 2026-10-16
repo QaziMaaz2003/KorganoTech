@@ -3,8 +3,9 @@
 export const brand = {
   name: "KorganoTech",
   tagline: "Advancing Air Filtration for Cleaner Environments", // original
-  logoTagline: "Air filters for healthy living",
-  address: "69 E Air Way Blvd, Livermore, CA 94551", // original
+  logoTagline: "Clean Air is Our Passion",
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "",
+  address: "71 E Airway Blvd, Livermore, CA 94551",
   epaEstablishment: "102482-CA-1", // original
   trademark: "7565070", // original
   walmartUrl: "https://www.walmart.com/search?q=KorganoTech",
@@ -96,46 +97,17 @@ export const aboutCopy = {
     "Disclaimer: Please note that air filters and air purifiers cannot fully prevent transmission of a pathogen and protect people from COVID-19 and other airborne diseases. Please follow the directions and best practices recommended by the Centers for Disease Control and other Government authorities. KorganoTech Air filters can be part of a plan to protect yourself and your family, employees, and customers.",
 };
 
-export const franchiseCopy = {
-  title: "Franchise Opportunity",
-  subtitle: "(Manufacturing Franchises Available for Qualified Entrepreneurs)",
-  vision:
-    "Empowering entrepreneurs to deliver clean, safe indoor air to their communities — with low start-up costs and strong support.",
-  mission:
-    "Bringing innovation into underserved communities and creating high-paying jobs for individuals of every qualification",
-  opportunity: "Earn income by manufacturing and selling high-quality HVAC air filters to:",
-  customers: ["Schools", "Senior Centers", "Animal & Poultry Farms", "Commercial Buildings"],
-  why: [
-    { title: "Low Entry Cost", body: "No upfront franchise fee. Pay only after generating sales" },
-    { title: "Community Focused", body: "Serve underserved regions with high-quality pathogen air filters." },
-    { title: "Strong Support System", body: "We provide training, product access, marketing materials, and sales tools." },
-  ],
-  receive: [
-    "Comprehensive onboarding and technical training",
-    "Sales and customer service support",
-    "Product marketing and branded materials",
-    "Exclusive regional territory options",
-  ],
-  steps: [
-    { title: "Apply", body: "Explain why you want a franchise & submit your resume, fill out the Franchise Form" },
-    { title: "Interview", body: "We’ll get to know you and assess your target community and market potential." },
-    { title: "Prove Sales Ability", body: "Sell $250K worth of filters in 6 months (earn 5% commission on all sales)." },
-    { title: "Training", body: "If selected, we train & teach you everything about business." },
-    { title: "Business Setup", body: "Once you qualify, you establish your business, and we set up the manufacturing & supply chain in your area." },
-    { title: "Manage & Operate", body: "You handle production, management & sales. We provide guidance at every step." },
-  ],
-  closing: "Join Us in Expanding Clean Air Solutions & Creating Meaningful Careers",
-  closingSub: "Let’s build a healthier future — together.",
-};
-
 // ─── Navigation ─────────────────────────────────────────────────────────────
 
 export const mainNav = [
-  { label: "Technology", href: "/technology" },
   { label: "About Us", href: "/about" },
-  { label: "Franchise", href: "/franchise" },
   { label: "Resources", href: "/resources" },
 ];
+
+export const technologyNav = programs.filter((p) => p.slug !== "hvac").map((p) => ({
+  ...p,
+  navLabel: p.slug === "pathogen" ? "Pathogen Air Filter" : "Environmental Filters",
+}));
 
 export const footerNav = [
   {
@@ -175,7 +147,6 @@ export const footerNav = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
-      { label: "Franchise Opportunity", href: "/franchise" },
       { label: "Contact Sales", href: "/contact" },
       { label: "My Account", href: "/account" },
       { label: "Track an Order", href: "/account/orders" },

@@ -81,11 +81,11 @@ export default function AboutPage() {
         </div>
         <div className="flex flex-col justify-between rounded-[1.75rem] bg-gradient-brand p-8 text-white">
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight">Grow clean air in your community</h2>
-            <p className="mt-3 text-white/80">Manufacturing franchises are available for qualified entrepreneurs.</p>
+            <h2 className="text-2xl font-extrabold tracking-tight">Work with KorganoTech</h2>
+            <p className="mt-3 text-white/80">Ask about bulk orders, custom sizes and landfill demonstration projects.</p>
           </div>
-          <ButtonLink href="/franchise" variant="light" className="mt-6 self-start">
-            Franchise opportunity <ArrowRight className="size-4" />
+          <ButtonLink href="/contact" variant="light" className="mt-6 self-start">
+            Contact us <ArrowRight className="size-4" />
           </ButtonLink>
         </div>
       </section>

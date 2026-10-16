@@ -301,7 +301,7 @@ export function AdminInquiries() {
 
   return (
     <div>
-      <PageHeader title="Inquiries" description="Contact-sales, franchise, notify-me and landfill enquiries from the website." />
+      <PageHeader title="Inquiries" description="Contact-sales, notify-me and landfill enquiries from the website." />
       <div className="mb-4 space-y-3">
         <Tabs<TypeTab>
           value={type}
@@ -366,7 +366,7 @@ export function AdminInquiries() {
           </div>
         </div>
       ) : (
-        <Panel><EmptyState icon={Inbox} title="No inquiries here" body="Messages from the contact, franchise and notify-me forms land in this inbox." /></Panel>
+        <Panel><EmptyState icon={Inbox} title="No inquiries here" body="Messages from the contact and notify-me forms land in this inbox." /></Panel>
       )}
     </div>
   );

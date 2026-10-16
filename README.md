@@ -77,7 +77,7 @@ Open the site at **http://localhost:3000**. Sign in with the seeded admin accoun
 | Inventory | Adjust stock with a reason; see each variant's movement history |
 | Categories | Edit the three programs' copy and images |
 | Customers | View orders, spend and addresses; deactivate accounts or grant admin |
-| Inquiries | Contact-sales, franchise, notify-me and landfill enquiries |
+| Inquiries | Contact-sales, notify-me and landfill enquiries |
 | Newsletter | Subscribers, with CSV export |
 | Settings | Shipping fee, free-shipping threshold, tax rate, COD switch, announcement bar |
 
@@ -86,7 +86,7 @@ Open the site at **http://localhost:3000**. Sign in with the seeded admin accoun
 - **Home:** layout follows filterking.com.
 - **Shopping:** `/shop`, `/shop/sizes`, `/products/[slug]`, `/cart`, `/checkout`.
 - **Product programs:** `/hvac-air-filters`, `/pathogen-air-filters`, and `/environmental-air-filters`, which is a port of the Environmental Filters site with its own theme.
-- **Company and info:** `/about`, `/franchise`, `/technology`, `/resources`, `/faq`, `/contact`, plus the policy pages.
+- **Company and info:** `/about`, `/technology`, `/resources`, `/faq`, `/contact`, plus the policy pages.
 - **Customer account:** `/login`, `/register`, `/account/*`.
 
 Copy from the original korganotech.com lives in `frontend/src/lib/site.ts`. Content for the Environmental page lives in `frontend/src/lib/env-data.ts`.
