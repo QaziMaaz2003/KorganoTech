@@ -5,7 +5,7 @@ export const brand = {
   tagline: "Advancing Air Filtration for Cleaner Environments", // original
   logoTagline: "Clean Air is Our Passion",
   supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "",
-  address: "71 E Airway Blvd, Livermore, CA 94551",
+  address: "69 E Airway Blvd, Livermore, CA 94551",
   epaEstablishment: "102482-CA-1", // original
   trademark: "7565070", // original
   walmartUrl: "https://www.walmart.com/search?q=KorganoTech",

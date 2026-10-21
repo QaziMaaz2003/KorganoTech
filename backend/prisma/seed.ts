@@ -178,7 +178,7 @@ async function main() {
     create: {
       id: 1,
       storeName: 'KorganoTech',
-      address: '71 E Airway Blvd, Livermore, CA 94551',
+      address: '69 E Airway Blvd, Livermore, CA 94551',
       shippingFee: 9.99,
       freeShippingThreshold: 75,
       taxRate: 0,
