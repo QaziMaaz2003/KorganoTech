@@ -1448,14 +1448,57 @@ export function EnvironmentalContent() {
           <div className="rx-split-layout rx-split-layout--stretch">
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div className="rx-media-frame rx-media-frame--overlay-caption">
-                <img
-                  src="/images/program/environmental/image4.jpg"
-                  alt="Four-panel photograph (A, B, C, D) showing the KorganoTech prototype filter cartridge and central optical sensor window before and after CO2 absorption and heat-assisted regeneration."
-                  width="1180"
-                  height="860"
-                  loading="lazy"
-                  decoding="async" />
-                <div className="rx-media-frame__caption rx-media-frame__caption--overlay">
+                <div className="rx-cartridge-panels">
+                  <figure className="rx-cartridge-panel rx-is-active" data-panel="A">
+                    <img
+                      src="/images/environment/panel-a.webp"
+                      alt="Panel A: KorganoTech prototype cartridge with CO2 capture media integrated with a MERV 13 pleated particulate layer."
+                      width="1024"
+                      height="1024"
+                      loading="lazy"
+                      decoding="async" />
+                    <span className="rx-cartridge-panel__tag">
+                      A
+                    </span>
+                  </figure>
+                  <figure className="rx-cartridge-panel" data-panel="B">
+                    <img
+                      src="/images/environment/panel-b.webp"
+                      alt="Panel B: cartridge with gas-entry and gas-exit architecture."
+                      width="1024"
+                      height="1024"
+                      loading="lazy"
+                      decoding="async" />
+                    <span className="rx-cartridge-panel__tag">
+                      B
+                    </span>
+                  </figure>
+                  <figure className="rx-cartridge-panel" data-panel="C">
+                    <img
+                      src="/images/environment/panel-c.webp"
+                      alt="Panel C: central optical sensor window showing the visible sensor response after CO2 absorption."
+                      width="1024"
+                      height="1024"
+                      loading="lazy"
+                      decoding="async" />
+                    <span className="rx-cartridge-panel__tag">
+                      C
+                    </span>
+                  </figure>
+                  <figure className="rx-cartridge-panel" data-panel="D">
+                    <img
+                      src="/images/environment/panel-d.webp"
+                      alt="Panel D: optical sensor window restored after heat-assisted CO2 removal."
+                      width="1024"
+                      height="1024"
+                      loading="lazy"
+                      decoding="async" />
+                    <span className="rx-cartridge-panel__tag">
+                      D
+                    </span>
+                  </figure>
+                </div>
+                <div className="rx-media-frame__caption rx-media-frame__caption--overlay rx-media-frame__caption--static">
                   <span id="cartridge-inspector-text">
                     <strong style={{ color: "var(--lilac-highlight)" }}>
                       Active Selection:
@@ -1559,7 +1602,7 @@ export function EnvironmentalContent() {
                 <div className="rx-capsule-simulator__stage">
                   <div>
                     <img
-                      src="/images/program/environmental/image5.jpg"
+                      src="/images/environment/image5.webp"
                       alt="Microscopy images a, b, and c showing purple microcapsules with no CO2, yellow/gold microcapsules after CO2 is absorbed, and purple microcapsules after regeneration."
                       style={{ width: "100%", borderRadius: "0.625rem" }}
                       width="636"

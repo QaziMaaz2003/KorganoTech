@@ -113,7 +113,7 @@ export function PathogenContent() {
                     id="hero-vis-gif"
                     style={{ borderRadius: "1rem", overflow: "hidden", background: "#000", border: "1px solid rgba(197, 176, 246, 0.25)" }}>
                     <img
-                      src="/images/program/pathogen/image1.gif"
+                      src="/images/pathogen/image1.webp"
                       alt="Side-by-side comparison of Traditional Filters versus Korgano Pathogen Filters, illustrating pathogen and particle free pure air flow."
                       style={{ width: "100%", height: "auto" }}
                       width="1500"
@@ -494,10 +494,10 @@ export function PathogenContent() {
               style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
               <div className="rx-evidence-photo-wrap">
                 <img
-                  src="/images/program/pathogen/AdobeStock_507420448.jpeg"
+                  src="/images/pathogen/AdobeStock_507420448.webp"
                   alt="Residents and care staff in an assisted living facility"
-                  width="1600"
-                  height="1066"
+                  width="1000"
+                  height="667"
                   loading="lazy"
                   decoding="async" />
                 {" "}
@@ -527,10 +527,10 @@ export function PathogenContent() {
               style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
               <div className="rx-evidence-photo-wrap">
                 <img
-                  src="/images/program/pathogen/AdobeStock_410479691.jpeg"
+                  src="/images/pathogen/AdobeStock_410479691.webp"
                   alt="Hospital ward and clinical care beds"
-                  width="1600"
-                  height="1066"
+                  width="1000"
+                  height="667"
                   loading="lazy"
                   decoding="async" />
                 {" "}
@@ -560,10 +560,10 @@ export function PathogenContent() {
               style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
               <div className="rx-evidence-photo-wrap">
                 <img
-                  src="/images/program/pathogen/AdobeStock_170767323.jpeg"
+                  src="/images/pathogen/AdobeStock_170767323.webp"
                   alt="Veterinary specialist in protective gear examining poultry"
-                  width="1600"
-                  height="1066"
+                  width="1000"
+                  height="667"
                   loading="lazy"
                   decoding="async" />
                 {" "}
@@ -623,7 +623,7 @@ export function PathogenContent() {
               <div className="rx-media-frame">
                 <img
                   className="rx-zoomable-media"
-                  src="/images/program/pathogen/image5.png"
+                  src="/images/pathogen/image5.webp"
                   alt="Excerpt from published study 'Survival of Microorganisms on HEPA Filters' by Himanshu Mittal, Simon R. Parks, Thomas Pottage, James T. Walker, and Allan M. Bennett"
                   style={{ width: "100%", height: "auto" }}
                   width="707"
@@ -735,7 +735,7 @@ export function PathogenContent() {
                 style={{ padding: "1.5rem", flex: "1", display: "grid", placeItems: "center", backgroundColor: "#ffffff" }}>
                 <img
                   className="rx-zoomable-media"
-                  src="/images/program/pathogen/image6.png"
+                  src="/images/pathogen/image6.webp"
                   alt="Multi-layer Pathogen Filter and Pre-Filter with SEM magnification showing 100-500 nm (1/1000 of human hair) porous nanowire surface"
                   style={{ maxHeight: "26rem", width: "auto", marginInline: "auto" }}
                   width="550"
@@ -758,7 +758,7 @@ export function PathogenContent() {
                 style={{ padding: "1.5rem", flex: "1", display: "grid", placeItems: "center", backgroundColor: "#ffffff" }}>
                 <img
                   className="rx-zoomable-media"
-                  src="/images/program/pathogen/image7.jpeg"
+                  src="/images/pathogen/image7.webp"
                   alt="Diagram showing Bioactive Metal Particles (BMPs) and metal ions (Zn2+, Ag+, Fe3+, Mg2+, Cu2+) causing Membrane Damage, Formation of ROS, DNA Damage, and Protein Damage leading to Cell Death"
                   style={{ maxHeight: "26rem", width: "auto", marginInline: "auto" }}
                   width="535"
@@ -826,11 +826,11 @@ export function PathogenContent() {
             <div className="rx-media-frame" style={{ backgroundColor: "#ffffff" }}>
               <div style={{ padding: "1.25rem" }}>
                 <img
-                  src="/images/program/pathogen/image8.jpg"
+                  src="/images/pathogen/image8.webp"
                   alt="KorganoTech Air Filter product line display showing pleated filters"
                   style={{ width: "100%", height: "auto", borderRadius: "0.75rem" }}
-                  width="1800"
-                  height="1350"
+                  width="1400"
+                  height="1050"
                   loading="lazy"
                   decoding="async" />
               </div>

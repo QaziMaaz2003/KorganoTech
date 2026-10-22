@@ -131,12 +131,21 @@ export function initEnvironmental(root: HTMLElement, signal: AbortSignal): () =>
   // 2. Cartridge A-D callouts
   const calloutBtns = all<HTMLElement>(root, `.${C}cartridge-callout-btn`);
   const inspectorText = byId<HTMLElement>(root, "cartridge-inspector-text");
+  const panels = all<HTMLElement>(root, `.${C}cartridge-panel`);
+  panels.forEach((panel) =>
+    panel.addEventListener(
+      "click",
+      () => calloutBtns.find((b) => b.dataset.panel === panel.dataset.panel)?.click(),
+      { signal },
+    ),
+  );
   calloutBtns.forEach((btn) =>
     btn.addEventListener(
       "click",
       () => {
         calloutBtns.forEach((b) => b.classList.remove(`${C}is-active`));
         btn.classList.add(`${C}is-active`);
+        panels.forEach((p) => p.classList.toggle(`${C}is-active`, p.dataset.panel === btn.dataset.panel));
         if (inspectorText) {
           const label = document.createElement("strong");
           label.style.color = "var(--lilac-highlight)";
