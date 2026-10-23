@@ -304,6 +304,15 @@ export class OrdersService {
       orderId: order.id,
       orderNumber: number,
       email: order.email,
+      customer: {
+        name: order.shipFullName,
+        phone: order.shipPhone,
+        line1: order.shipLine1,
+        line2: order.shipLine2,
+        city: order.shipCity,
+        state: order.shipState,
+        postalCode: order.shipPostalCode,
+      },
       currency: order.currency,
       lines: order.items.map((i) => ({
         name: i.productName,

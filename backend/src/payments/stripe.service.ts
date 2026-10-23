@@ -20,6 +20,16 @@ export interface CheckoutSessionInput {
   /** Human order number, e.g. "KT-100123". */
   orderNumber: string;
   email: string;
+  /** The delivery address, used to prefill Stripe's billing country (US) and ZIP. */
+  customer?: {
+    name: string;
+    phone: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+  };
   currency: string;
   lines: CheckoutLine[];
   shippingFee: number;
@@ -95,11 +105,38 @@ export class StripeService {
 
     const metadata = { orderId: input.orderId, orderNumber: input.orderNumber };
     try {
+      // A customer record with a US address makes Stripe's page default the country to United
+      // States, instead of guessing from the visitor's IP. Without it we fall back to the email.
+      const customerId = input.customer
+        ? (
+            await this.stripe.customers.create(
+              {
+                email: input.email,
+                name: input.customer.name,
+                phone: input.customer.phone,
+                address: {
+                  line1: input.customer.line1,
+                  line2: input.customer.line2 || undefined,
+                  city: input.customer.city,
+                  state: input.customer.state,
+                  postal_code: input.customer.postalCode,
+                  country: 'US',
+                },
+                metadata,
+              },
+              { idempotencyKey: `customer-${input.orderId}` },
+            )
+          ).id
+        : null;
       const session = await this.stripe.checkout.sessions.create(
         {
           mode: 'payment',
           client_reference_id: input.orderId,
-          customer_email: input.email,
+          ...(customerId ? { customer: customerId } : { customer_email: input.email }),
+          // Always charge in the store currency. Stripe's "adaptive pricing" would otherwise show
+          // visitors a converted amount in their local currency (for example PKR).
+          adaptive_pricing: { enabled: false },
+          locale: 'en',
           line_items,
           success_url: input.successUrl,
           cancel_url: input.cancelUrl,
