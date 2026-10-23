@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Archive, Download, ImagePlus, Inbox, Loader2, Mail, MailOpen, Phone, Trash2, Users } from "lucide-react";
+import { Archive, Building2, Download, ImagePlus, Inbox, Paperclip, Loader2, Mail, MailOpen, Phone, Trash2, Users } from "lucide-react";
 import { api, del, get, patch, qs } from "@/lib/client-api";
 import type { AdminSettings, CustomerDetail, CustomerRow, Inquiry, Paged, Subscriber } from "@/lib/admin-types";
 import type { Category, InquiryStatus, InquiryType } from "@/lib/types";
@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { NativeSelect } from "@/components/ui/native-select";
 import { ProductImage } from "@/components/shop/product-image";
 import { PaymentBadge, StatusBadge } from "@/components/orders/order-ui";
+import { CustomFilterRulesEditor, formToRules, rulesToForm, type RulesForm } from "./custom-filter-rules";
 import { formatAddress } from "@/components/account/address-form";
 import { EmptyState, Label, PageHeader, Pagination, Panel, SearchInput, TableSkeleton, Tabs, btn, inputCls, td, th } from "./admin-ui";
 
@@ -301,7 +302,7 @@ export function AdminInquiries() {
 
   return (
     <div>
-      <PageHeader title="Inquiries" description="Contact-sales, notify-me and landfill enquiries from the website." />
+      <PageHeader title="Inquiries" description="Contact-sales, business-account, notify-me and landfill enquiries from the website." />
       <div className="mb-4 space-y-3">
         <Tabs<TypeTab>
           value={type}
@@ -358,7 +359,23 @@ export function AdminInquiries() {
                   </button>
                 </div>
               </div>
+              {i.address ? <p className="mt-3 text-sm"><span className="font-semibold">Address:</span> {i.address}</p> : null}
               <p className="mt-3 text-sm whitespace-pre-wrap">{i.message}</p>
+              {i.type === "BUSINESS_ACCOUNT" ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {i.attachmentUrl ? (
+                    <a href={i.attachmentUrl} target="_blank" rel="noopener noreferrer" className={btn.secondary}>
+                      <Paperclip className="size-4" /> {i.attachmentName || "Filter list"}
+                    </a>
+                  ) : null}
+                  <Link
+                    href={`/admin/businesses?${new URLSearchParams({ new: "1", inquiry: i.id, name: i.company ?? i.name, email: i.email, contact: i.name, phone: i.phone ?? "", address: i.address ?? "" }).toString()}`}
+                    className={btn.primary}
+                  >
+                    <Building2 className="size-4" /> Create business account
+                  </Link>
+                </div>
+              ) : null}
             </article>
           ))}
           <div className="rounded-2xl border border-lavender bg-white">
@@ -436,9 +453,10 @@ function SettingsForm({ s }: { s: AdminSettings }) {
     shippingFee: String(s.shippingFee),
     freeShippingThreshold: s.freeShippingThreshold === null ? "" : String(s.freeShippingThreshold),
     taxRatePct: String(Math.round(s.taxRate * 10000) / 100),
-    codEnabled: s.codEnabled,
+    checkoutEnabled: s.checkoutEnabled,
     announcement: s.announcement ?? "",
   });
+  const [rules, setRules] = useState<RulesForm>(() => rulesToForm(s.customFilter));
   const save = useMutation({
     mutationFn: () =>
       patch<AdminSettings>("/admin/settings", {
@@ -449,12 +467,15 @@ function SettingsForm({ s }: { s: AdminSettings }) {
         shippingFee: Number(v.shippingFee),
         freeShippingThreshold: v.freeShippingThreshold === "" ? null : Number(v.freeShippingThreshold),
         taxRate: Number(v.taxRatePct) / 100,
-        codEnabled: v.codEnabled,
+        checkoutEnabled: v.checkoutEnabled,
         announcement: v.announcement || null,
+        customFilter: formToRules(rules),
       }),
     onSuccess: (d) => {
       qc.setQueryData(["admin", "settings"], d);
       qc.invalidateQueries({ queryKey: ["settings"] });
+      qc.invalidateQueries({ queryKey: ["custom-filters"] });
+      setRules(rulesToForm(d.customFilter));
       toast.success("Settings saved.");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -484,11 +505,16 @@ function SettingsForm({ s }: { s: AdminSettings }) {
           <label><Label hint="Leave empty to disable">Free shipping from ($)</Label><input type="number" min={0} step="0.01" className={inputCls} value={v.freeShippingThreshold} onChange={set("freeShippingThreshold")} /></label>
           <label><Label hint="Applied to the subtotal">Sales tax (%)</Label><input type="number" min={0} max={50} step="0.01" className={inputCls} value={v.taxRatePct} onChange={set("taxRatePct")} /></label>
           <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 p-4">
-            <span><span className="block text-sm font-semibold">Cash on Delivery</span><span className="text-xs text-muted-foreground">Turning this off pauses checkout until another payment method is added.</span></span>
-            <Switch checked={v.codEnabled} onCheckedChange={(c) => setV({ ...v, codEnabled: c })} aria-label="Cash on Delivery enabled" />
+            <span><span className="block text-sm font-semibold">Online checkout</span><span className="text-xs text-muted-foreground">Customers pay by card through Stripe. Turn this off to pause new orders (for example during maintenance).</span></span>
+            <Switch checked={v.checkoutEnabled} onCheckedChange={(c) => setV({ ...v, checkoutEnabled: c })} aria-label="Online checkout enabled" />
           </div>
         </div>
       </Panel>
+      <div className="xl:col-span-2">
+        <Panel title="Custom size filters">
+          <CustomFilterRulesEditor value={rules} onChange={setRules} />
+        </Panel>
+      </div>
       <div className="xl:col-span-2">
         <button type="submit" className={btn.primary} disabled={save.isPending}>
           {save.isPending ? <Loader2 className="size-4 animate-spin" /> : null} Save settings

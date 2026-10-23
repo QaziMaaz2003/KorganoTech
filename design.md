@@ -17,7 +17,8 @@ A full-stack e-commerce site for KorganoTech, a maker of MERV 11 / MERV 13 pleat
 | Company and info pages (About, Technology, Resources, FAQ, Contact, policies) | Built |
 | Customer accounts: register, login, addresses, order history with live status and tracking | Built |
 | Admin dashboard: products, sizes and prices, stock, images, orders, customers, inquiries, settings | Built |
-| Payment | **Cash on Delivery only.** The data model is ready for a gateway (Stripe is the likely choice) |
+| Payment | **Card payments through Stripe Checkout** (hosted page, webhook-confirmed). Earlier orders were Cash on Delivery and keep that method |
+| Custom-size filters | Instant online price from admin-set rates; made to order, no stock |
 | Transactional email | Not built |
 
 **Design goals that shaped the code:**
@@ -156,9 +157,12 @@ All paths are under `/api`.
 | `cart` | `POST quote` (public, prices guest carts); `GET /`, `POST items`, `PATCH/DELETE items/:id`, `DELETE /`, `POST merge` | Quote public; rest signed in |
 | `orders` | `POST /`, `GET me`, `GET me/:number`, `POST me/:number/cancel` | Signed in |
 | `inquiries` | `POST inquiries`, `POST newsletter` | Public, rate limited |
-| `settings` | `GET store` (shipping, tax, COD switch, announcement) | Public |
+| `settings` | `GET store` (shipping, tax, checkout switch, announcement) | Public |
+| `custom-filters` | `GET config`, `POST quote` (validates a size and returns its price) | Public |
+| `payments` | `POST stripe/webhook` (signature-verified Stripe events) | Stripe signature |
+| `business` | `POST requests` (multipart request form, rate limited); `GET me`, `POST me/reorder` (the signed-in business's saved filters; reorder adds them to the cart) | Requests public; rest signed in with a business |
 | `health` | `GET /` runs `SELECT 1`; returns `503` with the reason if the database is unreachable | Public |
-| `admin/*` | stats; products (CRUD, images, variants, bulk generate); images; variants; inventory (adjust, movements); orders (list, detail, status, payment, tracking); customers; categories (+ image); inquiries; newsletter; settings | `ADMIN` only |
+| `admin/*` | stats; products (CRUD, images, variants, bulk generate); images; variants; inventory (adjust, movements); orders (list, detail, status, payment, tracking); customers; businesses (create from a request, logins, filter list); categories (+ image); inquiries; newsletter; settings | `ADMIN` only |
 
 ### 5.3 Authentication and sessions
 
@@ -187,7 +191,7 @@ PENDING → CONFIRMED → PROCESSING → SHIPPED → DELIVERED
    └────────┴────────────┴──→ CANCELLED   (allowed until shipped; restocks every line)
 ```
 
-Marking an order delivered sets the COD payment to paid.
+A card order is created `PENDING` / `UNPAID`, becomes `CONFIRMED` / `PAID` when Stripe confirms payment, and is cancelled and restocked if its checkout session expires. Cancelling a paid order refunds the card. Orders placed before card payments (Cash on Delivery) are marked paid on delivery.
 
 ### 5.5 Other behaviour worth knowing
 
@@ -274,7 +278,8 @@ erDiagram
         decimal shippingFee
         decimal freeShippingThreshold
         decimal taxRate
-        bool codEnabled
+        bool checkoutEnabled
+        json customFilter
     }
     Inquiry {
         enum type
@@ -289,6 +294,7 @@ erDiagram
 
 **Design notes**
 - **Catalog shape:** `Category` is one of the three programs (`hvac`, `pathogen`, `environmental`). A `Product` has many `ProductVariant`s. Each variant is one **size × MERV rating × pack quantity** with its own SKU, price, compare-at price, stock and low-stock threshold. The combination is unique per product.
+- **Business accounts:** `Business` has many `User` logins (`User.businessId`) and many `BusinessFilter` rows, each either a catalog variant or a saved custom size with a quantity and label. A business may be created from a `BUSINESS_ACCOUNT` inquiry (one account per request).
 - **Order numbers** are human-friendly integers starting at 100001 (a database sequence).
 - **Deletes cascade down the catalog:** deleting a product removes its images and variants, and carts lose those lines. A category cannot be deleted while it has products (`Restrict`).
 - **Order history survives** because `OrderItem` carries its own copy of every displayed value.
@@ -321,7 +327,7 @@ Next.js 16 Cache Components means the static parts of a page are prerendered and
 
 - **Guests** keep their cart in a persisted zustand store (localStorage) as lines of `{ variantId, quantity }`. The API prices it through the public `POST /cart/quote`.
 - **On sign-in** the guest lines are sent to `POST /cart/merge` and folded into the account cart.
-- **Checkout requires an account** (shoppers can register on the checkout page). It supports a saved address or a new one, and places the order with Cash on Delivery.
+- **Checkout requires an account** (shoppers can register on the checkout page). It supports a saved address or a new one, and places the order, then sends the shopper to Stripe's hosted payment page. Guest cart lines are `{ variantId, quantity }` or `{ custom, quantity }` for a custom size.
 - Anything that depends on the session or browser storage is gated by `useHydrated()` to avoid server/client mismatches.
 
 ### 7.4 Admin dashboard
@@ -337,7 +343,7 @@ A client-rendered shell (sidebar with live badges for pending orders, low stock 
 | Categories | Copy and images for the three programs |
 | Customers | Orders, spend, addresses; deactivate or grant admin |
 | Inquiries, Newsletter | Triage; CSV export |
-| Settings | Shipping fee, free-shipping threshold, tax rate, COD switch, announcement bar |
+| Settings | Shipping fee, free-shipping threshold, tax rate, online-checkout switch, announcement bar, custom-size pricing rules |
 
 ### 7.5 Look and feel
 
@@ -435,7 +441,7 @@ sequenceDiagram
     B->>D: update status + history row
     A->>B: PATCH /admin/orders/:id/tracking (carrier, number)
     A->>B: PATCH /admin/orders/:id/status (SHIPPED, then DELIVERED)
-    B->>D: DELIVERED also marks COD payment as paid
+    B->>D: DELIVERED also marks an earlier COD order as paid
     Note over A,D: CANCELLED at any allowed point restocks every line
 ```
 
@@ -583,7 +589,10 @@ Host the **backend only** on a platform that runs a normal long-lived Node serve
 | Rate limiter is per instance | Weaker abuse protection on serverless | Acceptable now; move counters to a shared store if abuse appears |
 | Visitor IP behind two proxies | Possible shared rate-limit bucket | Verify after deployment and adjust `TRUST_PROXY_HOPS` (10.5) |
 | Cloud name must match in two places | Images break if the frontend and backend disagree | Keep `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` equal to `CLOUDINARY_CLOUD_NAME` |
-| Online payments | COD only | Add Stripe (needs keys, webhook secret and business details) |
+| Stripe setup | Card checkout needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and a webhook endpoint | See the backend `.env.example` and README |
+| Business logins | No email provider, so the admin passes on the temporary password shown at creation | Add a provider such as Resend |
+| Subscriptions | Not built; deferred by the client | Revisit later |
+| Custom-size prices | The starting rates are placeholders | Review them in Admin → Settings → Custom size filters |
 | Transactional email | No order or password-reset emails | Add a provider such as Resend |
 | Placeholder content | Prices, stock and policy pages are seed data and templates | Client to supply real data and review policies |
 | Local e2e spec | `test/app.e2e-spec.ts` lacks `supertest` typings | Add the types or drop the spec |

@@ -54,8 +54,7 @@ export function Footer({ logoTitle, logoSubtitle, description, links = navLinks,
                 { label: "KorganoTech home", href: "/" },
                 { label: "Shop all air filters", href: "/shop" },
                 { label: "Traditional HVAC air filters", href: "/hvac-air-filters" },
-                { label: "Pathogen air filters", href: "/pathogen-air-filters" },
-                { label: "Environmental air filters", href: "/environmental-air-filters" },
+                { label: "Clean Air Technology", href: "/technology" },
                 { label: "About KorganoTech", href: "/about" },
               ].map((l) => (
                 <li key={l.href}>

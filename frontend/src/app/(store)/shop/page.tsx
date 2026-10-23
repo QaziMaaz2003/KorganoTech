@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Shop Air Filters",
   description:
-    "Shop KorganoTech MERV 11 and MERV 13 pleated HVAC air filters by size, depth and MERV rating. Cash on Delivery available.",
+    "Shop KorganoTech MERV 11 and MERV 13 pleated HVAC air filters by size, depth and MERV rating. Secure card checkout.",
 };
 
 type SP = Record<string, string | string[] | undefined>;
@@ -256,7 +256,8 @@ export default function ShopPage(props: PageProps<"/shop">) {
         <h1 className="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl">Shop air filters</h1>
         <p className="max-w-2xl text-muted-foreground">
           MERV 11 and MERV 13 pleated HVAC air filters made with traditional melt blown filtration media. Pick your size,
-          choose your MERV rating, and pay in cash on delivery.
+          choose your MERV rating, and check out securely by card. Need an odd size?{" "}
+          <Link href="/custom-filters" className="font-semibold text-brand underline">Order a custom size</Link>.
         </p>
       </div>
       <Suspense fallback={<ShopSkeleton />}>

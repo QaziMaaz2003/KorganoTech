@@ -11,6 +11,10 @@ import {
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
 
+/** We only ship within the United States. */
+const US_COUNTRY = /^(united states( of america)?|u.?s.?(a.?)?)$/i;
+const US_ONLY = { message: 'We currently ship to the United States only.' };
+
 export class UpdateProfileDto {
   @IsOptional()
   @Transform(trim)
@@ -101,6 +105,7 @@ export class AddressDto {
   @Transform(trim)
   @IsString()
   @MaxLength(80)
+  @Matches(US_COUNTRY, US_ONLY)
   country?: string;
 
   @IsOptional()
@@ -117,6 +122,6 @@ export class UpdateAddressDto {
   @IsOptional() @Transform(trim) @IsString() @MinLength(1) @MaxLength(80) city?: string;
   @IsOptional() @Transform(trim) @IsString() @MinLength(1) @MaxLength(80) state?: string;
   @IsOptional() @Transform(trim) @IsString() @MinLength(3) @MaxLength(20) postalCode?: string;
-  @IsOptional() @Transform(trim) @IsString() @MaxLength(80) country?: string;
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(80) @Matches(US_COUNTRY, US_ONLY) country?: string;
   @IsOptional() @IsBoolean() isDefault?: boolean;
 }

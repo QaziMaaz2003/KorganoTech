@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, Banknote, ShoppingCart, Trash2, Truck } from "lucide-react";
+import { AlertCircle, Lock, ShoppingCart, Trash2, Truck } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useCartStore } from "@/lib/cart-store";
 import { money } from "@/lib/format";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { QtyStepper } from "@/components/shop/qty-stepper";
 import { ProductImage } from "@/components/shop/product-image";
+import { CustomFilterThumb } from "@/components/shop/custom-filter-thumb";
 import type { Cart } from "@/lib/types";
 
 export function FreeShippingMeter({ cart }: { cart: Cart }) {
@@ -38,19 +39,28 @@ export function CartLines({ cart, compact = false }: { cart: Cart; compact?: boo
     <ul className="divide-y divide-lavender">
       {cart.lines.map((line) => (
         <li key={line.id} className="flex gap-4 py-4">
-          <ProductImage
-            src={line.product?.image?.url}
-            alt={line.product?.name ?? "Product"}
-            sizes="96px"
-            className={compact ? "size-20 shrink-0 rounded-xl" : "size-24 shrink-0 rounded-xl"}
-          />
+          {line.isCustom ? (
+            <CustomFilterThumb
+              spec={line.custom}
+              className={compact ? "size-20 shrink-0 rounded-xl" : "size-24 shrink-0 rounded-xl"}
+            />
+          ) : (
+            <ProductImage
+              src={line.product?.image?.url}
+              alt={line.product?.name ?? "Product"}
+              sizes="96px"
+              className={compact ? "size-20 shrink-0 rounded-xl" : "size-24 shrink-0 rounded-xl"}
+            />
+          )}
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                {line.product ? (
+                {line.product?.slug ? (
                   <Link href={`/products/${line.product.slug}`} className="line-clamp-2 font-semibold text-foreground hover:text-brand">
                     {line.product.name}
                   </Link>
+                ) : line.product ? (
+                  <p className="line-clamp-2 font-semibold text-foreground">{line.product.name}</p>
                 ) : (
                   <p className="font-semibold text-muted-foreground">Unavailable item</p>
                 )}
@@ -161,7 +171,7 @@ export function CartDrawer() {
                 </div>
               </div>
               <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Banknote className="size-4 text-brand" /> Pay in cash when your order is delivered.
+                <Lock className="size-4 text-brand" /> Secure card payment — you&apos;ll pay on the next step.
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Link

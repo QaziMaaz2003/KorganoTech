@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Banknote, Lock, ShoppingCart } from "lucide-react";
+import { ArrowRight, CreditCard, Lock, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { money } from "@/lib/format";
 import { CartLines, FreeShippingMeter } from "@/components/site/cart-drawer";
@@ -94,10 +94,10 @@ export function CartView() {
           </p>
         </div>
         <div className="flex gap-3 rounded-2xl bg-accent/60 p-4 text-sm">
-          <Banknote className="size-5 shrink-0 text-brand" />
+          <CreditCard className="size-5 shrink-0 text-brand" />
           <p>
-            <span className="font-semibold text-primary">Cash on Delivery.</span>{" "}
-            <span className="text-muted-foreground">Pay the courier when your order arrives — no card needed.</span>
+            <span className="font-semibold text-primary">Secure card payment.</span>{" "}
+            <span className="text-muted-foreground">Pay by card on Stripe&apos;s secure page when you check out.</span>
           </p>
         </div>
       </aside>

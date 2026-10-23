@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Banknote, CreditCard, Loader2, Lock, MapPin, ShoppingBag } from "lucide-react";
+import { CreditCard, Loader2, Lock, MapPin, ShieldCheck, ShoppingBag } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useMe } from "@/hooks/use-auth";
 import { get, post } from "@/lib/client-api";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { AuthForm, Field, fieldCls } from "@/components/account/auth-form";
 import { AddressFields, emptyAddress, formatAddress, type AddressInput } from "@/components/account/address-form";
 import { ProductImage } from "./product-image";
+import { CustomFilterThumb } from "./custom-filter-thumb";
 import { OrderTotals } from "./cart-view";
 import { ButtonLink } from "@/components/ui/button-link";
 
@@ -59,8 +60,8 @@ export function CheckoutView() {
 
   const place = useMutation({
     mutationFn: () =>
-      post<Order>("/orders", {
-        paymentMethod: "COD",
+      post<Order & { checkoutUrl?: string }>("/orders", {
+        paymentMethod: "CARD",
         note: note || undefined,
         ...(addressId && addressId !== "new" ? { addressId } : { address, saveAddress: save }),
       }),
@@ -71,7 +72,9 @@ export function CheckoutView() {
         qc.invalidateQueries({ queryKey: ["orders"] }),
         qc.invalidateQueries({ queryKey: ["addresses"] }),
       ]);
-      router.push(`/order-confirmation/${order.orderNumber}`);
+      // Card details are entered on Stripe's own page; we only ever get the result back.
+      if (order.checkoutUrl) window.location.assign(order.checkoutUrl);
+      else router.push(`/account/orders/${order.orderNumber}`);
     },
   });
 
@@ -124,6 +127,7 @@ export function CheckoutView() {
         </Step>
 
         <Step n={2} title="Delivery address">
+          <p className="-mt-2 mb-4 text-xs text-muted-foreground">We ship to addresses in the United States only.</p>
           {addresses.isLoading ? (
             <div className="h-24 animate-pulse rounded-xl bg-muted" />
           ) : (
@@ -185,26 +189,19 @@ export function CheckoutView() {
 
         <Step n={3} title="Payment">
           <div className="space-y-3">
-            <label className="flex items-start gap-3 rounded-xl border-2 border-brand bg-accent/40 p-4">
-              <input type="radio" name="payment" checked readOnly className="mt-1 size-4 accent-[var(--brand)]" />
-              <span>
-                <span className="flex items-center gap-2 font-semibold">
-                  <Banknote className="size-4.5 text-brand" /> Cash on Delivery
-                </span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">
-                  Pay {cart ? money(cart.total) : "the order total"} in cash when your order is delivered.
-                </span>
-              </span>
-            </label>
-            <div className="flex items-start gap-3 rounded-xl border-2 border-dashed border-lavender p-4 opacity-60" aria-disabled>
-              <input type="radio" disabled className="mt-1 size-4" aria-label="Card payment (coming soon)" />
-              <span>
-                <span className="flex items-center gap-2 font-semibold">
-                  <CreditCard className="size-4.5" /> Card payment
-                </span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">Coming soon</span>
-              </span>
+            <div className="flex items-start gap-3 rounded-xl border-2 border-brand bg-accent/40 p-4">
+              <CreditCard className="mt-0.5 size-5 shrink-0 text-brand" />
+              <div>
+                <p className="font-semibold">Pay by card</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  You&apos;ll be taken to Stripe&apos;s secure page to pay {cart ? money(cart.total) : "your order total"}.
+                  Visa, Mastercard, American Express, Apple Pay and Google Pay are supported.
+                </p>
+              </div>
             </div>
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="size-4 text-brand" /> Your card details go straight to Stripe and are never stored by KorganoTech.
+            </p>
           </div>
         </Step>
 
@@ -232,14 +229,18 @@ export function CheckoutView() {
         ) : null}
         <button
           type="submit"
-          disabled={blocked || place.isPending || !addressId}
+          disabled={blocked || place.isPending || place.isSuccess || !addressId}
           className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-gradient-brand text-base font-bold text-white shadow-card transition hover:shadow-lift disabled:opacity-50"
         >
-          {place.isPending ? <Loader2 className="size-5 animate-spin" /> : <Lock className="size-4.5" />}
-          {place.isPending ? "Placing order…" : `Place order · ${cart ? money(cart.total) : ""}`}
+          {place.isPending || place.isSuccess ? <Loader2 className="size-5 animate-spin" /> : <Lock className="size-4.5" />}
+          {place.isPending
+            ? "Preparing secure payment…"
+            : place.isSuccess
+              ? "Redirecting to payment…"
+              : `Continue to payment · ${cart ? money(cart.total) : ""}`}
         </button>
         <p className="text-center text-xs text-muted-foreground">
-          By placing your order you agree to our <Link href="/terms" className="underline">Terms</Link> and{" "}
+          By continuing to payment you agree to our <Link href="/terms" className="underline">Terms</Link> and{" "}
           <Link href="/shipping-returns" className="underline">Shipping &amp; Returns</Link> policy.
         </p>
       </aside>
@@ -257,7 +258,11 @@ function CheckoutSummary() {
         {cart.lines.map((l) => (
           <li key={l.id} className="flex gap-3 py-3">
             <div className="relative">
-              <ProductImage src={l.product?.image?.url} alt="" sizes="64px" className="size-16 rounded-xl" />
+              {l.isCustom ? (
+                <CustomFilterThumb spec={l.custom} className="size-16 rounded-xl" />
+              ) : (
+                <ProductImage src={l.product?.image?.url} alt="" sizes="64px" className="size-16 rounded-xl" />
+              )}
               <span className="absolute -top-2 -right-2 grid size-5 place-items-center rounded-full bg-primary text-[11px] font-bold text-white">
                 {l.quantity}
               </span>

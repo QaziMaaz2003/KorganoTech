@@ -6,7 +6,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions",
-  description: "Answers about KorganoTech products, sizes, ordering, Cash on Delivery and order tracking.",
+  description: "Answers about KorganoTech products, sizes, custom sizes, ordering, payment and order tracking.",
 };
 
 const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = [
@@ -64,8 +64,9 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
         q: "Do you make custom sizes?",
         a: (
           <>
-            Yes — custom sizes and bulk orders are handled by our sales team. <Link href="/contact">Contact sales</Link>{" "}
-            with your dimensions and quantity.
+            Yes. Enter your exact measurements on our <Link href="/custom-filters">custom size page</Link>, choose depth,
+            MERV rating and pack size, and see your price instantly. For large or recurring orders,{" "}
+            <Link href="/contact">contact sales</Link>.
           </>
         ),
       },
@@ -79,8 +80,16 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
         a: "Yes. You can order KorganoTech Traditional Air Filters on this website, and they are also available at Walmart.com. For bulk purchases, please fill out our Contact Form.",
       },
       {
-        q: "How does Cash on Delivery work?",
-        a: "Place your order online, then pay the courier in cash when your filters are delivered. No card details are needed. Online card payments are coming soon.",
+        q: "How do I pay?",
+        a: "You pay by card on Stripe's secure checkout page after you place your order. Visa, Mastercard, American Express, Apple Pay and Google Pay are supported. Your card details go straight to Stripe and are never stored by KorganoTech.",
+      },
+      {
+        q: "Which countries do you ship to, and in what currency?",
+        a: "We currently ship to addresses in the United States only. All prices and payments are in US dollars (USD).",
+      },
+      {
+        q: "Is sales tax added to my order?",
+        a: "No. No sales tax is added at checkout, so the total in your cart is the amount you pay.",
       },
       {
         q: "How much is shipping?",
@@ -97,7 +106,17 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
       },
       {
         q: "Can I cancel an order?",
-        a: "You can cancel online while an order is still pending. After it has been confirmed, please contact us and we'll help.",
+        a: "You can cancel online while an order is still awaiting payment. After it has been paid and confirmed, please contact us and we'll help.",
+      },
+      {
+        q: "Can I return a filter?",
+        a: (
+          <>
+            Yes. Email <a href="mailto:support@korganotech.com">support@korganotech.com</a> with your order number and the reason, and we will send a
+            return authorization with instructions. Please don&apos;t send anything back before you have one. See our{" "}
+            <Link href="/shipping-returns">Shipping &amp; Returns</Link> policy.
+          </>
+        ),
       },
     ],
   },

@@ -3,6 +3,8 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CloudinaryService } from '../cloudinary/cloudinary.service.js';
 import { SettingsService } from '../settings/settings.service.js';
+import { CustomFilterService } from '../custom-filters/custom-filter.service.js';
+import { sanitizeConfig } from '../custom-filters/custom-filter.config.js';
 import { paginate, toPage } from '../common/utils/format.js';
 import type {
   AdminInquiriesQueryDto,
@@ -19,6 +21,7 @@ export class AdminContentService {
     private readonly prisma: PrismaService,
     private readonly cloudinary: CloudinaryService,
     private readonly settings: SettingsService,
+    private readonly customFilters: CustomFilterService,
   ) {}
 
   // ─── Categories ──────────────────────────────────────────────────────────
@@ -115,12 +118,18 @@ export class AdminContentService {
 
   // ─── Settings ────────────────────────────────────────────────────────────
 
-  getSettings() {
-    return this.settings.get();
+  /** The settings row, with the custom-filter rules shown as they are actually applied. */
+  async getSettings() {
+    const [s, customFilter] = await Promise.all([this.settings.get(), this.customFilters.getConfig()]);
+    return { ...s, customFilter };
   }
 
-  updateSettings(dto: UpdateSettingsDto) {
-    return this.settings.update({
+  async updateSettings(dto: UpdateSettingsDto) {
+    const customFilter =
+      dto.customFilter === undefined
+        ? undefined
+        : (sanitizeConfig(dto.customFilter, true) as unknown as Prisma.InputJsonValue);
+    await this.settings.update({
       storeName: dto.storeName,
       supportEmail: dto.supportEmail === undefined ? undefined : dto.supportEmail || null,
       supportPhone: dto.supportPhone === undefined ? undefined : dto.supportPhone || null,
@@ -128,8 +137,10 @@ export class AdminContentService {
       shippingFee: dto.shippingFee,
       freeShippingThreshold: dto.freeShippingThreshold,
       taxRate: dto.taxRate,
-      codEnabled: dto.codEnabled,
+      checkoutEnabled: dto.checkoutEnabled,
       announcement: dto.announcement === undefined ? undefined : dto.announcement || null,
+      customFilter,
     });
+    return this.getSettings();
   }
 }

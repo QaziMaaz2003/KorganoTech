@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { ArrowRight, BadgeCheck, Banknote, Ruler, ShieldCheck, Truck } from "lucide-react";
+import { ArrowRight, BadgeCheck, CreditCard, Ruler, ShieldCheck, Truck } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button-link";
 
 const trust = [
   { icon: Truck, label: "Free shipping over $75" },
-  { icon: Banknote, label: "Cash on Delivery" },
+  { icon: CreditCard, label: "Secure card checkout" },
   { icon: ShieldCheck, label: "MERV 11 & MERV 13" },
   { icon: Ruler, label: "Standard & custom sizes" },
 ];

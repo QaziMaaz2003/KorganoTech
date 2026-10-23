@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Banknote, Check, CircleAlert, Info, PackageCheck, ShoppingCart, Truck, Zap } from "lucide-react";
+import { Check, CircleAlert, CreditCard, Info, PackageCheck, ShoppingCart, Truck, Zap } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useStoreSettings } from "@/hooks/use-store-data";
 import { money, packLabel } from "@/lib/format";
@@ -317,10 +317,10 @@ export function PdpView({
 
               <ul className="space-y-3 border-t border-lavender pt-4 text-sm">
                 <li className="flex gap-3">
-                  <Banknote className="mt-0.5 size-5 shrink-0 text-brand" />
+                  <CreditCard className="mt-0.5 size-5 shrink-0 text-brand" />
                   <span>
-                    <span className="block font-semibold">Cash on Delivery</span>
-                    <span className="text-muted-foreground">Pay when your order arrives.</span>
+                    <span className="block font-semibold">Secure card checkout</span>
+                    <span className="text-muted-foreground">Pay safely by card through Stripe.</span>
                   </span>
                 </li>
                 <li className="flex gap-3">

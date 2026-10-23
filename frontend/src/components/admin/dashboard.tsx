@@ -77,10 +77,10 @@ export function Dashboard() {
       <PageHeader title="Dashboard" description="Sales, orders and stock at a glance. Refreshes every minute." />
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <Kpi icon={DollarSign} label="Gross sales" value={money(t.grossSales)} hint="All orders except cancelled" />
-        <Kpi icon={Banknote} label="Cash collected" value={money(t.collected)} hint="Orders marked paid (COD)" />
+        <Kpi icon={DollarSign} label="Gross sales" value={money(t.grossSales)} hint="Paid orders, before refunds" />
+        <Kpi icon={Banknote} label="Payments received" value={money(t.collected)} hint="Orders marked paid" />
         <Kpi icon={ShoppingBag} label="Orders" value={t.orders} hint={`${last30Orders} in the last 30 days`} href="/admin/orders" />
-        <Kpi icon={Clock} label="Awaiting confirmation" value={t.pending} hint="Pending orders" href="/admin/orders?status=PENDING" />
+        <Kpi icon={Clock} label="Ready to fulfil" value={t.toFulfil} hint="Paid, not yet shipped" href="/admin/orders?status=CONFIRMED" />
         <Kpi icon={Users} label="Customers" value={t.customers} href="/admin/customers" />
         <Kpi icon={Package} label="Active products" value={t.activeProducts} href="/admin/products" />
         <Kpi icon={Boxes} label="Low-stock variants" value={t.lowStock} hint="At or below their threshold" href="/admin/inventory?low=1" />

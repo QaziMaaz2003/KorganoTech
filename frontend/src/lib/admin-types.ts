@@ -26,6 +26,7 @@ export interface AdminStats {
     collected: number;
     orders: number;
     pending: number;
+    toFulfil: number;
     customers: number;
     activeProducts: number;
     lowStock: number;
@@ -167,6 +168,10 @@ export interface Inquiry {
   productId: string | null;
   productName: string | null;
   message: string;
+  /** Business-account requests only. */
+  address: string | null;
+  attachmentUrl: string | null;
+  attachmentName: string | null;
   createdAt: string;
 }
 
@@ -186,9 +191,58 @@ export interface AdminSettings {
   shippingFee: number;
   freeShippingThreshold: number | null;
   taxRate: number;
-  codEnabled: boolean;
+  checkoutEnabled: boolean;
   announcement: string | null;
+  customFilter: CustomFilterRules;
   updatedAt: string;
 }
 
+/** Admin-editable rules for custom-size filter ordering. */
+export interface CustomFilterRules {
+  enabled: boolean;
+  minDimension: number;
+  maxDimension: number;
+  step: number;
+  depths: number[];
+  mervRatings: number[];
+  /** Dollars per square inch per filter: rates[depth][merv]. */
+  rates: Record<string, Record<string, number>>;
+  minUnitPrice: number;
+  packs: { quantity: number; discount: number }[];
+  leadTimeNote: string;
+}
+
 export type { PaymentStatus };
+
+// ─── Business accounts ──────────────────────────────────────────────────────
+
+import type { BusinessFilterLine } from "./types";
+
+export interface BusinessRow {
+  id: string;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  isActive: boolean;
+  createdAt: string;
+  _count: { users: number; filters: number };
+}
+
+export interface BusinessDetail {
+  id: string;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+  isActive: boolean;
+  inquiryId: string | null;
+  createdAt: string;
+  users: { id: string; email: string; firstName: string; lastName: string; isActive: boolean; createdAt: string }[];
+  filters: BusinessFilterLine[];
+}
+
+/** Returned when a login is created or linked. The temporary password is shown once. */
+export interface BusinessLoginResult {
+  business: BusinessDetail;
+  login: { email: string; created: boolean; tempPassword: string | null };
+}

@@ -13,6 +13,8 @@ export async function createApp(): Promise<RequestHandler> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     // Keep start-up quiet and fast; errors still log.
     logger: ['error', 'warn', 'log'],
+    // Stripe webhook signatures are verified against the raw bytes.
+    rawBody: true,
   });
   configureApp(app);
   await app.init();

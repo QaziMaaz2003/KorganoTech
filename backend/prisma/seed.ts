@@ -183,7 +183,7 @@ async function main() {
       freeShippingThreshold: 75,
       taxRate: 0,
       codEnabled: true,
-      announcement: 'Free shipping on orders over $75 · Cash on Delivery available',
+      announcement: 'Free shipping on orders over $75',
     },
     update: {},
   });

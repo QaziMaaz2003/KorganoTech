@@ -32,8 +32,10 @@ export class CheckoutDto {
   @MaxLength(500)
   note?: string;
 
-  @IsIn(['COD'], { message: 'Cash on Delivery is the only payment method available.' })
-  paymentMethod: 'COD';
+  /** Payment is by card through Stripe; the field is accepted for clarity. */
+  @IsOptional()
+  @IsIn(['CARD'], { message: 'Card is the only payment method available.' })
+  paymentMethod?: 'CARD';
 }
 
 export const ORDER_FILTERS = ['all', 'active', 'delivered', 'cancelled', 'paid'] as const;

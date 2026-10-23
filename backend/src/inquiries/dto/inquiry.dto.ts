@@ -11,6 +11,7 @@ import {
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
 
+/** Types the public contact forms may file. Business-account requests have their own endpoint. */
 export const INQUIRY_TYPES = [
   'CONTACT_SALES',
   'FRANCHISE',

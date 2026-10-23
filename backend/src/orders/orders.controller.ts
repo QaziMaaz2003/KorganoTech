@@ -38,6 +38,22 @@ export class OrdersController {
     return this.orders.getMine(user.id, number);
   }
 
+  /** Opens (or re-opens) the Stripe payment page for an unpaid order. */
+  @RateLimit({ limit: 20, ttl: 60_000 })
+  @Post('me/:number/pay')
+  @HttpCode(200)
+  pay(@CurrentUser() user: AuthUser, @Param('number') number: string) {
+    return this.orders.startPayment(user.id, number);
+  }
+
+  /** Re-checks the payment with Stripe (used on the page the customer returns to). */
+  @RateLimit({ limit: 60, ttl: 60_000 })
+  @Post('me/:number/sync-payment')
+  @HttpCode(200)
+  syncPayment(@CurrentUser() user: AuthUser, @Param('number') number: string) {
+    return this.orders.syncPayment(user.id, number);
+  }
+
   @Post('me/:number/cancel')
   @HttpCode(200)
   cancel(@CurrentUser() user: AuthUser, @Param('number') number: string) {

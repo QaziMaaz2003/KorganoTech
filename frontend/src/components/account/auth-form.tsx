@@ -123,7 +123,7 @@ export function AuthForm({
           <input required type="email" autoComplete="email" className={fieldCls} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
         </Field>
         {current === "register" ? (
-          <Field label="Phone (optional)" hint="Used by the courier for Cash on Delivery.">
+          <Field label="Phone (optional)" hint="Used by the courier if there is a question about your delivery.">
             <input type="tel" autoComplete="tel" className={fieldCls} value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
           </Field>
         ) : null}

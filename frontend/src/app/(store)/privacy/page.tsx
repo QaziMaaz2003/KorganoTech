@@ -12,12 +12,16 @@ export default function PrivacyPage() {
       <ul>
         <li>Account details you provide: name, email address, phone number and password (stored only as a secure hash).</li>
         <li>Order details: delivery addresses, the products you order and your order history.</li>
+        <li>
+          Payment details: card payments are taken by Stripe on its own secure page. We receive confirmation that an
+          order was paid, but never your full card number.
+        </li>
         <li>Messages you send through our contact and notify-me forms, and newsletter sign-ups.</li>
         <li>Basic technical data such as your IP address, used to protect our forms from abuse.</li>
       </ul>
       <h2>How we use it</h2>
       <ul>
-        <li>To process, deliver and support your orders, including Cash on Delivery collection.</li>
+        <li>To process, deliver and support your orders, including taking payment through Stripe.</li>
         <li>To respond to your enquiries and send updates you have asked for.</li>
         <li>To keep the website secure and prevent fraud.</li>
       </ul>

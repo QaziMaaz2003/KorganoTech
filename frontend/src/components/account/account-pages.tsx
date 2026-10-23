@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowRight, Banknote, Loader2, MapPin, Package, PackageCheck, Pencil, Plus, ShoppingCart, Star, Trash2, Truck, Wallet } from "lucide-react";
+import { ArrowRight, CreditCard, Loader2, MapPin, Package, PackageCheck, Pencil, Plus, ShoppingCart, Star, Trash2, Truck, Wallet } from "lucide-react";
 import { del, get, patch, post } from "@/lib/client-api";
 import type { Address, Order, OrderSummary, User } from "@/lib/types";
-import { date, money } from "@/lib/format";
+import { date, money, PAYMENT_METHOD_LABEL } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useMe, ME_KEY } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { useCartStore } from "@/lib/cart-store";
 import { ButtonLink } from "@/components/ui/button-link";
 import { OrderItemsTable, OrderTimeline, OrderTracker, PaymentBadge, StatusBadge } from "@/components/orders/order-ui";
+import { holdUntil, needsPayment, PayNowButton, useOrderPayment } from "@/components/orders/order-payment";
 import { OrderTotals } from "@/components/shop/cart-view";
 import { ProductImage } from "@/components/shop/product-image";
 import {
@@ -229,6 +231,21 @@ export function MyOrderDetail({ number }: { number: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Back from Stripe (or just opened an unpaid order): check the real payment state once.
+  const params = useSearchParams();
+  const { sync, payNow } = useOrderPayment(number);
+  const checked = useRef(false);
+  useEffect(() => {
+    if (order && needsPayment(order) && !checked.current) {
+      checked.current = true;
+      sync.mutate();
+    }
+  }, [order, sync]);
+  const cancelledPayment = params.get("payment") === "cancelled";
+  useEffect(() => {
+    if (cancelledPayment) toast.message("Payment was cancelled. You can pay again from this page.");
+  }, [cancelledPayment]);
+
   if (isLoading) return <div className="h-96 animate-pulse rounded-2xl bg-white" />;
   if (error || !order) {
     return (
@@ -279,15 +296,24 @@ export function MyOrderDetail({ number }: { number: string }) {
           <section className="surface-card p-6">
             <h2 className="text-lg font-bold text-primary">Payment</h2>
             <p className="mt-3 flex items-center gap-2 text-sm">
-              <Banknote className="size-4.5 text-brand" /> Cash on Delivery
+              <CreditCard className="size-4.5 text-brand" /> {PAYMENT_METHOD_LABEL[order.paymentMethod]}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               {order.paymentStatus === "PAID"
                 ? `Paid ${date(order.paidAt)}`
-                : order.status === "CANCELLED"
-                  ? "No payment due"
-                  : `Pay ${money(order.total)} in cash on delivery`}
+                : order.paymentStatus === "REFUNDED"
+                  ? "Refunded to your card"
+                  : order.status === "CANCELLED"
+                    ? "No payment due"
+                    : order.paymentMethod === "COD"
+                      ? `Pay ${money(order.total)} in cash on delivery`
+                      : sync.isPending
+                        ? "Checking your payment…"
+                        : `Awaiting payment${holdUntil(order) ? ` · items reserved until ${holdUntil(order)}` : ""}`}
             </p>
+            {needsPayment(order) && !sync.isPending ? (
+              <PayNowButton order={order} pending={payNow.isPending} onClick={() => payNow.mutate()} className="mt-4 w-full" />
+            ) : null}
             <div className="mt-4 border-t border-lavender pt-4">
               <OrderTotals cart={order} />
             </div>

@@ -18,7 +18,7 @@ export const ACTIVE_STATUSES: OrderStatus[] = [
 ];
 
 export const STATUS_NOTES: Record<OrderStatus, string> = {
-  PENDING: 'Order placed — Cash on Delivery',
+  PENDING: 'Order placed — awaiting payment',
   CONFIRMED: 'Order confirmed',
   PROCESSING: 'Order is being prepared',
   SHIPPED: 'Order shipped',

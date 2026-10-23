@@ -9,6 +9,7 @@ import {
   IsIn,
   IsInt,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
@@ -214,8 +215,8 @@ export class UpdateCustomerDto {
 // ─── Inquiries ──────────────────────────────────────────────────────────────
 
 export class AdminInquiriesQueryDto extends PaginationQueryDto {
-  @IsOptional() @IsIn(['CONTACT_SALES', 'FRANCHISE', 'PRODUCT_INTEREST', 'GENERAL'])
-  type?: 'CONTACT_SALES' | 'FRANCHISE' | 'PRODUCT_INTEREST' | 'GENERAL';
+  @IsOptional() @IsIn(['CONTACT_SALES', 'FRANCHISE', 'PRODUCT_INTEREST', 'GENERAL', 'BUSINESS_ACCOUNT'])
+  type?: 'CONTACT_SALES' | 'FRANCHISE' | 'PRODUCT_INTEREST' | 'GENERAL' | 'BUSINESS_ACCOUNT';
   @IsOptional() @IsIn(['NEW', 'READ', 'ARCHIVED']) status?: 'NEW' | 'READ' | 'ARCHIVED';
 }
 
@@ -243,6 +244,9 @@ export class UpdateSettingsDto {
   @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 4 }) @Min(0) @Max(0.5)
   taxRate?: number;
 
-  @IsOptional() @IsBoolean() codEnabled?: boolean;
+  @IsOptional() @IsBoolean() checkoutEnabled?: boolean;
+
+  /** Custom-size filter rules; validated field by field in sanitizeConfig. */
+  @IsOptional() @IsObject() customFilter?: Record<string, unknown>;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(200) announcement?: string | null;
 }

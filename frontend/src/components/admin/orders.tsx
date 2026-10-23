@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Banknote, Loader2, Mail, MapPin, Phone, ShoppingBag, Truck, User } from "lucide-react";
+import { CreditCard, Loader2, Mail, MapPin, Phone, ShoppingBag, Truck, User } from "lucide-react";
 import { get, patch, qs } from "@/lib/client-api";
 import type { AdminOrder, AdminOrderRow, Paged } from "@/lib/admin-types";
 import type { OrderStatus, PaymentStatus } from "@/lib/types";
-import { dateTime, money, ORDER_STATUS_LABEL } from "@/lib/format";
+import { dateTime, money, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { EmptyState, inputCls, Label, PageHeader, Pagination, Panel, SearchInput, TableSkeleton, Tabs, btn, td, th } from "./admin-ui";
 import { OrderItemsTable, OrderTimeline, OrderTracker, PaymentBadge, StatusBadge } from "@/components/orders/order-ui";
@@ -42,7 +42,7 @@ export function AdminOrders({ initialStatus }: { initialStatus?: string }) {
 
   return (
     <div>
-      <PageHeader title="Orders" description="Confirm, ship and track Cash-on-Delivery orders." />
+      <PageHeader title="Orders" description="Fulfil, ship and track paid orders." />
       <div className="mb-4 space-y-3">
         <Tabs
           value={status}
@@ -76,7 +76,7 @@ export function AdminOrders({ initialStatus }: { initialStatus?: string }) {
             aria-label="Payment status"
           >
             <option value="">All payments</option>
-            <option value="UNPAID">Unpaid (COD)</option>
+            <option value="UNPAID">Awaiting payment</option>
             <option value="PAID">Paid</option>
             <option value="REFUNDED">Refunded</option>
           </NativeSelect>
@@ -205,7 +205,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
             <PaymentBadge status={order.paymentStatus} />
           </span>
         }
-        description={`Placed ${dateTime(order.placedAt)} · Cash on Delivery`}
+        description={`Placed ${dateTime(order.placedAt)} · ${PAYMENT_METHOD_LABEL[order.paymentMethod]}`}
         actions={order.allowedTransitions.map((s) => (
           <button key={s} type="button" className={s === "CANCELLED" ? btn.danger : btn.primary} onClick={() => openAction(s)}>
             {ACTION_LABEL[s]}
@@ -262,8 +262,13 @@ export function AdminOrderDetail({ id }: { id: string }) {
           </Panel>
           <Panel title="Payment">
             <p className="flex items-center gap-2 text-sm">
-              <Banknote className="size-4 text-brand" /> Cash on Delivery · <span className="font-semibold">{money(order.total)}</span>
+              <CreditCard className="size-4 text-brand" /> {PAYMENT_METHOD_LABEL[order.paymentMethod]} · <span className="font-semibold">{money(order.total)}</span>
             </p>
+            {order.stripePaymentIntentId ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Stripe payment <span className="font-mono">{order.stripePaymentIntentId}</span>
+              </p>
+            ) : null}
             <label className="mt-4 block">
               <Label hint={order.paidAt ? `Paid ${dateTime(order.paidAt)}` : undefined}>Payment status</Label>
               <NativeSelect
@@ -271,12 +276,16 @@ export function AdminOrderDetail({ id }: { id: string }) {
                 disabled={payment.isPending}
                 onChange={(e) => payment.mutate(e.target.value as PaymentStatus)}
               >
-                <option value="UNPAID">Unpaid — collect on delivery</option>
-                <option value="PAID">Paid — cash collected</option>
+                <option value="UNPAID">{order.paymentMethod === "COD" ? "Unpaid — collect on delivery" : "Awaiting payment"}</option>
+                <option value="PAID">{order.paymentMethod === "COD" ? "Paid — cash collected" : "Paid"}</option>
                 <option value="REFUNDED">Refunded</option>
               </NativeSelect>
             </label>
-            <p className="mt-2 text-xs text-muted-foreground">Marking an order delivered sets it to paid automatically.</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {order.paymentMethod === "COD"
+                ? "Marking an order delivered sets it to paid automatically."
+                : "Card payments are marked paid automatically when Stripe confirms them. Changing this by hand does not move money; use Stripe for manual refunds."}
+            </p>
           </Panel>
           <TrackingForm key={`${order.id}:${order.carrier}:${order.trackingNumber}`} order={order} onSaved={onSaved} />
         </div>
@@ -301,9 +310,12 @@ export function AdminOrderDetail({ id }: { id: string }) {
               </div>
             ) : null}
             {pending === "CANCELLED" ? (
-              <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Cancelling returns every item&apos;s quantity to stock.</p>
+              <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                Cancelling returns every item&apos;s quantity to stock
+                {order.paymentMethod === "CARD" && order.paymentStatus === "PAID" ? " and refunds the customer's card automatically" : ""}.
+              </p>
             ) : null}
-            {pending === "DELIVERED" && order.paymentStatus === "UNPAID" ? (
+            {pending === "DELIVERED" && order.paymentStatus === "UNPAID" && order.paymentMethod === "COD" ? (
               <p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">The order will also be marked as paid (cash collected).</p>
             ) : null}
             <label className="block">

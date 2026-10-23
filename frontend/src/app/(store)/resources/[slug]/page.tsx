@@ -56,7 +56,7 @@ export default async function ArticlePage(props: PageProps<"/resources/[slug]">)
         <aside className="space-y-6 lg:sticky lg:top-36 lg:self-start">
           <div className="rounded-2xl bg-gradient-brand p-6 text-white">
             <p className="text-lg font-bold">Find your filter</p>
-            <p className="mt-1 text-sm text-white/80">MERV 11 and MERV 13 pleated filters, with Cash on Delivery.</p>
+            <p className="mt-1 text-sm text-white/80">MERV 11 and MERV 13 pleated filters, with secure card checkout.</p>
             <ButtonLink href="/shop" variant="light" size="sm" className="mt-4">Shop filters</ButtonLink>
           </div>
           <div className="surface-card p-6">

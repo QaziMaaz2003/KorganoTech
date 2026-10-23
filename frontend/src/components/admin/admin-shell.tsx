@@ -7,6 +7,7 @@ import { Suspense, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Boxes,
+  Building2,
   ExternalLink,
   FolderTree,
   Inbox,
@@ -34,6 +35,7 @@ const nav = [
   { href: "/admin/inventory", label: "Inventory", icon: Boxes, badge: "lowStock" as const },
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/businesses", label: "Businesses", icon: Building2 },
   { href: "/admin/inquiries", label: "Inquiries", icon: Inbox, badge: "newInquiries" as const },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/settings", label: "Settings", icon: Settings },

@@ -20,12 +20,14 @@ export const publicUserSelect = {
   phone: true,
   role: true,
   createdAt: true,
+  /** The business account this login belongs to, if any. */
+  business: { select: { id: true, name: true, isActive: true } },
 } as const;
 
 export type PublicUser = Pick<
   User,
   'id' | 'email' | 'firstName' | 'lastName' | 'phone' | 'role' | 'createdAt'
->;
+> & { business: { id: string; name: string; isActive: boolean } | null };
 
 @Injectable()
 export class AuthService {
@@ -73,7 +75,7 @@ export class AuthService {
         'This account has been deactivated. Please contact support.',
       );
     }
-    return { user: this.toPublic(user), token: await this.sign(user) };
+    return { user: await this.me(user.id), token: await this.sign(user) };
   }
 
   /** Invalidates every outstanding token for the user. */
@@ -100,8 +102,9 @@ export class AuthService {
     return this.jwt.signAsync(payload);
   }
 
+  /** A just-registered user has no business account yet. */
   private toPublic(user: User): PublicUser {
     const { id, email, firstName, lastName, phone, role, createdAt } = user;
-    return { id, email, firstName, lastName, phone, role, createdAt };
+    return { id, email, firstName, lastName, phone, role, createdAt, business: null };
   }
 }

@@ -36,7 +36,9 @@ enum OrderStatus {
 }
 
 enum PaymentMethod {
+  /// Legacy: kept so orders placed before card payments stay valid. Not offered at checkout.
   COD
+  CARD
 }
 
 enum PaymentStatus {
@@ -57,6 +59,8 @@ enum InquiryType {
   FRANCHISE
   PRODUCT_INTEREST
   GENERAL
+  /// "Request a free business account" form.
+  BUSINESS_ACCOUNT
 }
 
 enum InquiryStatus {
@@ -81,6 +85,10 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  /// Set when the user is a login of a business account (reorder list, see Business).
+  businessId     String?
+  business       Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
   addresses      Address[]
   cart           Cart?
   orders         Order[]
@@ -88,6 +96,7 @@ model User {
   stockMovements StockMovement[]
 
   @@index([role])
+  @@index([businessId])
 }
 
 model Address {
@@ -208,6 +217,7 @@ model ProductVariant {
   cartItems      CartItem[]
   orderItems     OrderItem[]
   stockMovements StockMovement[]
+  businessFilters BusinessFilter[]
 
   @@unique([productId, size, mervRating, packQuantity])
   @@index([size])
@@ -246,15 +256,20 @@ model Cart {
 model CartItem {
   id        String   @id @default(cuid())
   cartId    String
-  variantId String
+  /// Null for custom-size items.
+  variantId String?
+  /// Stable key for a custom size, e.g. "20x25x1-M13-4pk" (null for catalog items).
+  customKey String?
+  customSpec Json?
   quantity  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  cart    Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@unique([cartId, variantId])
+  @@unique([cartId, customKey])
 }
 
 // ─── Orders ─────────────────────────────────────────────────────────────────
@@ -265,8 +280,13 @@ model Order {
   number        Int           @unique @default(autoincrement())
   userId        String?
   status        OrderStatus   @default(PENDING)
-  paymentMethod PaymentMethod @default(COD)
+  paymentMethod PaymentMethod @default(CARD)
   paymentStatus PaymentStatus @default(UNPAID)
+  /// Stripe Checkout Session for the current payment attempt.
+  stripeSessionId       String? @unique
+  stripePaymentIntentId String?
+  /// Unpaid orders hold stock until this time, then are cancelled and restocked.
+  paymentExpiresAt      DateTime?
   currency      String        @default("USD")
   subtotal      Decimal       @db.Decimal(10, 2)
   shippingFee   Decimal       @db.Decimal(10, 2)
@@ -319,6 +339,10 @@ model OrderItem {
   unitPrice    Decimal @db.Decimal(10, 2)
   quantity     Int
   lineTotal    Decimal @db.Decimal(10, 2)
+  /// Made-to-order custom size filter (no catalog variant, no stock).
+  isCustom     Boolean @default(false)
+  /// { width, height, depth, mervRating, packQuantity } for custom items.
+  customSpec   Json?
 
   order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
@@ -357,11 +381,60 @@ model Inquiry {
   productId   String?
   productName String?
   message     String
+  /// Business-account requests: where the company is.
+  address        String?
+  /// Business-account requests: an uploaded filter list (Cloudinary).
+  attachmentUrl  String?
+  attachmentName String?
   ipAddress   String?
   createdAt   DateTime      @default(now())
 
   @@index([type, status])
   @@index([createdAt])
+}
+
+// ─── Business accounts ──────────────────────────────────────────────────────
+
+/// A company that orders regularly. An admin creates it from a business-account
+/// request, links one or more customer logins and sets up its filter list.
+model Business {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  address   String?
+  /// Internal notes, never shown to the customer.
+  notes     String?
+  isActive  Boolean  @default(true)
+  /// The request this account was created from.
+  inquiryId String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users   User[]
+  filters BusinessFilter[]
+}
+
+/// One filter on a business's saved list: a catalog variant or a custom size.
+model BusinessFilter {
+  id         String   @id @default(cuid())
+  businessId String
+  /// Where it is used, e.g. "Front office" (optional).
+  label      String?
+  variantId  String?
+  customKey  String?
+  customSpec Json?
+  /// Packs usually ordered; pre-fills the reorder screen.
+  quantity   Int      @default(1)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  variant  ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, variantId])
+  @@unique([businessId, customKey])
+  @@index([businessId, sortOrder])
 }
 
 model NewsletterSubscriber {
@@ -383,7 +456,10 @@ model StoreSettings {
   freeShippingThreshold Decimal? @default(75) @db.Decimal(10, 2)
   /// Fraction, e.g. 0.0725 for 7.25%.
   taxRate               Decimal  @default(0) @db.Decimal(5, 4)
-  codEnabled            Boolean  @default(true)
+  /// Master switch for online checkout.
+  checkoutEnabled       Boolean  @default(true)
+  /// Custom-size filter ordering rules and prices (merged over code defaults).
+  customFilter          Json?
   announcement          String?
   updatedAt             DateTime @updatedAt
 }

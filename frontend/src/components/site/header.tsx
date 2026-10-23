@@ -46,7 +46,7 @@ export function AnnouncementBar() {
   const { data } = useStoreSettings();
   const text =
     data?.announcement ??
-    "Free shipping on orders over $75 · Cash on Delivery available";
+    "Free shipping on orders over $75";
   return (
     <div className="bg-gradient-brand text-primary-foreground">
       <p className="container-page flex h-9 items-center justify-center gap-2 text-center text-xs font-medium tracking-wide sm:text-[13px]">
@@ -140,6 +140,11 @@ function AccountMenu() {
         <DropdownMenuItem onClick={() => router.push("/account/orders")}>
           <Package /> My orders
         </DropdownMenuItem>
+        {user.business ? (
+          <DropdownMenuItem onClick={() => router.push("/account/business")}>
+            <Building2 /> Business filters
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() =>
@@ -370,7 +375,7 @@ const primaryNav: (
 )[] = [
   { type: "menu", key: "sizes", label: "Shop by size" },
   { type: "menu", key: "merv", label: "Shop by MERV" },
-  { type: "link", href: "/contact", label: "Custom Filters" },
+  { type: "link", href: "/custom-filters", label: "Custom Filters" },
   { type: "menu", key: "technology", label: "Clean Air Technology" },
 ];
 
@@ -423,7 +428,7 @@ export function Header() {
         <SearchBox className="hidden max-w-xl flex-1 md:block" />
         <nav aria-label="Utility" className="ml-auto flex items-center gap-1 sm:gap-2">
           <Link
-            href="/contact"
+            href="/business-account"
             className="hidden items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-primary transition hover:bg-accent lg:inline-flex"
           >
             <Building2 className="size-4.5" /> Business Account
@@ -566,7 +571,7 @@ function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange: (o: bo
             </div>
           </div>
           <ul className="space-y-1 border-t border-lavender pt-4">
-            {[{ label: "Shop all filters", href: "/shop" }, { label: "Custom Filters", href: "/contact" }, { label: "Technology", href: "/technology" }, ...mainNav, { label: "Business Account", href: "/contact" }, { label: "Support", href: supportHref }].map((n) => (
+            {[{ label: "Shop all filters", href: "/shop" }, { label: "Custom Filters", href: "/custom-filters" }, { label: "Technology", href: "/technology" }, ...mainNav, { label: "Business Account", href: "/business-account" }, { label: "Support", href: supportHref }].map((n) => (
               <li key={n.href}>
                 <Link href={n.href} className="block rounded-xl px-3 py-2.5 font-semibold text-foreground hover:bg-accent">
                   {n.label}

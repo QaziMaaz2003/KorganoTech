@@ -12,6 +12,7 @@ import {
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ProductImage } from "@/components/shop/product-image";
+import { CustomFilterThumb } from "@/components/shop/custom-filter-thumb";
 
 export function StatusBadge({ status, className }: { status: OrderStatus; className?: string }) {
   return (
@@ -95,7 +96,11 @@ export function OrderItemsTable({ order, linkProducts = true }: { order: Order; 
     <ul className="divide-y divide-lavender">
       {order.items.map((i) => (
         <li key={i.id} className="flex gap-4 py-4">
-          <ProductImage src={i.imageUrl} alt={i.productName} sizes="80px" className="size-20 shrink-0 rounded-xl" />
+          {i.isCustom ? (
+            <CustomFilterThumb spec={i.customSpec} className="size-20 shrink-0 rounded-xl" />
+          ) : (
+            <ProductImage src={i.imageUrl} alt={i.productName} sizes="80px" className="size-20 shrink-0 rounded-xl" />
+          )}
           <div className="min-w-0 flex-1">
             {linkProducts && i.productSlug ? (
               <Link href={`/products/${i.productSlug}`} className="font-semibold hover:text-brand">
@@ -105,6 +110,11 @@ export function OrderItemsTable({ order, linkProducts = true }: { order: Order; 
               <p className="font-semibold">{i.productName}</p>
             )}
             <p className="text-sm text-muted-foreground">{i.variantLabel}</p>
+            {i.isCustom ? (
+              <p className="mt-1 inline-flex rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-primary">
+                Made to order · exact size {i.customSpec ? `${i.customSpec.width}" × ${i.customSpec.height}" × ${i.customSpec.depth}"` : ""}
+              </p>
+            ) : null}
             <p className="text-xs text-muted-foreground">SKU {i.sku}</p>
           </div>
           <div className="text-right text-sm">

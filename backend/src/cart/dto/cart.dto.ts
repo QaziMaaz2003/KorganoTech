@@ -3,19 +3,28 @@ import {
   ArrayMaxSize,
   IsArray,
   IsInt,
+  IsOptional,
   IsString,
   Max,
   MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
+import { CustomSpecDto } from '../../custom-filters/dto/custom-filter.dto.js';
 
 export const MAX_LINE_QTY = 99;
 
+/** A cart line is either a catalog variant or a custom size (never both). */
 export class CartLineDto {
+  @IsOptional()
   @IsString()
   @MaxLength(40)
-  variantId: string;
+  variantId?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CustomSpecDto)
+  custom?: CustomSpecDto;
 
   @Type(() => Number)
   @IsInt()

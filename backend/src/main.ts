@@ -7,7 +7,9 @@ import { configureApp } from './app.setup.js';
 
 /** Local / traditional-server entry point. Vercel uses vercel.ts instead. */
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true, // Stripe webhook signatures are verified against the raw bytes
+  });
   configureApp(app);
 
   const port = Number(process.env.PORT ?? 3001);

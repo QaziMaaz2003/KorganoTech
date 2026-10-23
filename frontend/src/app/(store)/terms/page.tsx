@@ -15,8 +15,14 @@ export default function TermsPage() {
         your order. We may cancel an order if a product becomes unavailable or a pricing error occurs, in which case no
         payment is due.
       </p>
+      <h2>Shipping area and currency</h2>
+      <p>We ship to addresses in the United States only. All prices and payments are in US dollars (USD).</p>
       <h2>Payment</h2>
-      <p>Payment is made by Cash on Delivery. The amount due is the order total shown at checkout and in your order confirmation.</p>
+      <p>
+        Payment is made by card through Stripe when you place your order. The amount due is the order total shown at
+        checkout and in your order confirmation. An order is confirmed once payment is received. If an order is
+        cancelled after payment, the amount paid is refunded to the original card.
+      </p>
       <h2>Shipping, cancellations and returns</h2>
       <p>
         See our <Link href="/shipping-returns">Shipping &amp; Returns</Link> policy.

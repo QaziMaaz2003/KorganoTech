@@ -56,7 +56,7 @@ const hero: HeroContent = {
     { value: "11 & 13", label: "MERV ratings made by KorganoTech", tone: "leaf" },
     { value: "1″–4″", label: "filter depths for furnaces and HVAC systems", tone: "sky" },
     { value: "#1", label: "America’s pleated HVAC air filter, at Walmart.com", tone: "sun" },
-    { value: "COD", label: "Cash on Delivery on every online order", tone: "white" },
+    { value: "Card", label: "Secure card checkout on every online order", tone: "white" },
   ],
   slides: [
     {
@@ -112,8 +112,8 @@ const faqs = [
     a: "Higher-efficiency filters create a little more resistance to airflow. Check your equipment manufacturer's guidance to confirm your furnace or air conditioner is designed for the MERV level you choose.",
   },
   {
-    q: "Can I pay when my filters arrive?",
-    a: "Yes. Cash on Delivery is available on every online order — place your order, then pay the courier in cash when it arrives. Online card payments are coming soon.",
+    q: "How do I pay for an order?",
+    a: "You pay by card on Stripe's secure checkout page when you place your order. Your card details go straight to Stripe and are never stored by KorganoTech.",
   },
   {
     q: "Where can I buy KorganoTech filters?",
@@ -136,7 +136,7 @@ export default function HvacPage() {
             "Furnaces & air conditioners",
             "Available at Walmart.com",
             "Bulk & custom sizes",
-            "Cash on Delivery",
+            "Secure card checkout",
           ]}
         />
 

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CustomFiltersModule } from '../custom-filters/custom-filters.module.js';
 import { OrdersModule } from '../orders/orders.module.js';
 import { AdminContentService } from './admin-content.service.js';
 import { AdminCustomersService } from './admin-customers.service.js';
@@ -18,7 +19,7 @@ import {
 } from './admin.controllers.js';
 
 @Module({
-  imports: [OrdersModule],
+  imports: [OrdersModule, CustomFiltersModule],
   controllers: [
     AdminDashboardController,
     AdminProductsController,

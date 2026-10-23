@@ -4,7 +4,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { toast } from "sonner";
 import { del, patch, post, get } from "@/lib/client-api";
 import { useCartStore } from "@/lib/cart-store";
-import type { Cart } from "@/lib/types";
+import type { Cart, CustomSpec } from "@/lib/types";
 import { useMe } from "./use-auth";
 
 /**
@@ -44,11 +44,19 @@ export function useCart() {
   const setServer = (c: Cart) => qc.setQueryData(["cart", "server"], c);
 
   const add = useMutation({
-    mutationFn: async ({ variantId, quantity }: { variantId: string; quantity: number }) => {
+    mutationFn: async ({
+      variantId,
+      custom,
+      quantity,
+    }: {
+      variantId?: string;
+      custom?: CustomSpec;
+      quantity: number;
+    }) => {
       if (signedIn) {
-        setServer(await post<Cart>("/cart/items", { variantId, quantity }));
+        setServer(await post<Cart>("/cart/items", { variantId, custom, quantity }));
       } else {
-        store.getState().addGuest(variantId, quantity);
+        store.getState().addGuest({ variantId, custom }, quantity);
       }
     },
     onSuccess: () => store.getState().setDrawerOpen(true),

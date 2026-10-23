@@ -3,19 +3,30 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import type { CustomSpec } from "./types";
+
+/** A guest cart line: a catalog variant or a custom size, never both. */
 export interface GuestLine {
-  variantId: string;
+  variantId?: string;
+  custom?: CustomSpec;
   quantity: number;
 }
+
+/** Identity of a guest line. Matches the id the API returns when pricing the cart. */
+export const guestLineKey = (l: Pick<GuestLine, "variantId" | "custom">) =>
+  l.variantId ??
+  (l.custom
+    ? `${l.custom.width}x${l.custom.height}x${l.custom.depth}-M${l.custom.mervRating}-${l.custom.packQuantity}pk`
+    : "");
 
 interface CartUiState {
   /** Cart held in localStorage until the shopper signs in. */
   guestLines: GuestLine[];
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
-  addGuest: (variantId: string, quantity: number) => void;
-  setGuestQuantity: (variantId: string, quantity: number) => void;
-  removeGuest: (variantId: string) => void;
+  addGuest: (line: Pick<GuestLine, "variantId" | "custom">, quantity: number) => void;
+  setGuestQuantity: (key: string, quantity: number) => void;
+  removeGuest: (key: string) => void;
   clearGuest: () => void;
 }
 
@@ -27,27 +38,26 @@ export const useCartStore = create<CartUiState>()(
       guestLines: [],
       drawerOpen: false,
       setDrawerOpen: (drawerOpen) => set({ drawerOpen }),
-      addGuest: (variantId, quantity) =>
+      addGuest: (line, quantity) =>
         set((s) => {
-          const existing = s.guestLines.find((l) => l.variantId === variantId);
+          const key = guestLineKey(line);
+          const existing = s.guestLines.find((l) => guestLineKey(l) === key);
           return {
             guestLines: existing
               ? s.guestLines.map((l) =>
-                  l.variantId === variantId
-                    ? { ...l, quantity: Math.min(MAX, l.quantity + quantity) }
-                    : l,
+                  guestLineKey(l) === key ? { ...l, quantity: Math.min(MAX, l.quantity + quantity) } : l,
                 )
-              : [...s.guestLines, { variantId, quantity: Math.min(MAX, quantity) }],
+              : [...s.guestLines, { ...line, quantity: Math.min(MAX, quantity) }],
           };
         }),
-      setGuestQuantity: (variantId, quantity) =>
+      setGuestQuantity: (key, quantity) =>
         set((s) => ({
           guestLines: s.guestLines.map((l) =>
-            l.variantId === variantId ? { ...l, quantity: Math.max(1, Math.min(MAX, quantity)) } : l,
+            guestLineKey(l) === key ? { ...l, quantity: Math.max(1, Math.min(MAX, quantity)) } : l,
           ),
         })),
-      removeGuest: (variantId) =>
-        set((s) => ({ guestLines: s.guestLines.filter((l) => l.variantId !== variantId) })),
+      removeGuest: (key) =>
+        set((s) => ({ guestLines: s.guestLines.filter((l) => guestLineKey(l) !== key) })),
       clearGuest: () => set({ guestLines: [] }),
     }),
     {

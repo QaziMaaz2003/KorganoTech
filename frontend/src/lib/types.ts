@@ -10,7 +10,37 @@ export type OrderStatus =
   | "DELIVERED"
   | "CANCELLED";
 export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED";
-export type InquiryType = "CONTACT_SALES" | "FRANCHISE" | "PRODUCT_INTEREST" | "GENERAL";
+/** COD only appears on orders placed before card payments; it is no longer offered. */
+export type PaymentMethod = "COD" | "CARD";
+
+/** A made-to-order filter as the customer specified it (inches). */
+export interface CustomSpec {
+  width: number;
+  height: number;
+  depth: number;
+  mervRating: number;
+  packQuantity: number;
+}
+
+export interface CustomFilterOptions {
+  enabled: boolean;
+  minDimension: number;
+  maxDimension: number;
+  step: number;
+  depths: number[];
+  mervRatings: number[];
+  packs: { quantity: number; discount: number }[];
+  leadTimeNote: string;
+}
+
+export interface CustomQuote {
+  label: string;
+  sizeLabel: string;
+  perFilter: number;
+  unitPrice: number;
+  packQuantity: number;
+}
+export type InquiryType = "CONTACT_SALES" | "FRANCHISE" | "PRODUCT_INTEREST" | "GENERAL" | "BUSINESS_ACCOUNT";
 export type InquiryStatus = "NEW" | "READ" | "ARCHIVED";
 
 export interface User {
@@ -21,6 +51,8 @@ export interface User {
   phone: string | null;
   role: Role;
   createdAt: string;
+  /** Set when this login belongs to a business account. */
+  business: { id: string; name: string; isActive: boolean } | null;
 }
 
 export interface Address {
@@ -170,7 +202,10 @@ export interface FilterSize {
 
 export interface CartLine {
   id: string;
-  variantId: string;
+  /** Null for custom-size lines. */
+  variantId: string | null;
+  isCustom: boolean;
+  custom: CustomSpec | null;
   quantity: number;
   available: boolean;
   issue: string | null;
@@ -186,7 +221,7 @@ export interface CartLine {
     packQuantity: number;
     label: string;
   } | null;
-  product: { id: string; name: string; slug: string; image: ImageRef | null } | null;
+  product: { id: string; name: string; slug: string | null; image: ImageRef | null } | null;
 }
 
 export interface Cart {
@@ -215,6 +250,8 @@ export interface OrderItem {
   unitPrice: number;
   quantity: number;
   lineTotal: number;
+  isCustom: boolean;
+  customSpec: CustomSpec | null;
 }
 
 export interface OrderHistoryEntry {
@@ -231,8 +268,12 @@ export interface Order {
   orderNumber: string;
   userId: string | null;
   status: OrderStatus;
-  paymentMethod: "COD";
+  paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  /** Unpaid card orders hold stock until this time. */
+  paymentExpiresAt: string | null;
+  stripeSessionId: string | null;
+  stripePaymentIntentId: string | null;
   currency: string;
   subtotal: number;
   shippingFee: number;
@@ -278,7 +319,7 @@ export interface StoreSettings {
   shippingFee: number;
   freeShippingThreshold: number | null;
   taxRate: number;
-  codEnabled: boolean;
+  checkoutEnabled: boolean;
   announcement: string | null;
 }
 
@@ -288,4 +329,23 @@ export interface Page<T> {
   page: number;
   pageSize: number;
   pageCount: number;
+}
+
+// ─── Business accounts ──────────────────────────────────────────────────────
+
+/** One filter on a business's saved list, priced and checked against stock. */
+export type BusinessFilterLine = CartLine & {
+  label: string | null;
+  sortOrder: number;
+};
+
+export interface MyBusiness {
+  business: { id: string; name: string; phone: string | null; address: string | null };
+  filters: BusinessFilterLine[];
+}
+
+export interface ReorderResult {
+  added: number;
+  skipped: { filterId: string; reason: string }[];
+  cart: Cart;
 }

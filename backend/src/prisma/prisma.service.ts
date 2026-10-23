@@ -32,7 +32,8 @@ export class PrismaService
     super({
       adapter: new PrismaPg({
         connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false },
+        // DB_SSL=false is only for a local database without TLS.
+        ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false },
         // Each serverless instance keeps its own small pool; many instances can
         // run at once, so a big pool per instance would exhaust the database.
         max: Number(process.env.DB_POOL_MAX ?? (process.env.VERCEL ? 3 : 10)),

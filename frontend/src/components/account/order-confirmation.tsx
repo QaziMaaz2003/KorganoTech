@@ -1,19 +1,35 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Banknote, CheckCircle2, PackageSearch } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, PackageSearch, XCircle } from "lucide-react";
 import { get } from "@/lib/client-api";
 import type { Order } from "@/lib/types";
 import { money } from "@/lib/format";
 import { ButtonLink } from "@/components/ui/button-link";
 import { OrderTotals } from "@/components/shop/cart-view";
+import { holdUntil, needsPayment, PayNowButton, useOrderPayment } from "@/components/orders/order-payment";
 import { formatAddress } from "./address-form";
 
 export function OrderConfirmation({ number }: { number: string }) {
+  const params = useSearchParams();
+  const returnedFromStripe = params.has("session_id");
   const { data: order, isLoading, error } = useQuery({
     queryKey: ["order", number],
     queryFn: () => get<Order>(`/orders/me/${encodeURIComponent(number)}`),
   });
+  const { sync, payNow } = useOrderPayment(number);
+
+  // Coming back from Stripe: ask the server for the real payment result right away
+  // rather than waiting for the webhook.
+  const checked = useRef(false);
+  useEffect(() => {
+    if (order && needsPayment(order) && !checked.current) {
+      checked.current = true;
+      sync.mutate();
+    }
+  }, [order, sync]);
 
   if (isLoading) return <div className="mx-auto h-96 max-w-2xl animate-pulse rounded-2xl bg-white" />;
   if (error || !order) {
@@ -26,27 +42,82 @@ export function OrderConfirmation({ number }: { number: string }) {
     );
   }
 
+  const confirming = sync.isPending && needsPayment(order);
+  const unpaid = needsPayment(order) && !confirming;
+  const cancelled = order.status === "CANCELLED";
+  const until = holdUntil(order);
+
   return (
     <div className="mx-auto max-w-2xl">
       <div className="text-center">
-        <CheckCircle2 className="mx-auto size-16 text-emerald-600" />
-        <p className="eyebrow mt-5">Order placed</p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary sm:text-4xl">Thank you for your order!</h1>
-        <p className="mt-3 text-muted-foreground">
-          Your order <span className="font-bold text-foreground">{order.orderNumber}</span> has been received and is
-          pending confirmation. You can follow its status any time from your account.
-        </p>
+        {confirming ? (
+          <Loader2 className="mx-auto size-16 animate-spin text-brand" />
+        ) : cancelled ? (
+          <XCircle className="mx-auto size-16 text-zinc-500" />
+        ) : unpaid ? (
+          <Clock className="mx-auto size-16 text-amber-600" />
+        ) : (
+          <CheckCircle2 className="mx-auto size-16 text-emerald-600" />
+        )}
+
+        {confirming ? (
+          <>
+            <p className="eyebrow mt-5">One moment</p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary sm:text-4xl">Confirming your payment…</h1>
+            <p className="mt-3 text-muted-foreground">We&apos;re checking with Stripe. This only takes a few seconds.</p>
+          </>
+        ) : cancelled ? (
+          <>
+            <p className="eyebrow mt-5">Order cancelled</p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary sm:text-4xl">
+              {order.orderNumber} was cancelled
+            </h1>
+            <p className="mt-3 text-muted-foreground">
+              {order.paymentStatus === "REFUNDED"
+                ? "Your payment has been refunded to your card."
+                : "No payment was taken. You can place a new order any time."}
+            </p>
+          </>
+        ) : unpaid ? (
+          <>
+            <p className="eyebrow mt-5">Payment needed</p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary sm:text-4xl">
+              {returnedFromStripe ? "We haven't received your payment yet" : "Finish paying for your order"}
+            </h1>
+            <p className="mt-3 text-muted-foreground">
+              Order <span className="font-bold text-foreground">{order.orderNumber}</span> is saved
+              {until ? ` and your items are reserved until ${until}` : ""}. Pay {money(order.total)} by card to confirm it.
+              {returnedFromStripe ? " If you've just paid, give it a moment and check again." : ""}
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <PayNowButton order={order} pending={payNow.isPending} onClick={() => payNow.mutate()} />
+              {returnedFromStripe ? (
+                <button
+                  type="button"
+                  onClick={() => sync.mutate()}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-border bg-white px-5 text-sm font-semibold text-primary hover:bg-accent"
+                >
+                  I&apos;ve paid — check again
+                </button>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="eyebrow mt-5">{order.paymentStatus === "PAID" ? "Payment received" : "Order placed"}</p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary sm:text-4xl">Thank you for your order!</h1>
+            <p className="mt-3 text-muted-foreground">
+              Your order <span className="font-bold text-foreground">{order.orderNumber}</span>{" "}
+              {order.paymentStatus === "PAID"
+                ? `is confirmed — we received your payment of ${money(order.total)}.`
+                : "has been received."}{" "}
+              You can follow its status any time from your account.
+            </p>
+          </>
+        )}
       </div>
 
-      <div className="mt-8 flex gap-4 rounded-2xl bg-gradient-brand p-6 text-white shadow-lift">
-        <Banknote className="size-8 shrink-0" />
-        <div>
-          <p className="text-lg font-bold">Pay {money(order.total)} on delivery</p>
-          <p className="text-sm text-white/80">Please have the exact amount ready in cash when the courier arrives.</p>
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-6 sm:grid-cols-2">
+      <div className="mt-8 grid gap-6 sm:grid-cols-2">
         <div className="surface-card p-6">
           <p className="text-sm font-bold text-primary">Delivering to</p>
           <p className="mt-2 text-sm font-semibold">{order.shipFullName}</p>

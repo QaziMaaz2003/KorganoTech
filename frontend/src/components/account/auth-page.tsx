@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Suspense } from "react";
-import { Banknote, PackageSearch, ShoppingCart } from "lucide-react";
+import { CreditCard, PackageSearch, ShoppingCart } from "lucide-react";
 import { AuthForm } from "./auth-form";
 
 /** Only allow same-site relative redirects. */
@@ -37,7 +37,7 @@ export function AuthPage({
         <p className="mt-2 mb-8 text-muted-foreground">
           {mode === "login"
             ? "See your cart, track deliveries and review the filters you've ordered."
-            : "Save your cart, check out with Cash on Delivery and track every order."}
+            : "Save your cart, check out securely by card and track every order."}
         </p>
         <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-white" />}>
           <FormWithNext mode={mode} searchParams={searchParams} />
@@ -51,7 +51,7 @@ export function AuthPage({
             {[
               { icon: ShoppingCart, t: "Your cart, everywhere", b: "Items you add are saved to your account across devices." },
               { icon: PackageSearch, t: "Track every order", b: "Follow each order from pending to shipped to delivered." },
-              { icon: Banknote, t: "Cash on Delivery", b: "No card needed — pay the courier when your filters arrive." },
+              { icon: CreditCard, t: "Secure card checkout", b: "Pay on Stripe's secure page. Your card details are never stored here." },
             ].map(({ icon: Icon, t, b }) => (
               <li key={t} className="flex gap-4">
                 <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/15">

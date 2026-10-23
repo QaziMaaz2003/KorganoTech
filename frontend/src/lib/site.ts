@@ -4,7 +4,7 @@ export const brand = {
   name: "KorganoTech",
   tagline: "Advancing Air Filtration for Cleaner Environments", // original
   logoTagline: "Clean Air is Our Passion",
-  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "",
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@korganotech.com",
   address: "69 E Airway Blvd, Livermore, CA 94551",
   epaEstablishment: "102482-CA-1", // original
   trademark: "7565070", // original
@@ -120,17 +120,9 @@ export const footerNav = [
       { label: "4 Inch Air Filters", href: "/shop?depth=4" },
       { label: "MERV 11 Air Filters", href: "/shop?merv=11" },
       { label: "MERV 13 Air Filters", href: "/shop?merv=13" },
-      { label: "Bulk & Custom Sizes", href: "/contact" },
-    ],
-  },
-  {
-    title: "Our Products",
-    links: [
-      { label: "Traditional HVAC Air Filters", href: "/hvac-air-filters" },
-      { label: "Pathogen Air Filters", href: "/pathogen-air-filters" },
-      { label: "Environmental Air Filters", href: "/environmental-air-filters" },
-      { label: "Technology", href: "/technology" },
-      { label: "Applications", href: "/technology#applications" },
+      { label: "Custom Size Filters", href: "/custom-filters" },
+      { label: "Bulk Orders", href: "/contact" },
+      { label: "Business Account", href: "/business-account" },
     ],
   },
   {
@@ -147,6 +139,7 @@ export const footerNav = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
+      { label: "Clean Air Technology", href: "/technology" },
       { label: "Contact Sales", href: "/contact" },
       { label: "My Account", href: "/account" },
       { label: "Track an Order", href: "/account/orders" },

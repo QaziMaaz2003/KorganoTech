@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense } from "react";
-import { LayoutDashboard, LogOut, MapPin, Package, Settings, ShoppingCart } from "lucide-react";
+import { Building2, LayoutDashboard, LogOut, MapPin, Package, Settings, ShoppingCart } from "lucide-react";
 import { useLogout, useMe } from "@/hooks/use-auth";
 import { useCartStore } from "@/lib/cart-store";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -16,6 +16,8 @@ const links = [
   { href: "/account/settings", label: "Account settings", icon: Settings },
 ];
 
+const businessLink = { href: "/account/business", label: "Business filters", icon: Building2, exact: false };
+
 const linkCls = (active: boolean) =>
   cn(
     "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap transition",
@@ -24,9 +26,11 @@ const linkCls = (active: boolean) =>
 
 function NavLinks() {
   const pathname = usePathname();
+  const { data: user } = useMe();
+  const all = user?.business ? [...links.slice(0, 2), businessLink, ...links.slice(2)] : links;
   return (
     <>
-      {links.map(({ href, label, icon: Icon, exact }) => {
+      {all.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
         return (
           <Link key={href} href={href} className={linkCls(active)}>

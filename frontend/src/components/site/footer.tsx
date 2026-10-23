@@ -26,7 +26,7 @@ export function Footer() {
             <SocialIcons className="mt-6" itemClassName="border-white/20 text-white hover:bg-white hover:text-night" />
           </div>
 
-          <div className="grid gap-10 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-10 sm:grid-cols-2 xl:grid-cols-3">
             {footerNav.map((col) => (
               <div key={col.title}>
                 <h3 className="border-b border-white/25 pb-3 text-lg font-bold">{col.title}</h3>

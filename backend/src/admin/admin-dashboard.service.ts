@@ -5,6 +5,12 @@ import { withLabel } from '../orders/orders.service.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 
+/** Sales count once an order is real: card orders only when paid (earlier COD orders as before). */
+const COUNTS_AS_SALE = {
+  status: { not: 'CANCELLED' },
+  NOT: { paymentMethod: 'CARD', paymentStatus: 'UNPAID' },
+} as const;
+
 @Injectable()
 export class AdminDashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -28,7 +34,7 @@ export class AdminDashboardService {
       newInquiries,
     ] = await Promise.all([
       this.prisma.order.aggregate({
-        where: { status: { not: 'CANCELLED' } },
+        where: COUNTS_AS_SALE,
         _sum: { total: true },
       }),
       this.prisma.order.aggregate({
@@ -63,11 +69,11 @@ export class AdminDashboardService {
       }),
       this.prisma.order.findMany({
         where: { placedAt: { gte: since } },
-        select: { placedAt: true, total: true, status: true },
+        select: { placedAt: true, total: true, status: true, paymentMethod: true, paymentStatus: true },
       }),
       this.prisma.orderItem.groupBy({
         by: ['productName'],
-        where: { order: { status: { not: 'CANCELLED' } } },
+        where: { order: COUNTS_AS_SALE },
         _sum: { quantity: true, lineTotal: true },
         orderBy: { _sum: { quantity: 'desc' } },
         take: 5,
@@ -84,8 +90,9 @@ export class AdminDashboardService {
       const key = o.placedAt.toISOString().slice(0, 10);
       const bucket = series.find((s) => s.date === key);
       if (!bucket) continue;
-      bucket.orders += 1;
-      if (o.status !== 'CANCELLED') {
+      const isSale = o.status !== 'CANCELLED' && !(o.paymentMethod === 'CARD' && o.paymentStatus === 'UNPAID');
+      if (isSale) bucket.orders += 1;
+      if (isSale) {
         bucket.revenue = Math.round((bucket.revenue + o.total.toNumber()) * 100) / 100;
       }
     }
@@ -98,6 +105,8 @@ export class AdminDashboardService {
         collected: collected._sum.total?.toNumber() ?? 0,
         orders: orderCount,
         pending: statusCounts.PENDING ?? 0,
+        /** Paid (or earlier COD) orders the team still has to prepare and ship. */
+        toFulfil: (statusCounts.CONFIRMED ?? 0) + (statusCounts.PROCESSING ?? 0),
         customers,
         activeProducts,
         lowStock: lowStockCount,

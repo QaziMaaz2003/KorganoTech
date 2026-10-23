@@ -35,7 +35,7 @@ export class SettingsService {
       shippingFee: s.shippingFee,
       freeShippingThreshold: s.freeShippingThreshold,
       taxRate: s.taxRate,
-      codEnabled: s.codEnabled,
+      checkoutEnabled: s.checkoutEnabled,
       announcement: s.announcement,
     };
   }

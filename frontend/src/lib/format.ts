@@ -1,4 +1,4 @@
-import type { InquiryType, OrderStatus, PaymentStatus } from "./types";
+import type { InquiryType, OrderStatus, PaymentMethod, PaymentStatus } from "./types";
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
@@ -45,9 +45,14 @@ export const ORDER_STATUS_TONE: Record<OrderStatus, string> = {
 };
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
-  UNPAID: "Unpaid · COD",
+  UNPAID: "Awaiting payment",
   PAID: "Paid",
   REFUNDED: "Refunded",
+};
+
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
+  CARD: "Card (Stripe)",
+  COD: "Cash on Delivery (earlier order)",
 };
 
 export const PAYMENT_STATUS_TONE: Record<PaymentStatus, string> = {
@@ -61,6 +66,7 @@ export const INQUIRY_TYPE_LABEL: Record<InquiryType, string> = {
   FRANCHISE: "Franchise",
   PRODUCT_INTEREST: "Notify me",
   GENERAL: "General",
+  BUSINESS_ACCOUNT: "Business account",
 };
 
 export const ORDER_FLOW: OrderStatus[] = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"];
