@@ -4,7 +4,10 @@ export const brand = {
   name: "KorganoTech",
   tagline: "Advancing Air Filtration for Cleaner Environments", // original
   logoTagline: "Clean Air is Our Passion",
-  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@korganotech.com",
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "Support@KorganoTech.com",
+  phone: "925-989-8726",
+  phoneHref: "tel:+19259898726",
+  hours: "Monday to Friday, 8:00 AM to 5:00 PM Pacific",
   address: "69 E Airway Blvd, Livermore, CA 94551",
   epaEstablishment: "102482-CA-1", // original
   trademark: "7565070", // original

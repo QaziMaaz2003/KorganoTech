@@ -3,7 +3,7 @@ import { ArrowRight, BadgeCheck, CreditCard, Ruler, ShieldCheck, Truck } from "l
 import { ButtonLink } from "@/components/ui/button-link";
 
 const trust = [
-  { icon: Truck, label: "Free shipping over $75" },
+  { icon: Truck, label: "Free shipping over $50" },
   { icon: CreditCard, label: "Secure card checkout" },
   { icon: ShieldCheck, label: "MERV 11 & MERV 13" },
   { icon: Ruler, label: "Standard & custom sizes" },

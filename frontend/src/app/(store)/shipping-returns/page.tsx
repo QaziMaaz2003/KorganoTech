@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { brand } from "@/lib/site";
 import { PolicyPage } from "@/components/content/policy";
 
 export const metadata: Metadata = { title: "Shipping & Returns" };
@@ -10,8 +11,12 @@ export default function ShippingReturnsPage() {
       <h2>Shipping</h2>
       <p>
         We ship KorganoTech filters to addresses in the <strong>United States only</strong>. We cannot ship outside the
-        United States at this time. Orders over the free-shipping threshold shown in your cart ship free; smaller orders
-        pay the flat shipping fee shown at checkout.
+        United States at this time. Orders of <strong>$50 or more ship free</strong>; smaller orders pay the flat
+        shipping fee shown at checkout.
+      </p>
+      <p>
+        Orders are prepared and shipped within <strong>3 to 5 business days</strong> of payment. Filters made to a
+        custom size are made to order and ship in 3 business days.
       </p>
       <h2>Currency and taxes</h2>
       <p>
@@ -37,9 +42,10 @@ export default function ShippingReturnsPage() {
       </p>
       <h2>Returns</h2>
       <p>
-        Returns are accepted. Please do not send anything back until you have a return authorization: email{" "}
-        <a href="mailto:support@korganotech.com">support@korganotech.com</a> with your order number and the reason for the return, and we will send
-        you a return authorization and instructions. Returned filters must be unused and in their original packaging.
+        Returns are accepted within <strong>30 days</strong> of delivery, for filters that are new and unused. Please do
+        not send anything back until you have a return authorization: email{" "}
+        <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a> with your order number and the reason for the return, and we will send
+        you a return authorization and instructions. Returned filters must be in their original packaging.
         If a filter arrives damaged or is not the size you ordered, tell us in the same email and we will arrange a
         replacement or refund.
       </p>
@@ -47,8 +53,13 @@ export default function ShippingReturnsPage() {
       <p>
         Filters ordered on our <Link href="/custom-filters">custom size page</Link> are made to the exact measurements you
         enter, so they cannot be returned or exchanged because of a measuring mistake. If a custom filter arrives
-        damaged, or is not made to the size you ordered, email <a href="mailto:support@korganotech.com">support@korganotech.com</a> with your order
-        number and we will make it right.
+        damaged, or is not made to the size you ordered, email <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a> with your order
+        number and we will make it right. Custom filters are not returnable unless faulty.
+      </p>
+      <h2>Questions</h2>
+      <p>
+        Call <a href={brand.phoneHref}>{brand.phone}</a> ({brand.hours}) or email{" "}
+        <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a>.
       </p>
       <h2>Bulk orders</h2>
       <p>Shipping and return terms for large or recurring orders are agreed with our sales team when you order.</p>

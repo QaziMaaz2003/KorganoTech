@@ -592,7 +592,9 @@ Host the **backend only** on a platform that runs a normal long-lived Node serve
 | Stripe setup | Card checkout needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and a webhook endpoint | See the backend `.env.example` and README |
 | Business logins | No email provider, so the admin passes on the temporary password shown at creation | Add a provider such as Resend |
 | Subscriptions | Not built; deferred by the client | Revisit later |
-| Custom-size prices | The starting rates are placeholders | Review them in Admin → Settings → Custom size filters |
+| Custom-size prices | Set from the client's document (base charge + per sq in) | Adjust in Admin → Settings → Custom size filters |
+| Catalog price oddities | Many 2-pack per-filter prices in the client's price list are higher than the 4-pack, so a 2-pack costs almost as much as a 4-pack | Imported as given; ask the client to confirm |
+| Actual sizes and Walmart links | Not supplied yet; the product page hides the actual-size line | Add when the client provides them |
 | Transactional email | No order or password-reset emails | Add a provider such as Resend |
 | Placeholder content | Prices, stock and policy pages are seed data and templates | Client to supply real data and review policies |
 | Local e2e spec | `test/app.e2e-spec.ts` lacks `supertest` typings | Add the types or drop the spec |

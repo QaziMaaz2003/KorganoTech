@@ -17,7 +17,7 @@ import { CustomFilterThumb } from "@/components/shop/custom-filter-thumb";
 const BUSINESS_KEY = ["business", "me"];
 
 function lineTitle(l: BusinessFilterLine) {
-  return l.label || l.product?.name || (l.custom ? "Custom-size filter" : "Air filter");
+  return l.product?.name || (l.custom ? "Custom-size filter" : "Air filter");
 }
 
 function lineDetail(l: BusinessFilterLine) {
@@ -119,7 +119,7 @@ export function BusinessReorder() {
                 >
                   <input
                     type="checkbox"
-                    aria-label={`Select ${lineTitle(f)}`}
+                    aria-label={`Select ${f.label ? `${f.label}: ` : ""}${lineTitle(f)}`}
                     className="size-5 accent-[var(--brand)]"
                     checked={isPicked(f)}
                     disabled={!f.available}
@@ -136,6 +136,7 @@ export function BusinessReorder() {
                     />
                   )}
                   <div className="min-w-0 flex-1 basis-48">
+                    {f.label ? <p className="truncate text-xs font-semibold tracking-wide text-brand uppercase">{f.label}</p> : null}
                     <p className="truncate font-bold text-primary">{lineTitle(f)}</p>
                     <p className="text-sm text-muted-foreground">{lineDetail(f)}</p>
                     {f.issue ? <p className="mt-1 text-xs font-semibold text-destructive">{f.issue}</p> : null}

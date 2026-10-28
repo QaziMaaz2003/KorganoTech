@@ -214,7 +214,7 @@ export class BusinessesService {
       const spec = specOf(dto.custom);
       validateSpec(spec, await this.customFilters.getConfig());
       const key = customKey(spec);
-      await this.assertNew({ businessId: id, customKey: key });
+      await this.assertNew({ businessId: id, customKey: key, label: dto.label || null });
       await this.prisma.businessFilter.create({
         data: {
           businessId: id,
@@ -228,7 +228,7 @@ export class BusinessesService {
     } else if (dto.variantId) {
       const variant = await this.prisma.productVariant.findUnique({ where: { id: dto.variantId } });
       if (!variant) throw new NotFoundException('That filter does not exist.');
-      await this.assertNew({ businessId: id, variantId: variant.id });
+      await this.assertNew({ businessId: id, variantId: variant.id, label: dto.label || null });
       await this.prisma.businessFilter.create({
         data: {
           businessId: id,
@@ -245,7 +245,20 @@ export class BusinessesService {
   }
 
   async updateFilter(id: string, filterId: string, dto: UpdateBusinessFilterDto) {
-    await this.ownFilter(id, filterId);
+    const current = await this.ownFilter(id, filterId);
+    if (dto.label !== undefined) {
+      const label = dto.label || null;
+      if (label !== current.label) {
+        await this.assertNew(
+          {
+            businessId: id,
+            ...(current.variantId ? { variantId: current.variantId } : { customKey: current.customKey ?? undefined }),
+            label,
+          },
+          filterId,
+        );
+      }
+    }
     await this.prisma.businessFilter.update({
       where: { id: filterId },
       data: {
@@ -353,11 +366,18 @@ export class BusinessesService {
   private async ownFilter(businessId: string, filterId: string) {
     const f = await this.prisma.businessFilter.findFirst({ where: { id: filterId, businessId } });
     if (!f) throw new NotFoundException('Filter not found on this business.');
+    return f;
   }
 
-  private async assertNew(where: { businessId: string; variantId?: string; customKey?: string }) {
-    const dup = await this.prisma.businessFilter.findFirst({ where });
-    if (dup) throw new ConflictException('That filter is already on the list.');
+  /** The same size may appear once per label (null counts as a label of its own). */
+  private async assertNew(
+    where: { businessId: string; variantId?: string; customKey?: string; label: string | null },
+    exceptId?: string,
+  ) {
+    const dup = await this.prisma.businessFilter.findFirst({
+      where: { ...where, ...(exceptId ? { id: { not: exceptId } } : {}) },
+    });
+    if (dup) throw new ConflictException('That filter is already on the list for this label.');
   }
 
   /** Decides, before any write, how a login email will be attached. */

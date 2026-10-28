@@ -40,7 +40,7 @@ function sideError(label: string, value: number | null, raw: string, cfg: Custom
   if (!raw.trim()) return null; // not typed yet
   if (value === null) return `Enter ${label.toLowerCase()} in inches, like 20 or 20 1/2.`;
   if (value < cfg.minDimension || value > cfg.maxDimension) {
-    return `${label} must be between ${trim(cfg.minDimension)}" and ${trim(cfg.maxDimension)}".`;
+    return `${label} must be between ${trim(cfg.minDimension)}" and ${trim(cfg.maxDimension)}" (the shorter side up to ${trim(cfg.maxShortSide)}").`;
   }
   const steps = value / cfg.step;
   if (Math.abs(steps - Math.round(steps)) > 1e-9) {
@@ -164,8 +164,13 @@ export function CustomFilterOrder() {
   const height = parseInches(hRaw);
   const wErr = cfg ? sideError("Width", width, wRaw, cfg) : null;
   const hErr = cfg ? sideError("Height", height, hRaw, cfg) : null;
+  // Largest size is 25" x 36": whichever side is shorter may not pass the short-side limit.
+  const shapeErr =
+    cfg && width !== null && height !== null && !wErr && !hErr && Math.min(width, height) > cfg.maxShortSide
+      ? `The largest size we make is ${trim(cfg.maxShortSide)}" x ${trim(cfg.maxDimension)}". One side must be ${trim(cfg.maxShortSide)}" or less.`
+      : null;
   const spec: CustomSpec | null =
-    cfg && width !== null && height !== null && !sideError("Width", width, wRaw, cfg) && !sideError("Height", height, hRaw, cfg) && depthV && mervV && packV
+    cfg && width !== null && height !== null && !wErr && !hErr && !shapeErr && depthV && mervV && packV
       ? { width, height, depth: depthV, mervRating: mervV, packQuantity: packV }
       : null;
 
@@ -218,8 +223,11 @@ export function CustomFilterOrder() {
             <SizeField id="custom-width" label="Width" raw={wRaw} onChange={setWRaw} parsed={width} error={wErr} />
             <SizeField id="custom-height" label="Height" raw={hRaw} onChange={setHRaw} parsed={height} error={hErr} />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Sizes from {trim(cfg.minDimension)}&quot; to {trim(cfg.maxDimension)}&quot;.
+          {shapeErr ? (
+            <p role="alert" className="mt-2 text-sm font-medium text-destructive">{shapeErr}</p>
+          ) : null}
+          <p className="mt-2 text-xs text-muted-foreground">
+            Largest size: {trim(cfg.maxShortSide)}&quot; x {trim(cfg.maxDimension)}&quot;.
           </p>
         </section>
 

@@ -1,0 +1,862 @@
+[
+ {
+  "size": "10x20x1",
+  "width": 10,
+  "height": 20,
+  "depth": 1,
+  "merv": 11,
+  "price2": 18.35,
+  "price4": 11.2,
+  "price6": 10.93
+ },
+ {
+  "size": "10x20x1",
+  "width": 10,
+  "height": 20,
+  "depth": 1,
+  "merv": 13,
+  "price2": 21.2,
+  "price4": 12.93,
+  "price6": 12.08
+ },
+ {
+  "size": "10x30x1",
+  "width": 10,
+  "height": 30,
+  "depth": 1,
+  "merv": 11,
+  "price2": 25.33,
+  "price4": 15.45,
+  "price6": 12.94
+ },
+ {
+  "size": "10x30x1",
+  "width": 10,
+  "height": 30,
+  "depth": 1,
+  "merv": 13,
+  "price2": 23.73,
+  "price4": 14.48,
+  "price6": 13.23
+ },
+ {
+  "size": "12x12x1",
+  "width": 12,
+  "height": 12,
+  "depth": 1,
+  "merv": 11,
+  "price2": 13.93,
+  "price4": 9.78,
+  "price6": 9.78
+ },
+ {
+  "size": "12x12x1",
+  "width": 12,
+  "height": 12,
+  "depth": 1,
+  "merv": 13,
+  "price2": 15.83,
+  "price4": 10.35,
+  "price6": 10.35
+ },
+ {
+  "size": "12x24x1",
+  "width": 12,
+  "height": 24,
+  "depth": 1,
+  "merv": 11,
+  "price2": 17.73,
+  "price4": 10.81,
+  "price6": 10.64
+ },
+ {
+  "size": "12x24x1",
+  "width": 12,
+  "height": 24,
+  "depth": 1,
+  "merv": 13,
+  "price2": 20.58,
+  "price4": 12.55,
+  "price6": 10.64
+ },
+ {
+  "size": "12x30x1",
+  "width": 12,
+  "height": 30,
+  "depth": 1,
+  "merv": 11,
+  "price2": 18.35,
+  "price4": 12.65,
+  "price6": 12.65
+ },
+ {
+  "size": "12x30x1",
+  "width": 12,
+  "height": 30,
+  "depth": 1,
+  "merv": 13,
+  "price2": 34.83,
+  "price4": 21.24,
+  "price6": 17.41
+ },
+ {
+  "size": "14x14x1",
+  "width": 14,
+  "height": 14,
+  "depth": 1,
+  "merv": 11,
+  "price2": 12.9,
+  "price4": 10.35,
+  "price6": 10.35
+ },
+ {
+  "size": "14x14x1",
+  "width": 14,
+  "height": 14,
+  "depth": 1,
+  "merv": 13,
+  "price2": 17.4,
+  "price4": 10.93,
+  "price6": 10.93
+ },
+ {
+  "size": "14x20x1",
+  "width": 14,
+  "height": 20,
+  "depth": 1,
+  "merv": 11,
+  "price2": 12.81,
+  "price4": 11.5,
+  "price6": 11.5
+ },
+ {
+  "size": "14x20x1",
+  "width": 14,
+  "height": 20,
+  "depth": 1,
+  "merv": 13,
+  "price2": 18.98,
+  "price4": 11.58,
+  "price6": 10.93
+ },
+ {
+  "size": "14x25x1",
+  "width": 14,
+  "height": 25,
+  "depth": 1,
+  "merv": 11,
+  "price2": 17.08,
+  "price4": 15.46,
+  "price6": 15.46
+ },
+ {
+  "size": "14x25x1",
+  "width": 14,
+  "height": 25,
+  "depth": 1,
+  "merv": 13,
+  "price2": 17.24,
+  "price4": 17.24,
+  "price6": 17.24
+ },
+ {
+  "size": "14x30x1",
+  "width": 14,
+  "height": 30,
+  "depth": 1,
+  "merv": 11,
+  "price2": 20.58,
+  "price4": 13.23,
+  "price6": 13.23
+ },
+ {
+  "size": "14x30x1",
+  "width": 14,
+  "height": 30,
+  "depth": 1,
+  "merv": 13,
+  "price2": 21.53,
+  "price4": 13.23,
+  "price6": 13.23
+ },
+ {
+  "size": "16x20x1",
+  "width": 16,
+  "height": 20,
+  "depth": 1,
+  "merv": 11,
+  "price2": 15.83,
+  "price4": 10.35,
+  "price6": 10.35
+ },
+ {
+  "size": "16x20x1",
+  "width": 16,
+  "height": 20,
+  "depth": 1,
+  "merv": 13,
+  "price2": 18.68,
+  "price4": 12.65,
+  "price6": 12.65
+ },
+ {
+  "size": "16x25x1",
+  "width": 16,
+  "height": 25,
+  "depth": 1,
+  "merv": 11,
+  "price2": 16.45,
+  "price4": 10.64,
+  "price6": 10.64
+ },
+ {
+  "size": "16x25x1",
+  "width": 16,
+  "height": 25,
+  "depth": 1,
+  "merv": 13,
+  "price2": 18.98,
+  "price4": 11.58,
+  "price6": 10.64
+ },
+ {
+  "size": "18x24x1",
+  "width": 18,
+  "height": 24,
+  "depth": 1,
+  "merv": 11,
+  "price2": 20.25,
+  "price4": 12.64,
+  "price6": 12.64
+ },
+ {
+  "size": "18x24x1",
+  "width": 18,
+  "height": 24,
+  "depth": 1,
+  "merv": 13,
+  "price2": 17.08,
+  "price4": 14.94,
+  "price6": 14.94
+ },
+ {
+  "size": "18x30x1",
+  "width": 18,
+  "height": 30,
+  "depth": 1,
+  "merv": 11,
+  "price2": 21.53,
+  "price4": 14.38,
+  "price6": 14.38
+ },
+ {
+  "size": "18x30x1",
+  "width": 18,
+  "height": 30,
+  "depth": 1,
+  "merv": 13,
+  "price2": 34.18,
+  "price4": 20.85,
+  "price6": 17.09
+ },
+ {
+  "size": "20x20x1",
+  "width": 20,
+  "height": 20,
+  "depth": 1,
+  "merv": 11,
+  "price2": 13.93,
+  "price4": 12.08,
+  "price6": 12.08
+ },
+ {
+  "size": "20x20x1",
+  "width": 20,
+  "height": 20,
+  "depth": 1,
+  "merv": 13,
+  "price2": 15.83,
+  "price4": 13.23,
+  "price6": 13.23
+ },
+ {
+  "size": "20x24x1",
+  "width": 20,
+  "height": 24,
+  "depth": 1,
+  "merv": 11,
+  "price2": 18.35,
+  "price4": 13.23,
+  "price6": 13.23
+ },
+ {
+  "size": "20x24x1",
+  "width": 20,
+  "height": 24,
+  "depth": 1,
+  "merv": 13,
+  "price2": 21.36,
+  "price4": 13.8,
+  "price6": 13.8
+ },
+ {
+  "size": "20x25x1",
+  "width": 20,
+  "height": 25,
+  "depth": 1,
+  "merv": 11,
+  "price2": 18.03,
+  "price4": 15.53,
+  "price6": 15.53
+ },
+ {
+  "size": "20x25x1",
+  "width": 20,
+  "height": 25,
+  "depth": 1,
+  "merv": 13,
+  "price2": 14.38,
+  "price4": 14.38,
+  "price6": 14.38
+ },
+ {
+  "size": "20x30x1",
+  "width": 20,
+  "height": 30,
+  "depth": 1,
+  "merv": 11,
+  "price2": 17.5,
+  "price4": 16.1,
+  "price6": 16.1
+ },
+ {
+  "size": "20x30x1",
+  "width": 20,
+  "height": 30,
+  "depth": 1,
+  "merv": 13,
+  "price2": 26.58,
+  "price4": 16.68,
+  "price6": 16.68
+ },
+ {
+  "size": "24x24x1",
+  "width": 24,
+  "height": 24,
+  "depth": 1,
+  "merv": 11,
+  "price2": 19.63,
+  "price4": 14.38,
+  "price6": 14.38
+ },
+ {
+  "size": "24x24x1",
+  "width": 24,
+  "height": 24,
+  "depth": 1,
+  "merv": 13,
+  "price2": 23.1,
+  "price4": 17.25,
+  "price6": 17.25
+ },
+ {
+  "size": "12x24x2",
+  "width": 12,
+  "height": 24,
+  "depth": 2,
+  "merv": 11,
+  "price2": 25.22,
+  "price4": 21.85,
+  "price6": 21.85
+ },
+ {
+  "size": "12x24x2",
+  "width": 12,
+  "height": 24,
+  "depth": 2,
+  "merv": 13,
+  "price2": 26.59,
+  "price4": 25.3,
+  "price6": 25.3
+ },
+ {
+  "size": "14x20x2",
+  "width": 14,
+  "height": 20,
+  "depth": 2,
+  "merv": 11,
+  "price2": 22.61,
+  "price4": 22.61,
+  "price6": 22.61
+ },
+ {
+  "size": "14x20x2",
+  "width": 14,
+  "height": 20,
+  "depth": 2,
+  "merv": 13,
+  "price2": 28.61,
+  "price4": 26.44,
+  "price6": 26.44
+ },
+ {
+  "size": "16x16x2",
+  "width": 16,
+  "height": 16,
+  "depth": 2,
+  "merv": 11,
+  "price2": 23.0,
+  "price4": 23.0,
+  "price6": 23.0
+ },
+ {
+  "size": "16x16x2",
+  "width": 16,
+  "height": 16,
+  "depth": 2,
+  "merv": 13,
+  "price2": 33.27,
+  "price4": 21.85,
+  "price6": 21.85
+ },
+ {
+  "size": "16x20x2",
+  "width": 16,
+  "height": 20,
+  "depth": 2,
+  "merv": 11,
+  "price2": 22.07,
+  "price4": 16.38,
+  "price6": 16.38
+ },
+ {
+  "size": "16x20x2",
+  "width": 16,
+  "height": 20,
+  "depth": 2,
+  "merv": 13,
+  "price2": 21.27,
+  "price4": 19.16,
+  "price6": 19.16
+ },
+ {
+  "size": "16x25x2",
+  "width": 16,
+  "height": 25,
+  "depth": 2,
+  "merv": 11,
+  "price2": 26.45,
+  "price4": 26.45,
+  "price6": 26.45
+ },
+ {
+  "size": "16x25x2",
+  "width": 16,
+  "height": 25,
+  "depth": 2,
+  "merv": 13,
+  "price2": 26.2,
+  "price4": 24.73,
+  "price6": 24.73
+ },
+ {
+  "size": "16x30x2",
+  "width": 16,
+  "height": 30,
+  "depth": 2,
+  "merv": 11,
+  "price2": 33.27,
+  "price4": 23.58,
+  "price6": 23.58
+ },
+ {
+  "size": "16x30x2",
+  "width": 16,
+  "height": 30,
+  "depth": 2,
+  "merv": 13,
+  "price2": 39.74,
+  "price4": 27.03,
+  "price6": 27.03
+ },
+ {
+  "size": "18x18x2",
+  "width": 18,
+  "height": 18,
+  "depth": 2,
+  "merv": 11,
+  "price2": 27.09,
+  "price4": 20.7,
+  "price6": 20.7
+ },
+ {
+  "size": "18x18x2",
+  "width": 18,
+  "height": 18,
+  "depth": 2,
+  "merv": 13,
+  "price2": 34.44,
+  "price4": 21.11,
+  "price6": 18.98
+ },
+ {
+  "size": "18x24x2",
+  "width": 18,
+  "height": 24,
+  "depth": 2,
+  "merv": 11,
+  "price2": 23.0,
+  "price4": 23.0,
+  "price6": 23.0
+ },
+ {
+  "size": "18x24x2",
+  "width": 18,
+  "height": 24,
+  "depth": 2,
+  "merv": 13,
+  "price2": 30.75,
+  "price4": 21.85,
+  "price6": 21.85
+ },
+ {
+  "size": "18x25x2",
+  "width": 18,
+  "height": 25,
+  "depth": 2,
+  "merv": 11,
+  "price2": 28.08,
+  "price4": 19.54,
+  "price6": 19.54
+ },
+ {
+  "size": "18x25x2",
+  "width": 18,
+  "height": 25,
+  "depth": 2,
+  "merv": 13,
+  "price2": 36.51,
+  "price4": 22.86,
+  "price6": 22.86
+ },
+ {
+  "size": "20x20x2",
+  "width": 20,
+  "height": 20,
+  "depth": 2,
+  "merv": 11,
+  "price2": 18.52,
+  "price4": 16.86,
+  "price6": 16.86
+ },
+ {
+  "size": "20x20x2",
+  "width": 20,
+  "height": 20,
+  "depth": 2,
+  "merv": 13,
+  "price2": 25.02,
+  "price4": 18.65,
+  "price6": 18.65
+ },
+ {
+  "size": "20x24x2",
+  "width": 20,
+  "height": 24,
+  "depth": 2,
+  "merv": 11,
+  "price2": 25.32,
+  "price4": 18.66,
+  "price6": 18.66
+ },
+ {
+  "size": "20x24x2",
+  "width": 20,
+  "height": 24,
+  "depth": 2,
+  "merv": 13,
+  "price2": 24.53,
+  "price4": 22.99,
+  "price6": 22.99
+ },
+ {
+  "size": "20x25x2",
+  "width": 20,
+  "height": 25,
+  "depth": 2,
+  "merv": 11,
+  "price2": 23.55,
+  "price4": 16.38,
+  "price6": 16.38
+ },
+ {
+  "size": "20x25x2",
+  "width": 20,
+  "height": 25,
+  "depth": 2,
+  "merv": 13,
+  "price2": 31.05,
+  "price4": 31.05,
+  "price6": 31.05
+ },
+ {
+  "size": "20x30x2",
+  "width": 20,
+  "height": 30,
+  "depth": 2,
+  "merv": 11,
+  "price2": 27.57,
+  "price4": 19.68,
+  "price6": 19.68
+ },
+ {
+  "size": "20x30x2",
+  "width": 20,
+  "height": 30,
+  "depth": 2,
+  "merv": 13,
+  "price2": 36.31,
+  "price4": 22.99,
+  "price6": 22.99
+ },
+ {
+  "size": "24x24x2",
+  "width": 24,
+  "height": 24,
+  "depth": 2,
+  "merv": 11,
+  "price2": 25.9,
+  "price4": 16.38,
+  "price6": 16.38
+ },
+ {
+  "size": "24x24x2",
+  "width": 24,
+  "height": 24,
+  "depth": 2,
+  "merv": 13,
+  "price2": 29.44,
+  "price4": 19.84,
+  "price6": 19.84
+ },
+ {
+  "size": "25x25x2",
+  "width": 25,
+  "height": 25,
+  "depth": 2,
+  "merv": 11,
+  "price2": 31.24,
+  "price4": 19.15,
+  "price6": 18.98
+ },
+ {
+  "size": "25x25x2",
+  "width": 25,
+  "height": 25,
+  "depth": 2,
+  "merv": 13,
+  "price2": 41.08,
+  "price4": 25.18,
+  "price6": 22.09
+ },
+ {
+  "size": "14x25x4",
+  "width": 14,
+  "height": 25,
+  "depth": 4,
+  "merv": 11,
+  "price2": 32.96,
+  "price4": 32.96,
+  "price6": 32.96
+ },
+ {
+  "size": "14x25x4",
+  "width": 14,
+  "height": 25,
+  "depth": 4,
+  "merv": 13,
+  "price2": 39.09,
+  "price4": 39.09,
+  "price6": 39.09
+ },
+ {
+  "size": "16x20x4",
+  "width": 16,
+  "height": 20,
+  "depth": 4,
+  "merv": 11,
+  "price2": 30.28,
+  "price4": 30.28,
+  "price6": 30.28
+ },
+ {
+  "size": "16x20x4",
+  "width": 16,
+  "height": 20,
+  "depth": 4,
+  "merv": 13,
+  "price2": 34.49,
+  "price4": 34.49,
+  "price6": 34.49
+ },
+ {
+  "size": "16x24x4",
+  "width": 16,
+  "height": 24,
+  "depth": 4,
+  "merv": 11,
+  "price2": 32.96,
+  "price4": 32.96,
+  "price6": 32.96
+ },
+ {
+  "size": "16x24x4",
+  "width": 16,
+  "height": 24,
+  "depth": 4,
+  "merv": 13,
+  "price2": 39.09,
+  "price4": 39.09,
+  "price6": 39.09
+ },
+ {
+  "size": "16x25x4",
+  "width": 16,
+  "height": 25,
+  "depth": 4,
+  "merv": 11,
+  "price2": 27.29,
+  "price4": 27.29,
+  "price6": 27.29
+ },
+ {
+  "size": "16x25x4",
+  "width": 16,
+  "height": 25,
+  "depth": 4,
+  "merv": 13,
+  "price2": 40.23,
+  "price4": 40.23,
+  "price6": 40.23
+ },
+ {
+  "size": "18x24x4",
+  "width": 18,
+  "height": 24,
+  "depth": 4,
+  "merv": 11,
+  "price2": 36.41,
+  "price4": 36.41,
+  "price6": 36.41
+ },
+ {
+  "size": "18x24x4",
+  "width": 18,
+  "height": 24,
+  "depth": 4,
+  "merv": 13,
+  "price2": 45.99,
+  "price4": 45.99,
+  "price6": 45.99
+ },
+ {
+  "size": "20x20x4",
+  "width": 20,
+  "height": 20,
+  "depth": 4,
+  "merv": 11,
+  "price2": 30.28,
+  "price4": 30.28,
+  "price6": 30.28
+ },
+ {
+  "size": "20x20x4",
+  "width": 20,
+  "height": 20,
+  "depth": 4,
+  "merv": 13,
+  "price2": 33.65,
+  "price4": 33.65,
+  "price6": 33.65
+ },
+ {
+  "size": "20x25x4",
+  "width": 20,
+  "height": 25,
+  "depth": 4,
+  "merv": 11,
+  "price2": 28.05,
+  "price4": 28.05,
+  "price6": 28.05
+ },
+ {
+  "size": "20x25x4",
+  "width": 20,
+  "height": 25,
+  "depth": 4,
+  "merv": 13,
+  "price2": 31.43,
+  "price4": 31.43,
+  "price6": 31.43
+ },
+ {
+  "size": "20x30x4",
+  "width": 20,
+  "height": 30,
+  "depth": 4,
+  "merv": 11,
+  "price2": 36.03,
+  "price4": 36.03,
+  "price6": 36.03
+ },
+ {
+  "size": "20x30x4",
+  "width": 20,
+  "height": 30,
+  "depth": 4,
+  "merv": 13,
+  "price2": 43.02,
+  "price4": 41.39,
+  "price6": 41.39
+ },
+ {
+  "size": "24x24x4",
+  "width": 24,
+  "height": 24,
+  "depth": 4,
+  "merv": 11,
+  "price2": 36.03,
+  "price4": 36.03,
+  "price6": 36.03
+ },
+ {
+  "size": "24x24x4",
+  "width": 24,
+  "height": 24,
+  "depth": 4,
+  "merv": 13,
+  "price2": 40.24,
+  "price4": 40.24,
+  "price6": 40.24
+ },
+ {
+  "size": "25x25x4",
+  "width": 25,
+  "height": 25,
+  "depth": 4,
+  "merv": 11,
+  "price2": 28.27,
+  "price4": 27.59,
+  "price6": 27.59
+ },
+ {
+  "size": "25x25x4",
+  "width": 25,
+  "height": 25,
+  "depth": 4,
+  "merv": 13,
+  "price2": 45.07,
+  "price4": 39.09,
+  "price6": 39.09
+ }
+]

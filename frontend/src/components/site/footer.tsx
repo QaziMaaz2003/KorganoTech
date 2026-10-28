@@ -20,6 +20,10 @@ export function Footer() {
             <address className="mt-6 space-y-1 text-sm not-italic text-white/80">
               <p className="font-semibold text-white">KorganoTech</p>
               <p>{brand.address}</p>
+              <p>
+                <a href={brand.phoneHref} className="hover:underline">{brand.phone}</a>
+              </p>
+              <p>{brand.hours}</p>
               <p>EPA Establishment Number: {brand.epaEstablishment}</p>
               <p>U.S. registered trademark #{brand.trademark}</p>
             </address>

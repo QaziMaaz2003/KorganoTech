@@ -32,6 +32,7 @@ export class CustomFilterService {
       enabled: cfg.enabled,
       minDimension: cfg.minDimension,
       maxDimension: cfg.maxDimension,
+      maxShortSide: cfg.maxShortSide,
       step: cfg.step,
       depths: cfg.depths,
       mervRatings: cfg.mervRatings,

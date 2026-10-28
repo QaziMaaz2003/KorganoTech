@@ -46,7 +46,7 @@ export function AnnouncementBar() {
   const { data } = useStoreSettings();
   const text =
     data?.announcement ??
-    "Free shipping on orders over $75";
+    "Free shipping on orders over $50";
   return (
     <div className="bg-gradient-brand text-primary-foreground">
       <p className="container-page flex h-9 items-center justify-center gap-2 text-center text-xs font-medium tracking-wide sm:text-[13px]">

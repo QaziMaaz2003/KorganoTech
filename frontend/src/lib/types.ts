@@ -26,6 +26,7 @@ export interface CustomFilterOptions {
   enabled: boolean;
   minDimension: number;
   maxDimension: number;
+  maxShortSide: number;
   step: number;
   depths: number[];
   mervRatings: number[];

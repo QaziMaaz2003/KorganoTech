@@ -32,6 +32,9 @@ export default function ContactPage() {
                 <div>
                   <p className="font-bold">KorganoTech</p>
                   <p className="text-sm text-muted-foreground">{brand.address}</p>
+                  <p className="text-sm text-muted-foreground">
+                    <a href={brand.phoneHref} className="font-semibold text-brand hover:underline">{brand.phone}</a> · {brand.hours}
+                  </p>
                   <p className="text-sm text-muted-foreground">EPA Establishment Number: {brand.epaEstablishment}</p>
                 </div>
               </li>

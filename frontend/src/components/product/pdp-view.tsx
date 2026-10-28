@@ -134,7 +134,7 @@ export function PdpView({
         <div>
           <p className="eyebrow">{product.category.name}</p>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary sm:text-[2.1rem] sm:leading-tight">
-            {size && /^\d/.test(size) ? `${size} ` : ""}
+            {size && /^\d/.test(size) && !product.name.includes(size) ? `${size} ` : ""}
             {product.name}
           </h1>
           {variant?.actualSize ? (

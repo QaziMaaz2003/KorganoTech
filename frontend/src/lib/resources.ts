@@ -77,7 +77,7 @@ export const articles: Article[] = [
       {
         heading: "Nominal vs. actual size",
         paragraphs: [
-          "A filter's actual dimensions are usually a little smaller than its nominal size so it slides easily into the slot. A 16x25x1 filter typically measures about 15.5 × 24.5 × 0.75 inches. Each KorganoTech product page lists both nominal and actual size.",
+          "A filter's actual dimensions are usually a little smaller than its nominal size so it slides easily into the slot. A 16x25x1 filter typically measures about 15.5 × 24.5 × 0.75 inches. Each KorganoTech product page lists the nominal size, and the actual size where we have it.",
         ],
       },
       {

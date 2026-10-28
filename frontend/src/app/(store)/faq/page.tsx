@@ -93,7 +93,11 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
       },
       {
         q: "How much is shipping?",
-        a: "Orders above the free-shipping threshold shown in your cart ship free; smaller orders pay a flat shipping fee. The exact amounts are shown in your cart before you check out.",
+        a: "Orders of $50 or more ship free; smaller orders pay a flat shipping fee. The exact amount is shown in your cart before you check out.",
+      },
+      {
+        q: "How long until my order ships?",
+        a: "Orders ship within 3 to 5 business days of payment. Custom-size filters are made to order and ship in 3 business days.",
       },
       {
         q: "How do I track my order?",
@@ -112,7 +116,8 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
         q: "Can I return a filter?",
         a: (
           <>
-            Yes. Email <a href="mailto:support@korganotech.com">support@korganotech.com</a> with your order number and the reason, and we will send a
+            Yes. Returns are accepted within 30 days for filters that are new and unused. Email{" "}
+            <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a> with your order number and the reason, and we will send a
             return authorization with instructions. Please don&apos;t send anything back before you have one. See our{" "}
             <Link href="/shipping-returns">Shipping &amp; Returns</Link> policy.
           </>

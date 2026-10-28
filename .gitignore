@@ -24,3 +24,6 @@ npm-debug.log*
 Thumbs.db
 coverage/
 .vercel
+
+# client source documents (price list, customer lists, raw images): never committed, never in public/
+backend/prisma/data/source/

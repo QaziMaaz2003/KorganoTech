@@ -202,12 +202,14 @@ export interface CustomFilterRules {
   enabled: boolean;
   minDimension: number;
   maxDimension: number;
+  maxShortSide: number;
   step: number;
   depths: number[];
   mervRatings: number[];
   /** Dollars per square inch per filter: rates[depth][merv]. */
   rates: Record<string, Record<string, number>>;
-  minUnitPrice: number;
+  baseCharge: Record<string, Record<string, number>>;
+  minPrices: Record<string, Record<string, number>>;
   packs: { quantity: number; discount: number }[];
   leadTimeNote: string;
 }

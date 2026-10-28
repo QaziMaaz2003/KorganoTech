@@ -1,7 +1,7 @@
 /**
  * Seeds the KorganoTech store: settings, the three programs (categories),
- * HVAC products with size × MERV × pack variants, the two not-yet-purchasable
- * programs, and the admin account.
+ * the two not-yet-purchasable programs, and the admin account. The real HVAC
+ * catalog (86 products x 3 packs) is loaded by `npm run db:import-catalog`.
  *
  * Placeholder product photos are uploaded to Cloudinary first, so the database
  * holds Cloudinary URLs exactly as it does for admin uploads.
@@ -21,7 +21,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false },
   }),
 });
 
@@ -48,98 +48,9 @@ async function upload(file: string): Promise<Img> {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const actualSize = (w: number, h: number, d: number) =>
-  `${w - 0.5} x ${h - 0.5} x ${Math.max(d - 0.25, 0.25)}`;
-
-/** Deterministic pseudo-random stock so re-seeding is stable. */
-function stockFor(sku: string) {
-  let h = 0;
-  for (const c of sku) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  const r = h % 100;
-  if (r < 4) return 0; // a few sold-out variants
-  if (r < 14) return 3 + (h % 6); // some low-stock variants
-  return 20 + (h % 140);
-}
-
-const to99 = (n: number) => Math.max(0.99, Math.floor(n) + 0.99);
-
-interface HvacLine {
-  slug: string;
-  name: string;
-  filterType: string;
-  depth: number;
-  sizes: [number, number][];
-  perFilter: Record<11 | 13, number>;
-  packs: { qty: number; discount: number }[];
-  isFeatured: boolean;
-  badge?: string;
-  sortOrder: number;
-}
-
-const hvacLines: HvacLine[] = [
-  {
-    slug: 'pleated-hvac-air-filter-1-inch',
-    name: 'Pleated HVAC Air Filter — 1"',
-    filterType: 'Pleated',
-    depth: 1,
-    sizes: [
-      [10, 20], [12, 24], [14, 20], [14, 25], [16, 20], [16, 24], [16, 25],
-      [18, 24], [20, 20], [20, 24], [20, 25], [20, 30], [24, 24], [25, 25],
-    ],
-    perFilter: { 11: 8.25, 13: 10.5 },
-    packs: [
-      { qty: 4, discount: 1 },
-      { qty: 6, discount: 0.95 },
-      { qty: 12, discount: 0.88 },
-    ],
-    isFeatured: true,
-    badge: 'Best Seller',
-    sortOrder: 1,
-  },
-  {
-    slug: 'pleated-hvac-air-filter-2-inch',
-    name: 'Pleated HVAC Air Filter — 2"',
-    filterType: 'Pleated',
-    depth: 2,
-    sizes: [[16, 20], [16, 25], [20, 20], [20, 25], [24, 24]],
-    perFilter: { 11: 13.5, 13: 16.5 },
-    packs: [
-      { qty: 4, discount: 1 },
-      { qty: 6, discount: 0.95 },
-      { qty: 12, discount: 0.88 },
-    ],
-    isFeatured: true,
-    sortOrder: 2,
-  },
-  {
-    slug: 'deep-pleat-hvac-air-filter-4-inch',
-    name: 'Deep Pleat HVAC Air Filter — 4"',
-    filterType: 'Deep Pleat',
-    depth: 4,
-    sizes: [[16, 25], [20, 20], [20, 25]],
-    perFilter: { 11: 27.5, 13: 32.5 },
-    packs: [
-      { qty: 2, discount: 1 },
-      { qty: 4, discount: 0.95 },
-      { qty: 6, discount: 0.9 },
-    ],
-    isFeatured: true,
-    badge: 'New',
-    sortOrder: 3,
-  },
-];
-
 // Copy from the original korganotech.com.
 const HVAC_DESCRIPTION =
   'KorganoTech specializes in manufacturing high-performance MERV 11 and MERV 13 air filters using traditional melt blown filtration media and engineered to improve indoor air quality by reducing airborne pollutants and other harmful particulates.\n\nDesigned with a pleated construction to contribute to a cleaner and fresher indoor environment. Suitable for use in furnaces, air conditioners, heating systems, or HVAC systems.\n\nKorganoTech is a registered U.S. trademark # 7565070.';
-
-const HVAC_FEATURES = [
-  'High-performance MERV 11 and MERV 13 filtration',
-  'Traditional melt blown filtration media',
-  'Pleated construction for a cleaner and fresher indoor environment',
-  'Reduces airborne pollutants and other harmful particulates',
-  'Suitable for furnaces, air conditioners, heating systems, or HVAC systems',
-];
 
 const PATHOGEN_DESCRIPTION =
   'KorganoTech is developing a nanotechnology-based air filter designed to effectively capture and neutralize airborne pathogens, ensuring cleaner and safer indoor environments.\n\nKorganoTech Pathogen Air Filter is currently under development. Once developed and validated, it is expected to effectively capture and neutralize harmful airborne pathogens. Its efficacy is being validated through rigorous third-party certification testing to ensure compliance with EPA regulations and industry standards for air quality and safety. It is not yet registered as a pesticide or pesticide device.\n\n*Disclaimer: The KorganoTech Pathogen Air Filter is currently in the research and development phase and is not yet commercially available. Information presented on KorganoTech Pathogen Air Filters is intended for investor and informational purposes only and should not be construed as an endorsement, claim, or guarantee of performance until validated through regulatory approvals.';
@@ -165,9 +76,8 @@ const ENVIRONMENTAL_FEATURES = [
 
 async function main() {
   console.log('Uploading placeholder images to Cloudinary…');
-  const [hvacImg, heroImg, pathogenImg, envImg] = await Promise.all([
+  const [hvacImg, pathogenImg, envImg] = await Promise.all([
     upload('filter-hvac.jpg'),
-    upload('hero-filter.jpg'),
     upload('filter-pathogen.jpg'),
     upload('filter-environmental.jpg'),
   ]);
@@ -179,11 +89,12 @@ async function main() {
       id: 1,
       storeName: 'KorganoTech',
       address: '69 E Airway Blvd, Livermore, CA 94551',
+      supportPhone: '925-989-8726',
       shippingFee: 9.99,
-      freeShippingThreshold: 75,
+      freeShippingThreshold: 50,
       taxRate: 0,
-      codEnabled: true,
-      announcement: 'Free shipping on orders over $75',
+      checkoutEnabled: true,
+      announcement: 'Free shipping on orders over $50',
     },
     update: {},
   });
@@ -236,75 +147,8 @@ async function main() {
     }),
   };
 
-  console.log('HVAC products and variants…');
-  for (const line of hvacLines) {
-    const product = await prisma.product.upsert({
-      where: { slug: line.slug },
-      create: {
-        slug: line.slug,
-        name: line.name,
-        categoryId: categories.hvac.id,
-        shortDescription: `${line.filterType} HVAC air filter in MERV 11 and MERV 13, made with traditional melt blown filtration media. ${line.depth}" depth.`,
-        description: HVAC_DESCRIPTION,
-        features: HVAC_FEATURES,
-        specs: [
-          { label: 'Filter type', value: `${line.filterType} HVAC air filter` },
-          { label: 'Depth (nominal)', value: `${line.depth}"` },
-          { label: 'MERV ratings', value: 'MERV 11, MERV 13' },
-          { label: 'Filtration media', value: 'Traditional melt blown media' },
-          { label: 'Construction', value: 'Pleated' },
-          { label: 'Use', value: 'Furnaces, air conditioners, heating systems, HVAC systems' },
-          { label: 'Trademark', value: 'U.S. registered trademark #7565070' },
-        ],
-        filterType: line.filterType,
-        status: 'ACTIVE',
-        isPurchasable: true,
-        isFeatured: line.isFeatured,
-        badge: line.badge ?? null,
-        sortOrder: line.sortOrder,
-        images: {
-          create: [
-            { ...hvacImg, alt: line.name, isPrimary: true, sortOrder: 0 },
-            { ...heroImg, alt: `${line.name} — airflow`, sortOrder: 1 },
-          ],
-        },
-      },
-      update: {},
-    });
+  // HVAC products come from the client's price list: run `npm run db:import-catalog` after seeding.
 
-    for (const [w, h] of line.sizes) {
-      const size = `${w}x${h}x${line.depth}`;
-      const areaFactor = w * h > 500 ? 1.15 : 1;
-      for (const merv of [11, 13] as const) {
-        for (const pack of line.packs) {
-          const sku = `KT-${w}X${h}X${line.depth}-M${merv}-${pack.qty}PK`;
-          const list = line.perFilter[merv] * areaFactor * pack.qty;
-          const price = to99(list * pack.discount);
-          await prisma.productVariant.upsert({
-            where: { sku },
-            create: {
-              productId: product.id,
-              sku,
-              size,
-              width: w,
-              height: h,
-              depth: line.depth,
-              actualSize: actualSize(w, h, line.depth),
-              mervRating: merv,
-              packQuantity: pack.qty,
-              price,
-              compareAtPrice: pack.discount < 1 ? to99(list) : null,
-              stock: stockFor(sku),
-              lowStockThreshold: 10,
-            },
-            update: {},
-          });
-        }
-      }
-    }
-  }
-
-  console.log('Pathogen and Environmental programs…');
   await prisma.product.upsert({
     where: { slug: 'pathogen-air-filter' },
     create: {
@@ -340,7 +184,7 @@ async function main() {
           width: Number(w),
           height: Number(h),
           depth: Number(d),
-          actualSize: actualSize(Number(w), Number(h), Number(d)),
+          actualSize: null,
           mervRating: 13,
           packQuantity: 1,
           price: 39.99,

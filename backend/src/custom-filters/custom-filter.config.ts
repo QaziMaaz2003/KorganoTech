@@ -20,16 +20,22 @@ export interface CustomPack {
 /** Admin-editable rules for ordering custom-size filters. */
 export interface CustomFilterConfig {
   enabled: boolean;
+  /** Smallest allowed width or height (inches). */
   minDimension: number;
+  /** Longest side allowed (inches). */
   maxDimension: number;
+  /** The shorter side may not exceed this (inches). */
+  maxShortSide: number;
   /** Dimensions must be a multiple of this (inches). */
   step: number;
   depths: number[];
   mervRatings: number[];
   /** Dollars per square inch, per filter: rates[depth][merv]. */
   rates: Record<string, Record<string, number>>;
-  /** Floor price per filter before pack discounts. */
-  minUnitPrice: number;
+  /** Fixed charge per filter, added to the per-square-inch price: baseCharge[depth][merv]. */
+  baseCharge: Record<string, Record<string, number>>;
+  /** Floor price per filter before pack discounts: minPrices[depth][merv]. */
+  minPrices: Record<string, Record<string, number>>;
   packs: CustomPack[];
   leadTimeNote: string;
 }
@@ -40,29 +46,40 @@ export const MAX_CUSTOM_QTY = 99;
 export const CUSTOM_PRODUCT_NAME = 'Custom Size Air Filter';
 
 /**
- * Starting prices: the catalog's per-filter price curve with a made-to-order
- * premium. These are placeholders for the admin to review in Settings.
+ * The client's custom-filter pricing (Product info document): per filter, on a
+ * 2-pack basis, price = base charge + rate x (width x height), never below the
+ * minimum. 4-packs are 7% off per filter and 6-packs 13% off. The admin can
+ * adjust everything in Settings.
  */
 export const DEFAULT_CUSTOM_FILTER_CONFIG: CustomFilterConfig = {
   enabled: true,
-  minDimension: 6,
+  minDimension: 1,
   maxDimension: 36,
+  maxShortSide: 25,
   step: 0.125,
   depths: [1, 2, 4],
   mervRatings: [11, 13],
   rates: {
-    '1': { '11': 0.0248, '13': 0.0315 },
-    '2': { '11': 0.0405, '13': 0.0495 },
-    '4': { '11': 0.0825, '13': 0.0975 },
+    '1': { '11': 0.0157, '13': 0.0181 },
+    '2': { '11': 0.0157, '13': 0.0181 },
+    '4': { '11': 0.0157, '13': 0.0181 },
   },
-  minUnitPrice: 8.99,
+  baseCharge: {
+    '1': { '11': 10.73, '13': 11.29 },
+    '2': { '11': 20.08, '13': 22.75 },
+    '4': { '11': 34.82, '13': 42.56 },
+  },
+  minPrices: {
+    '1': { '11': 12.93, '13': 13.69 },
+    '2': { '11': 21.66, '13': 24.66 },
+    '4': { '11': 36.09, '13': 41.57 },
+  },
   packs: [
-    { quantity: 1, discount: 1 },
-    { quantity: 4, discount: 0.97 },
-    { quantity: 6, discount: 0.95 },
-    { quantity: 12, discount: 0.88 },
+    { quantity: 2, discount: 1 },
+    { quantity: 4, discount: 0.93 },
+    { quantity: 6, discount: 0.87 },
   ],
-  leadTimeNote: 'Made to order. Ships in 5–7 business days.',
+  leadTimeNote: 'Made to order. Ships in 3 business days.',
 };
 
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
@@ -83,10 +100,12 @@ export function sanitizeConfig(input: unknown, strict = false): CustomFilterConf
       if (src[k] !== undefined && !ok) fail(`"${k}" has an invalid value.`);
     };
     wrong('enabled', typeof src.enabled === 'boolean');
-    for (const k of ['minDimension', 'maxDimension', 'step', 'minUnitPrice'] as const) wrong(k, isNum(src[k]));
+    for (const k of ['minDimension', 'maxDimension', 'maxShortSide', 'step'] as const) wrong(k, isNum(src[k]));
     wrong('depths', Array.isArray(src.depths) && src.depths.every(isNum));
     wrong('mervRatings', Array.isArray(src.mervRatings) && src.mervRatings.every(isNum));
     wrong('rates', !!src.rates && typeof src.rates === 'object');
+    wrong('baseCharge', !!src.baseCharge && typeof src.baseCharge === 'object');
+    wrong('minPrices', !!src.minPrices && typeof src.minPrices === 'object');
     wrong('packs', Array.isArray(src.packs) && src.packs.every((p) => p && isNum(p.quantity) && isNum(p.discount)));
     wrong('leadTimeNote', typeof src.leadTimeNote === 'string');
   }
@@ -95,11 +114,15 @@ export function sanitizeConfig(input: unknown, strict = false): CustomFilterConf
     enabled: typeof src.enabled === 'boolean' ? src.enabled : base.enabled,
     minDimension: isNum(src.minDimension) ? src.minDimension : base.minDimension,
     maxDimension: isNum(src.maxDimension) ? src.maxDimension : base.maxDimension,
+    maxShortSide: isNum(src.maxShortSide) ? src.maxShortSide : base.maxShortSide,
     step: isNum(src.step) ? src.step : base.step,
     depths: Array.isArray(src.depths) ? src.depths.filter(isNum) : base.depths,
     mervRatings: Array.isArray(src.mervRatings) ? src.mervRatings.filter(isNum) : base.mervRatings,
     rates: src.rates && typeof src.rates === 'object' ? (src.rates as CustomFilterConfig['rates']) : base.rates,
-    minUnitPrice: isNum(src.minUnitPrice) ? src.minUnitPrice : base.minUnitPrice,
+    baseCharge:
+      src.baseCharge && typeof src.baseCharge === 'object' ? (src.baseCharge as CustomFilterConfig['baseCharge']) : base.baseCharge,
+    minPrices:
+      src.minPrices && typeof src.minPrices === 'object' ? (src.minPrices as CustomFilterConfig['minPrices']) : base.minPrices,
     packs: Array.isArray(src.packs)
       ? src.packs.filter((p) => p && isNum(p.quantity) && isNum(p.discount))
       : base.packs,
@@ -110,12 +133,14 @@ export function sanitizeConfig(input: unknown, strict = false): CustomFilterConf
   // somehow invalid falls back to defaults so the storefront keeps working.
   const problems: string[] = [];
   if (cfg.minDimension <= 0 || cfg.maxDimension <= cfg.minDimension) problems.push('Dimension limits are invalid.');
+  if (cfg.maxShortSide < cfg.minDimension || cfg.maxShortSide > cfg.maxDimension) {
+    problems.push('The shorter-side limit must sit between the smallest and the longest size.');
+  }
   if (cfg.step <= 0 || cfg.step > 1) problems.push('Dimension step must be between 0 and 1 inch.');
   if (!cfg.depths.length || cfg.depths.some((d) => d <= 0)) problems.push('Add at least one valid depth.');
   if (!cfg.mervRatings.length || cfg.mervRatings.some((m) => !Number.isInteger(m) || m < 1 || m > 16)) {
     problems.push('MERV ratings must be whole numbers from 1 to 16.');
   }
-  if (cfg.minUnitPrice < 0) problems.push('Minimum price cannot be negative.');
   if (!cfg.packs.length || cfg.packs.some((p) => !Number.isInteger(p.quantity) || p.quantity < 1 || p.discount <= 0 || p.discount > 1)) {
     problems.push('Packs need a whole quantity and a discount multiplier above 0 and up to 1.');
   }
@@ -124,6 +149,10 @@ export function sanitizeConfig(input: unknown, strict = false): CustomFilterConf
     for (const m of cfg.mervRatings) {
       const rate = cfg.rates?.[String(d)]?.[String(m)];
       if (!isNum(rate) || rate <= 0) problems.push(`Set a price rate for ${d}" depth, MERV ${m}.`);
+      const base = cfg.baseCharge?.[String(d)]?.[String(m)];
+      if (!isNum(base) || base < 0) problems.push(`Set a base charge for ${d}" depth, MERV ${m}.`);
+      const min = cfg.minPrices?.[String(d)]?.[String(m)];
+      if (!isNum(min) || min < 0) problems.push(`Set a minimum price for ${d}" depth, MERV ${m}.`);
     }
   }
   if (problems.length) {
@@ -154,8 +183,7 @@ export function customSku(spec: CustomSpec): string {
   return `CUSTOM-${trim(spec.width)}X${trim(spec.height)}X${trim(spec.depth)}-M${spec.mervRating}-${spec.packQuantity}PK`;
 }
 
-/** Whole dollars plus .99, like the catalog prices. */
-const to99 = (n: number) => Math.max(0.99, Math.floor(n) + 0.99);
+const toCents = (n: number) => Math.round(n * 100) / 100;
 
 /** Checks a spec against the rules and returns it normalized. */
 export function validateSpec(spec: CustomSpec, cfg: CustomFilterConfig): CustomSpec {
@@ -176,6 +204,9 @@ export function validateSpec(spec: CustomSpec, cfg: CustomFilterConfig): CustomS
     if (Math.abs(steps - Math.round(steps)) > 1e-9) {
       bad(`${name} must be in steps of ${cfg.step}" (for example 20, 20.125, 20.25).`);
     }
+  }
+  if (Math.min(spec.width, spec.height) > cfg.maxShortSide) {
+    bad(`The shorter side can be at most ${cfg.maxShortSide}" (the longer side up to ${cfg.maxDimension}").`);
   }
   if (!cfg.depths.includes(spec.depth)) bad(`Depth must be one of: ${cfg.depths.map((d) => `${d}"`).join(', ')}.`);
   if (!cfg.mervRatings.includes(spec.mervRating)) bad(`MERV rating must be one of: ${cfg.mervRatings.join(', ')}.`);
@@ -199,17 +230,20 @@ export interface CustomQuote {
 
 /** Prices a spec. Call validateSpec first. */
 export function priceSpec(spec: CustomSpec, cfg: CustomFilterConfig): CustomQuote {
-  const rate = cfg.rates[String(spec.depth)][String(spec.mervRating)];
+  const d = String(spec.depth);
+  const m = String(spec.mervRating);
+  const rate = cfg.rates[d][m];
   const pack = cfg.packs.find((p) => p.quantity === spec.packQuantity)!;
-  const raw = Math.max(cfg.minUnitPrice, spec.width * spec.height * rate);
-  const unitPrice = to99(raw * spec.packQuantity * pack.discount);
+  // Per filter: base charge + rate x area, never below the minimum for this depth and MERV.
+  const raw = Math.max(cfg.minPrices[d]?.[m] ?? 0, (cfg.baseCharge[d]?.[m] ?? 0) + spec.width * spec.height * rate);
+  const unitPrice = toCents(raw * pack.discount * spec.packQuantity);
   return {
     spec,
     key: customKey(spec),
     label: customLabel(spec),
     sku: customSku(spec),
     sizeLabel: customSizeLabel(spec),
-    perFilter: Math.round((unitPrice / spec.packQuantity) * 100) / 100,
+    perFilter: toCents(unitPrice / spec.packQuantity),
     unitPrice,
   };
 }
