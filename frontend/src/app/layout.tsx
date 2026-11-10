@@ -16,11 +16,11 @@ export const metadata: Metadata = {
     template: "%s | KorganoTech",
   },
   description:
-    "KorganoTech manufactures high-performance MERV 11 and MERV 13 pleated HVAC air filters and develops pathogen and environmental filtration technology. Livermore, California.",
+    "KorganoTech manufactures high-performance MERV 11 and MERV 13 pleated HVAC air filters in standard and custom sizes. Livermore, California.",
   openGraph: {
     title: "KorganoTech — Advanced Air Filtration for a Cleaner Future",
     description:
-      "HVAC air filters, pathogen filtration technology, and environmental filtration solutions for cleaner indoor and outdoor air.",
+      "MERV 11 and MERV 13 pleated HVAC air filters in standard and custom sizes.",
     type: "website",
   },
 };

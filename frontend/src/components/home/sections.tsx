@@ -5,7 +5,6 @@ import {
   BadgeCheck,
   Building2,
   Check,
-  Factory,
   HeartPulse,
   Home as HomeIcon,
   MapPin,
@@ -114,13 +113,6 @@ const mervCards = [
     href: "/contact",
     tone: "bg-lavender text-primary",
   },
-  {
-    title: "PATHOGEN",
-    tag: "In development",
-    body: "A nanotechnology-based filter designed to capture and neutralize airborne pathogens. Not yet commercially available.",
-    href: "/pathogen-air-filters",
-    tone: "bg-[linear-gradient(135deg,oklch(30%_0.12_300),oklch(45%_0.2_300))] text-white",
-  },
 ];
 
 export function ShopByMerv() {
@@ -130,7 +122,7 @@ export function ShopByMerv() {
         title={<span id="by-merv">Shop by MERV rating</span>}
         body="MERV ratings measure how much your filter captures — from everyday dust to fine particles. Find the right level for your home or building below."
       />
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {mervCards.map((m) => (
           <Link
             key={m.title}
@@ -194,7 +186,6 @@ const places = [
   { icon: Tractor, title: "Poultry & animal farms", body: "Dusty, high-load environments where air quality affects health." },
   { icon: Building2, title: "Commercial buildings", body: "Offices and facilities running large air-handling systems." },
   { icon: HomeIcon, title: "Homes", body: "Furnaces, air conditioners and residential HVAC systems." },
-  { icon: Factory, title: "Environmental sites", body: "Landfill-gas capture technology in development with LLNL." },
 ];
 
 export function WhereCleanAirMatters() {

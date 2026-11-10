@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -25,7 +24,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useLogout, useMe } from "@/hooks/use-auth";
 import { useFilterSizes, useStoreSettings } from "@/hooks/use-store-data";
 import { DEPTHS, groupByWidth, shopSizeHref, sizesForDepth } from "@/lib/sizes";
-import { brand, mainNav, technologyNav } from "@/lib/site";
+import { brand, mainNav } from "@/lib/site";
 import { money } from "@/lib/format";
 import { useCartStore } from "@/lib/cart-store";
 import { cn } from "@/lib/utils";
@@ -40,7 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-type MenuKey = "sizes" | "merv" | "technology" | null;
+type MenuKey = "sizes" | "merv" | null;
 
 export function AnnouncementBar() {
   const { data } = useStoreSettings();
@@ -307,38 +306,6 @@ function MervPanel() {
   );
 }
 
-function TechnologyPanel() {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto]">
-      {technologyNav.map((p) => (
-        <Link key={p.slug} href={p.href} className="group surface-card flex gap-4 p-3 hover:-translate-y-0.5 hover:shadow-lift">
-          <div className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-gradient-card">
-            <Image src={p.image} alt="" fill sizes="96px" className="object-cover transition duration-500 group-hover:scale-105" />
-          </div>
-          <div className="min-w-0 py-1">
-            <span
-              className={cn(
-                "inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                p.available ? "bg-emerald-50 text-emerald-700" : "bg-accent text-primary",
-              )}
-            >
-              {p.status}
-            </span>
-            <p className="mt-1.5 font-bold leading-snug text-primary">{p.navLabel}</p>
-            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{p.blurb}</p>
-          </div>
-        </Link>
-      ))}
-      <Link
-        href="/technology"
-        className="flex items-center gap-1.5 self-center px-4 py-2 text-sm font-semibold text-brand hover:underline"
-      >
-        Our technology <ArrowRight className="size-4" />
-      </Link>
-    </div>
-  );
-}
-
 /** Calls onChange after client-side navigations. Isolated so usePathname stays inside Suspense. */
 function RouteChangeListener({ onChange }: { onChange: () => void }) {
   const pathname = usePathname();
@@ -376,7 +343,6 @@ const primaryNav: (
   { type: "menu", key: "sizes", label: "Shop by size" },
   { type: "menu", key: "merv", label: "Shop by MERV" },
   { type: "link", href: "/custom-filters", label: "Custom Filters" },
-  { type: "menu", key: "technology", label: "Clean Air Technology" },
 ];
 
 const supportHref = brand.supportEmail ? `mailto:${brand.supportEmail}` : "/contact";
@@ -513,7 +479,7 @@ export function Header() {
             onMouseEnter={() => openMenu(menu)}
           >
             <div className="container-page py-8">
-              {menu === "sizes" ? <SizesPanel /> : menu === "merv" ? <MervPanel /> : <TechnologyPanel />}
+              {menu === "sizes" ? <SizesPanel /> : <MervPanel />}
             </div>
           </div>
         ) : null}
@@ -538,19 +504,6 @@ function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange: (o: bo
         <div className="space-y-6 p-4">
           <SearchBox onDone={() => onOpenChange(false)} />
           <div>
-            <p className="eyebrow mb-2">Clean Air Technology</p>
-            <ul className="space-y-1">
-              {technologyNav.map((p) => (
-                <li key={p.slug}>
-                  <Link href={p.href} className="flex items-center justify-between rounded-xl px-3 py-2.5 font-semibold text-primary hover:bg-accent">
-                    {p.navLabel}
-                    <span className="text-xs font-medium text-muted-foreground">{p.status}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
             <p className="eyebrow mb-2">Popular 1&quot; sizes</p>
             <div className="flex flex-wrap gap-2">
               {popular.map((s) => (
@@ -571,7 +524,7 @@ function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange: (o: bo
             </div>
           </div>
           <ul className="space-y-1 border-t border-lavender pt-4">
-            {[{ label: "Shop all filters", href: "/shop" }, { label: "Custom Filters", href: "/custom-filters" }, { label: "Technology", href: "/technology" }, ...mainNav, { label: "Business Account", href: "/business-account" }, { label: "Support", href: supportHref }].map((n) => (
+            {[{ label: "Shop all filters", href: "/shop" }, { label: "Custom Filters", href: "/custom-filters" }, ...mainNav, { label: "Business Account", href: "/business-account" }, { label: "Support", href: supportHref }].map((n) => (
               <li key={n.href}>
                 <Link href={n.href} className="block rounded-xl px-3 py-2.5 font-semibold text-foreground hover:bg-accent">
                   {n.label}

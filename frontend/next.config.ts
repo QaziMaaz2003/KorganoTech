@@ -20,6 +20,14 @@ const nextConfig: NextConfig = {
   },
   // The browser talks to the NestJS API through this origin, so the httpOnly
   // session cookie is first-party in development and production alike.
+  // Traditional filters only: the retired technology pages go to the shop.
+  async redirects() {
+    return [
+      { source: "/technology", destination: "/shop", permanent: true },
+      { source: "/pathogen-air-filters", destination: "/shop", permanent: true },
+      { source: "/environmental-air-filters", destination: "/shop", permanent: true },
+    ];
+  },
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }];
   },

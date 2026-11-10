@@ -14,8 +14,7 @@ export function Footer() {
               <img src="/images/korganotech-logo.png" alt="KorganoTech" className="h-14 w-auto" />
             </div>
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/70">
-              {brand.tagline}. Engineered air filtration for HVAC systems, pathogen capture research, and emerging
-              environmental applications.
+              {brand.tagline}. Pleated HVAC air filters in standard and custom sizes, made in Livermore, California.
             </p>
             <address className="mt-6 space-y-1 text-sm not-italic text-white/80">
               <p className="font-semibold text-white">KorganoTech</p>

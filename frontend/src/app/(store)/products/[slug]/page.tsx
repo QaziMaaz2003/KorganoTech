@@ -46,7 +46,7 @@ async function ProductContent(props: PageProps<"/products/[slug]">) {
         <Link href="/" className="hover:text-primary">Home</Link> /{" "}
         <Link href="/shop" className="hover:text-primary">Shop</Link> /{" "}
         <Link
-          href={product.category.slug === "hvac" ? "/hvac-air-filters" : product.category.slug === "pathogen" ? "/pathogen-air-filters" : "/environmental-air-filters"}
+          href="/hvac-air-filters"
           className="hover:text-primary"
         >
           {product.category.name}

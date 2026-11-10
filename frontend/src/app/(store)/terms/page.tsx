@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { aboutCopy, pathogenCopy } from "@/lib/site";
+import { aboutCopy } from "@/lib/site";
 import { PolicyPage } from "@/components/content/policy";
 
 export const metadata: Metadata = { title: "Terms of Service" };
@@ -31,7 +31,6 @@ export default function TermsPage() {
       </p>
       <h2>Product information</h2>
       <p>{aboutCopy.disclaimer}</p>
-      <p>{pathogenCopy.disclaimer}</p>
       <p>Product capabilities are subject to testing, validation, and applicable regulations.</p>
       <h2>Accounts</h2>
       <p>You are responsible for keeping your password confidential and for activity under your account.</p>

@@ -15,31 +15,7 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
     items: [
       {
         q: "What types of air filters does KorganoTech offer?",
-        a: "KorganoTech manufactures high-performance MERV 11 and MERV 13 pleated HVAC air filters using traditional melt blown filtration media. We are also developing a nanotechnology-based Pathogen Air Filter and an Environmental CO₂-capture filter for landfill applications; those two are not yet available for purchase.",
-      },
-      {
-        q: "What are Pathogen Air Filters?",
-        a: (
-          <>
-            KorganoTech is developing a nanotechnology-based air filter designed to capture and neutralize airborne
-            pathogens. It is in the research and development phase, is not yet registered as a pesticide or pesticide
-            device, and is not commercially available. <Link href="/pathogen-air-filters">Learn about the program</Link>.
-          </>
-        ),
-      },
-      {
-        q: "Are Pathogen Air Filters available for purchase?",
-        a: "Not yet. You can register your interest on the Pathogen Air Filters page and we'll let you know when that changes.",
-      },
-      {
-        q: "What are Environmental Air Filters?",
-        a: (
-          <>
-            An automated carbon-capture and methane-recovery system developed with Lawrence Livermore National Laboratory
-            that separates CO₂ from landfill gas using a reusable filter media. It is in development for landfill
-            applications. <Link href="/environmental-air-filters">See the technology</Link>.
-          </>
-        ),
+        a: "KorganoTech manufactures high-performance MERV 11 and MERV 13 pleated HVAC air filters using traditional melt blown filtration media.",
       },
       {
         q: "Which MERV rating should I choose?",

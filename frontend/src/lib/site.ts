@@ -107,11 +107,6 @@ export const mainNav = [
   { label: "Resources", href: "/resources" },
 ];
 
-export const technologyNav = programs.filter((p) => p.slug !== "hvac").map((p) => ({
-  ...p,
-  navLabel: p.slug === "pathogen" ? "Pathogen Air Filter" : "Environmental Filters",
-}));
-
 export const footerNav = [
   {
     title: "Shop Filters",
@@ -142,7 +137,6 @@ export const footerNav = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
-      { label: "Clean Air Technology", href: "/technology" },
       { label: "Contact Sales", href: "/contact" },
       { label: "My Account", href: "/account" },
       { label: "Track an Order", href: "/account/orders" },

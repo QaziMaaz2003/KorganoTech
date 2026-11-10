@@ -128,41 +128,7 @@ export const articles: Article[] = [
       {
         heading: "Capture is not deactivation",
         paragraphs: [
-          "Traditional filters hold particles; they don't change them. That is the gap KorganoTech's Pathogen Air Filter program is researching — a nanotechnology-based media designed to capture and neutralize airborne pathogens. That product is still under development and is not commercially available.",
-        ],
-      },
-    ],
-  },
-  {
-    slug: "future-of-environmental-filtration",
-    category: "Innovation",
-    title: "The Future of Environmental Filtration",
-    excerpt: "Where filtration research is heading for environmental applications.",
-    minutes: 6,
-    image: "/images/filter-environmental.jpg",
-    sections: [
-      {
-        paragraphs: [
-          "Filtration isn't only about the air indoors. The same design and manufacturing experience behind HVAC filters can be applied to gas separation — and landfills are one of the most important places to do it.",
-        ],
-      },
-      {
-        heading: "The landfill-gas problem",
-        paragraphs: [
-          "As buried organic waste breaks down it produces landfill gas that is roughly half methane and half carbon dioxide. Methane is at least 28 times more effective than CO₂ at trapping heat over 100 years, so capturing it has an outsized effect.",
-        ],
-      },
-      {
-        heading: "Separating CO₂ from methane",
-        paragraphs: [
-          "KorganoTech's Environmental Filters program, developed with Lawrence Livermore National Laboratory, passes landfill gas through a selective CO₂ filter media. CO₂ is held in the media while methane passes through for recovery as renewable natural gas or fuel for power.",
-          "When sensors show the media is loaded, the system swaps cartridges and regenerates the media with low-energy heat so it can be reused, and the released CO₂ is collected for storage or reuse.",
-        ],
-      },
-      {
-        heading: "Where it stands",
-        paragraphs: [
-          "The technology is at TRL 6 and in development for landfill applications. Performance figures come from laboratory studies and screening models; results at a specific site require pilot testing.",
+          "Traditional filters hold particles; they don't change them. That is why a filter should be replaced on schedule: a clogged filter holds more dust but restricts airflow, so check it and swap it at the interval that suits its thickness.",
         ],
       },
     ],

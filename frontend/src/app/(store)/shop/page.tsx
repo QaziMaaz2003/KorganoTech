@@ -95,17 +95,6 @@ async function ShopResults({ searchParams }: { searchParams: Promise<SP> }) {
         <div className="flex items-center gap-2 text-sm font-bold text-primary">
           <SlidersHorizontal className="size-4" /> Filters
         </div>
-        <div>
-          <p className="eyebrow mb-3">Product</p>
-          <div className="flex flex-wrap gap-2">
-            <FacetLink active={!current.category} href={hrefWith(current, { category: null })}>All</FacetLink>
-            {programs.map((p) => (
-              <FacetLink key={p.slug} active={current.category === p.slug} href={hrefWith(current, { category: p.slug })}>
-                {p.slug === "hvac" ? "HVAC" : p.slug === "pathogen" ? "Pathogen" : "Environmental"}
-              </FacetLink>
-            ))}
-          </div>
-        </div>
         {data.facets.mervRatings.length ? (
           <div>
             <p className="eyebrow mb-3">MERV rating</p>
