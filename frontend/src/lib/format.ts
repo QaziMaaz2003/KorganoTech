@@ -52,6 +52,7 @@ export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
   CARD: "Card (Stripe)",
+  INVOICE: "Invoice, Net 30",
   COD: "Cash on Delivery (earlier order)",
 };
 

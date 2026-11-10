@@ -196,6 +196,10 @@ export class UpdatePaymentDto {
   @IsOptional() @Transform(trim) @IsString() @MaxLength(500) note?: string;
 }
 
+export class RefundDto {
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(500) note?: string;
+}
+
 export class UpdateTrackingDto {
   @IsOptional() @Transform(trim) @IsString() @MaxLength(60) carrier?: string;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(80) trackingNumber?: string;

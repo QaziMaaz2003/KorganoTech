@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Check, CircleDot, Package, PackageCheck, Truck, XCircle, ClipboardCheck, Clock } from "lucide-react";
-import type { Order, OrderHistoryEntry, OrderStatus, PaymentStatus } from "@/lib/types";
+import type { Order, OrderHistoryEntry, OrderStatus, PaymentStatus, PaymentMethod } from "@/lib/types";
 import {
   dateTime,
   money,
@@ -22,10 +22,20 @@ export function StatusBadge({ status, className }: { status: OrderStatus; classN
   );
 }
 
-export function PaymentBadge({ status, className }: { status: PaymentStatus; className?: string }) {
+export function PaymentBadge({
+  status,
+  method,
+  className,
+}: {
+  status: PaymentStatus;
+  /** Invoice orders are not "awaiting payment": they are invoiced on delivery. */
+  method?: PaymentMethod;
+  className?: string;
+}) {
+  const label = method === "INVOICE" && status === "UNPAID" ? "Invoice (Net 30)" : PAYMENT_STATUS_LABEL[status];
   return (
     <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset", PAYMENT_STATUS_TONE[status], className)}>
-      {PAYMENT_STATUS_LABEL[status]}
+      {label}
     </span>
   );
 }

@@ -47,6 +47,16 @@ export class StripeService {
   private readonly logger = new Logger(StripeService.name);
   private client: Stripe | null = null;
 
+  /**
+   * Stripe Tax: Stripe works out sales tax from the delivery address on its checkout page.
+   * Off until STRIPE_TAX_ENABLED=true, which should only be set after Stripe Tax is switched
+   * on in the Stripe dashboard (with the business address and tax registrations), because
+   * Stripe rejects the checkout otherwise.
+   */
+  get taxEnabled(): boolean {
+    return process.env.STRIPE_TAX_ENABLED === 'true';
+  }
+
   /** True once STRIPE_SECRET_KEY is set. Checkout refuses to start without it. */
   get configured(): boolean {
     return Boolean(process.env.STRIPE_SECRET_KEY);
@@ -78,12 +88,17 @@ export class StripeService {
 
   async createCheckoutSession(input: CheckoutSessionInput) {
     const currency = input.currency.toLowerCase();
+    const tax = this.taxEnabled;
+    // General tangible goods; shipping has its own tax code.
+    const goods = tax ? ({ tax_behavior: 'exclusive' as const }) : {};
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = input.lines.map((l) => ({
       quantity: l.quantity,
       price_data: {
         currency,
         unit_amount: toCents(l.unitPrice),
+        ...goods,
         product_data: {
+          ...(tax ? { tax_code: 'txcd_99999999' } : {}),
           name: l.name,
           ...(l.description ? { description: l.description.slice(0, 500) } : {}),
           ...(l.imageUrl?.startsWith('https://') ? { images: [l.imageUrl] } : {}),
@@ -93,10 +108,16 @@ export class StripeService {
     if (input.shippingFee > 0) {
       line_items.push({
         quantity: 1,
-        price_data: { currency, unit_amount: toCents(input.shippingFee), product_data: { name: 'Shipping' } },
+        price_data: {
+          currency,
+          unit_amount: toCents(input.shippingFee),
+          ...goods,
+          product_data: { name: 'Shipping', ...(tax ? { tax_code: 'txcd_92010001' } : {}) },
+        },
       });
     }
-    if (input.tax > 0) {
+    // With Stripe Tax the tax is added by Stripe; otherwise a flat tax line from the store settings.
+    if (!tax && input.tax > 0) {
       line_items.push({
         quantity: 1,
         price_data: { currency, unit_amount: toCents(input.tax), product_data: { name: 'Sales tax' } },
@@ -114,6 +135,19 @@ export class StripeService {
                 email: input.email,
                 name: input.customer.name,
                 phone: input.customer.phone,
+                // Sales tax is worked out from where the order is delivered.
+                shipping: {
+                  name: input.customer.name,
+                  phone: input.customer.phone,
+                  address: {
+                    line1: input.customer.line1,
+                    line2: input.customer.line2 || undefined,
+                    city: input.customer.city,
+                    state: input.customer.state,
+                    postal_code: input.customer.postalCode,
+                    country: 'US',
+                  },
+                },
                 address: {
                   line1: input.customer.line1,
                   line2: input.customer.line2 || undefined,
@@ -136,6 +170,7 @@ export class StripeService {
           // Always charge in the store currency. Stripe's "adaptive pricing" would otherwise show
           // visitors a converted amount in their local currency (for example PKR).
           adaptive_pricing: { enabled: false },
+          ...(tax ? { automatic_tax: { enabled: true } } : {}),
           locale: 'en',
           line_items,
           success_url: input.successUrl,

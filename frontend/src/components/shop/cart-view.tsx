@@ -3,12 +3,23 @@
 import Link from "next/link";
 import { ArrowRight, CreditCard, Lock, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
+import { useStoreSettings } from "@/hooks/use-store-data";
 import { money } from "@/lib/format";
 import { CartLines, FreeShippingMeter } from "@/components/site/cart-drawer";
 import { ButtonLink } from "@/components/ui/button-link";
 import type { Cart } from "@/lib/types";
 
-export function OrderTotals({ cart }: { cart: Pick<Cart, "subtotal" | "shippingFee" | "tax" | "total"> }) {
+export function OrderTotals({
+  cart,
+  invoice = false,
+  taxAtPayment = false,
+}: {
+  cart: Pick<Cart, "subtotal" | "shippingFee" | "tax" | "total">;
+  /** Business invoice order: shipping and any tax are added on the invoice. */
+  invoice?: boolean;
+  /** Stripe works out sales tax on the payment page, so a cart cannot show it yet. */
+  taxAtPayment?: boolean;
+}) {
   return (
     <dl className="space-y-2 text-sm">
       <div className="flex justify-between">
@@ -17,8 +28,16 @@ export function OrderTotals({ cart }: { cart: Pick<Cart, "subtotal" | "shippingF
       </div>
       <div className="flex justify-between">
         <dt className="text-muted-foreground">Shipping</dt>
-        <dd className="font-semibold tabular-nums">{cart.shippingFee === 0 ? "Free" : money(cart.shippingFee)}</dd>
+        <dd className="font-semibold tabular-nums">
+          {invoice ? "On your invoice" : cart.shippingFee === 0 ? "Free" : money(cart.shippingFee)}
+        </dd>
       </div>
+      {taxAtPayment && cart.tax === 0 ? (
+        <div className="flex justify-between">
+          <dt className="text-muted-foreground">Sales tax</dt>
+          <dd className="text-muted-foreground">Calculated at payment</dd>
+        </div>
+      ) : null}
       {cart.tax > 0 ? (
         <div className="flex justify-between">
           <dt className="text-muted-foreground">Tax</dt>
@@ -35,6 +54,7 @@ export function OrderTotals({ cart }: { cart: Pick<Cart, "subtotal" | "shippingF
 
 export function CartView() {
   const { cart, isEmpty, isLoading, count } = useCart();
+  const { data: settings } = useStoreSettings();
 
   if (isEmpty) {
     return (
@@ -75,7 +95,7 @@ export function CartView() {
         <div className="surface-card space-y-5 p-6">
           <h2 className="text-lg font-bold text-primary">Order summary</h2>
           <FreeShippingMeter cart={cart} />
-          <OrderTotals cart={cart} />
+          <OrderTotals cart={cart} taxAtPayment={Boolean(settings?.taxAtCheckout)} />
           {blocked ? (
             <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
               Remove unavailable items to continue.

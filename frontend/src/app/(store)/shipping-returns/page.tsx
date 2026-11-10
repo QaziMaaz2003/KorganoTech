@@ -42,12 +42,18 @@ export default function ShippingReturnsPage() {
       </p>
       <h2>Returns</h2>
       <p>
-        Returns are accepted within <strong>30 days</strong> of delivery, for filters that are new and unused. Please do
-        not send anything back until you have a return authorization: email{" "}
-        <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a> with your order number and the reason for the return, and we will send
-        you a return authorization and instructions. Returned filters must be in their original packaging.
-        If a filter arrives damaged or is not the size you ordered, tell us in the same email and we will arrange a
-        replacement or refund.
+        Returns are accepted within <strong>30 days</strong> of delivery, for filters that are new and unused. There is
+        no restocking fee. Please do not send anything back until you have a return authorization (RMA): email{" "}
+        <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a> with your order number and the reason for the return.
+        We review every request and reply by email. Depending on the case, we will either ask you to send the filters
+        back (with instructions) or tell you to keep or discard them and refund you. If a filter arrives damaged or is
+        not the size you ordered, say so in the same email.
+      </p>
+      <h2>Refunds</h2>
+      <p>
+        Every refund is approved by our team, and we email you to confirm once it has been issued. Refunds go back to
+        the card you paid with, through Stripe. Allow up to <strong>7 days</strong> for the refund to be issued after
+        your return arrives (or after we approve it, if you do not need to send the filters back).
       </p>
       <h2>Custom-size filters</h2>
       <p>

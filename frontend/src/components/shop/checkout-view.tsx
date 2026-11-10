@@ -16,6 +16,7 @@ import { AddressFields, emptyAddress, formatAddress, type AddressInput } from "@
 import { ProductImage } from "./product-image";
 import { CustomFilterThumb } from "./custom-filter-thumb";
 import { OrderTotals } from "./cart-view";
+import { useStoreSettings } from "@/hooks/use-store-data";
 import { ButtonLink } from "@/components/ui/button-link";
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
@@ -249,6 +250,7 @@ export function CheckoutView() {
 }
 
 function CheckoutSummary() {
+  const { data: settings } = useStoreSettings();
   const { cart } = useCart();
   if (!cart) return <div className="h-64 animate-pulse rounded-2xl bg-white" />;
   return (
@@ -277,7 +279,7 @@ function CheckoutSummary() {
         ))}
       </ul>
       <div className="mt-4 border-t border-lavender pt-4">
-        <OrderTotals cart={cart} />
+        <OrderTotals cart={cart} taxAtPayment={Boolean(settings?.taxAtCheckout)} />
       </div>
     </div>
   );

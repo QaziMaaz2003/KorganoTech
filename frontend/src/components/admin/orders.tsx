@@ -5,7 +5,7 @@ import { useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CreditCard, Loader2, Mail, MapPin, Phone, ShoppingBag, Truck, User } from "lucide-react";
-import { get, patch, qs } from "@/lib/client-api";
+import { get, patch, post, qs } from "@/lib/client-api";
 import type { AdminOrder, AdminOrderRow, Paged } from "@/lib/admin-types";
 import type { OrderStatus, PaymentStatus } from "@/lib/types";
 import { dateTime, money, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL } from "@/lib/format";
@@ -116,7 +116,7 @@ export function AdminOrders({ initialStatus }: { initialStatus?: string }) {
                       </td>
                       <td className={cn(td, "tabular-nums")}>{o._count.items}</td>
                       <td className={td}><StatusBadge status={o.status} /></td>
-                      <td className={td}><PaymentBadge status={o.paymentStatus} /></td>
+                      <td className={td}><PaymentBadge status={o.paymentStatus} method={o.paymentMethod} /></td>
                       <td className={cn(td, "text-right font-semibold tabular-nums")}>{money(o.total)}</td>
                     </tr>
                   ))}
@@ -185,6 +185,15 @@ export function AdminOrderDetail({ id }: { id: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const refund = useMutation({
+    mutationFn: () => post<AdminOrder>(`/admin/orders/${id}/refund`, {}),
+    onSuccess: (o) => {
+      onSaved(o);
+      toast.success("Refund issued to the customer's card. A confirmation email was sent if email is set up.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (isLoading || !order) return <div className="h-96 animate-pulse rounded-2xl bg-white" />;
 
   const openAction = (s: OrderStatus) => {
@@ -202,7 +211,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
           <span className="flex flex-wrap items-center gap-3">
             Order {order.orderNumber}
             <StatusBadge status={order.status} />
-            <PaymentBadge status={order.paymentStatus} />
+            <PaymentBadge status={order.paymentStatus} method={order.paymentMethod} />
           </span>
         }
         description={`Placed ${dateTime(order.placedAt)} · ${PAYMENT_METHOD_LABEL[order.paymentMethod]}`}
@@ -276,16 +285,40 @@ export function AdminOrderDetail({ id }: { id: string }) {
                 disabled={payment.isPending}
                 onChange={(e) => payment.mutate(e.target.value as PaymentStatus)}
               >
-                <option value="UNPAID">{order.paymentMethod === "COD" ? "Unpaid — collect on delivery" : "Awaiting payment"}</option>
-                <option value="PAID">{order.paymentMethod === "COD" ? "Paid — cash collected" : "Paid"}</option>
+                <option value="UNPAID">
+                  {order.paymentMethod === "COD"
+                    ? "Unpaid — collect on delivery"
+                    : order.paymentMethod === "INVOICE"
+                      ? "Invoice not paid yet"
+                      : "Awaiting payment"}
+                </option>
+                <option value="PAID">
+                  {order.paymentMethod === "COD" ? "Paid — cash collected" : order.paymentMethod === "INVOICE" ? "Paid — invoice settled" : "Paid"}
+                </option>
                 <option value="REFUNDED">Refunded</option>
               </NativeSelect>
             </label>
             <p className="mt-2 text-xs text-muted-foreground">
               {order.paymentMethod === "COD"
                 ? "Marking an order delivered sets it to paid automatically."
-                : "Card payments are marked paid automatically when Stripe confirms them. Changing this by hand does not move money; use Stripe for manual refunds."}
+                : order.paymentMethod === "INVOICE"
+                  ? "Business order: invoice the customer on delivery (Net 30), then mark it paid here when the invoice is settled."
+                  : "Card payments are marked paid automatically when Stripe confirms them. Changing the status by hand does not move money. To return money after a return, use Approve refund below."}
             </p>
+            {order.paymentMethod === "CARD" && order.paymentStatus === "PAID" && order.stripePaymentIntentId ? (
+              <button
+                type="button"
+                className={`${btn.danger} mt-4 w-full`}
+                disabled={refund.isPending}
+                onClick={() => {
+                  if (confirm(`Refund ${money(order.total)} to the customer's card for ${order.orderNumber}? This cannot be undone. The customer is emailed a confirmation.`)) {
+                    refund.mutate();
+                  }
+                }}
+              >
+                {refund.isPending ? <Loader2 className="size-4 animate-spin" /> : null} Approve refund ({money(order.total)})
+              </button>
+            ) : null}
           </Panel>
           <TrackingForm key={`${order.id}:${order.carrier}:${order.trackingNumber}`} order={order} onSaved={onSaved} />
         </div>

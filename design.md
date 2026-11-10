@@ -160,9 +160,9 @@ All paths are under `/api`.
 | `settings` | `GET store` (shipping, tax, checkout switch, announcement) | Public |
 | `custom-filters` | `GET config`, `POST quote` (validates a size and returns its price) | Public |
 | `payments` | `POST stripe/webhook` (signature-verified Stripe events) | Stripe signature |
-| `business` | `POST requests` (multipart request form, rate limited); `GET me`, `POST me/reorder` (the signed-in business's saved filters; reorder adds them to the cart) | Requests public; rest signed in with a business |
+| `business` | `POST requests` (multipart request form, rate limited); `GET me` (the signed-in business's saved lines and prices), `POST me/order` (places an invoice order, no card) | Requests public; rest signed in with a business |
 | `health` | `GET /` runs `SELECT 1`; returns `503` with the reason if the database is unreachable | Public |
-| `admin/*` | stats; products (CRUD, images, variants, bulk generate); images; variants; inventory (adjust, movements); orders (list, detail, status, payment, tracking); customers; businesses (create from a request, logins, filter list); categories (+ image); inquiries; newsletter; settings | `ADMIN` only |
+| `admin/*` | stats; products (CRUD, images, variants, bulk generate); images; variants; inventory (adjust, movements); orders (list, detail, status, payment, tracking); customers; businesses (create from a request, logins, price list, Excel template / import / export); order refund approval; categories (+ image); inquiries; newsletter; settings | `ADMIN` only |
 
 ### 5.3 Authentication and sessions
 
@@ -294,7 +294,7 @@ erDiagram
 
 **Design notes**
 - **Catalog shape:** `Category` is one of the three programs (`hvac`, `pathogen`, `environmental`). A `Product` has many `ProductVariant`s. Each variant is one **size × MERV rating × pack quantity** with its own SKU, price, compare-at price, stock and low-stock threshold. The combination is unique per product.
-- **Business accounts:** `Business` has many `User` logins (`User.businessId`) and many `BusinessFilter` rows, each either a catalog variant or a saved custom size with a quantity and label. A business may be created from a `BUSINESS_ACCOUNT` inquiry (one account per request).
+- **Business accounts:** `Business` has many `User` logins (`User.businessId`) and many `BusinessFilter` rows. A row is a size, MERV rating and Nominal/Exact type (kept in `customSpec`), a number of filters, a label (school and building) and `unitPrice`, the agreed price per filter. A business order is an `INVOICE` order with no stock and no card step. A business may be created from a `BUSINESS_ACCOUNT` inquiry (one account per request).
 - **Order numbers** are human-friendly integers starting at 100001 (a database sequence).
 - **Deletes cascade down the catalog:** deleting a product removes its images and variants, and carts lose those lines. A category cannot be deleted while it has products (`Restrict`).
 - **Order history survives** because `OrderItem` carries its own copy of every displayed value.
@@ -590,7 +590,8 @@ Host the **backend only** on a platform that runs a normal long-lived Node serve
 | Visitor IP behind two proxies | Possible shared rate-limit bucket | Verify after deployment and adjust `TRUST_PROXY_HOPS` (10.5) |
 | Cloud name must match in two places | Images break if the frontend and backend disagree | Keep `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` equal to `CLOUDINARY_CLOUD_NAME` |
 | Stripe setup | Card checkout needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and a webhook endpoint | See the backend `.env.example` and README |
-| Business logins | No email provider, so the admin passes on the temporary password shown at creation | Add a provider such as Resend |
+| Emails | Sent only when `RESEND_API_KEY` and `MAIL_FROM` are set (domain verified in Resend); the admin still sees a new business's temporary password | Set the two variables after verifying the domain |
+| Stripe Tax | Off until `STRIPE_TAX_ENABLED=true`; Stripe Tax must first be switched on in the Stripe dashboard | Enable it, register the tax locations, then set the variable |
 | Subscriptions | Not built; deferred by the client | Revisit later |
 | Custom-size prices | Set from the client's document (base charge + per sq in) | Adjust in Admin → Settings → Custom size filters |
 | Catalog price oddities | Many 2-pack per-filter prices in the client's price list are higher than the 4-pack, so a 2-pack costs almost as much as a 4-pack | Imported as given; ask the client to confirm |

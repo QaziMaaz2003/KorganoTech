@@ -218,7 +218,7 @@ export type { PaymentStatus };
 
 // ─── Business accounts ──────────────────────────────────────────────────────
 
-import type { BusinessFilterLine } from "./types";
+import type { BusinessLine } from "./types";
 
 export interface BusinessRow {
   id: string;
@@ -240,11 +240,25 @@ export interface BusinessDetail {
   inquiryId: string | null;
   createdAt: string;
   users: { id: string; email: string; firstName: string; lastName: string; isActive: boolean; createdAt: string }[];
-  filters: BusinessFilterLine[];
+  filters: BusinessLine[];
 }
 
 /** Returned when a login is created or linked. The temporary password is shown once. */
 export interface BusinessLoginResult {
   business: BusinessDetail;
   login: { email: string; created: boolean; tempPassword: string | null };
+}
+
+/** What an Excel upload would do (preview) or did (applied). */
+export interface SheetImportSummary {
+  mode: "merge" | "replace";
+  applied: boolean;
+  customerName: string | null;
+  lines: number;
+  created: number;
+  updated: number;
+  removed: number;
+  withoutPrice: number;
+  errors: { row: number; message: string }[];
+  warnings: { row: number; message: string }[];
 }

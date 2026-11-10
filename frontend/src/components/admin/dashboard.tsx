@@ -160,7 +160,7 @@ export function Dashboard() {
                       </td>
                       <td className={td}>{o.user ? `${o.user.firstName} ${o.user.lastName}` : o.shipFullName}</td>
                       <td className={td}><StatusBadge status={o.status} /></td>
-                      <td className={td}><PaymentBadge status={o.paymentStatus} /></td>
+                      <td className={td}><PaymentBadge status={o.paymentStatus} method={o.paymentMethod} /></td>
                       <td className={`${td} text-right font-semibold tabular-nums`}>{money(o.total)}</td>
                     </tr>
                   ))}

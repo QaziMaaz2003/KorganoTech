@@ -17,7 +17,7 @@ import {
   type AuthUser,
 } from '../common/decorators/current-user.decorator.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
-import { BusinessRequestDto, ReorderDto } from './dto/business.dto.js';
+import { BusinessOrderDto, BusinessRequestDto } from './dto/business.dto.js';
 import { BusinessesService } from './businesses.service.js';
 
 @Controller('business')
@@ -44,11 +44,12 @@ export class BusinessController {
     return this.businesses.getMine(user.id);
   }
 
+  /** Places an invoice order (no card payment) for lines on the business's list. */
   @UseGuards(JwtAuthGuard)
-  @RateLimit({ limit: 30, ttl: 60_000 })
-  @Post('me/reorder')
-  @HttpCode(200)
-  reorder(@CurrentUser() user: AuthUser, @Body() dto: ReorderDto) {
-    return this.businesses.reorder(user.id, dto);
+  @RateLimit({ limit: 20, ttl: 60_000 })
+  @Post('me/order')
+  @HttpCode(201)
+  order(@CurrentUser() user: AuthUser, @Body() dto: BusinessOrderDto) {
+    return this.businesses.placeOrder(user.id, user.email, dto);
   }
 }

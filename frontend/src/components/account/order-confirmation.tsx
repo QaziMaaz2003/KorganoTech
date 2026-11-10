@@ -104,13 +104,17 @@ export function OrderConfirmation({ number }: { number: string }) {
           </>
         ) : (
           <>
-            <p className="eyebrow mt-5">{order.paymentStatus === "PAID" ? "Payment received" : "Order placed"}</p>
+            <p className="eyebrow mt-5">
+              {order.paymentMethod === "INVOICE" ? "Order received" : order.paymentStatus === "PAID" ? "Payment received" : "Order placed"}
+            </p>
             <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary sm:text-4xl">Thank you for your order!</h1>
             <p className="mt-3 text-muted-foreground">
               Your order <span className="font-bold text-foreground">{order.orderNumber}</span>{" "}
-              {order.paymentStatus === "PAID"
-                ? `is confirmed — we received your payment of ${money(order.total)}.`
-                : "has been received."}{" "}
+              {order.paymentMethod === "INVOICE"
+                ? "has been received. There is nothing to pay now: KorganoTech will send you an invoice when it is delivered (Net 30)."
+                : order.paymentStatus === "PAID"
+                  ? `is confirmed — we received your payment of ${money(order.total)}.`
+                  : "has been received."}{" "}
               You can follow its status any time from your account.
             </p>
           </>
@@ -145,7 +149,7 @@ export function OrderConfirmation({ number }: { number: string }) {
             ))}
           </ul>
           <div className="mt-4 border-t border-lavender pt-3">
-            <OrderTotals cart={order} />
+            <OrderTotals cart={order} invoice={order.paymentMethod === "INVOICE"} />
           </div>
         </div>
       </div>

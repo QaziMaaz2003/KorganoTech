@@ -45,6 +45,10 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
         q: "Which MERV rating should I choose?",
         a: "MERV 11 suits most homes, including those with pets or mild allergies. MERV 13 captures a higher share of smaller particles such as smoke and fine dust and suits households with allergies or higher-occupancy buildings. Check that your HVAC system is rated for the filter you choose.",
       },
+      {
+        q: "How do refunds work, and how long do they take?",
+        a: "Refunds are approved by our team and go back to the card you paid with. We email you to confirm when the refund has been made. Allow up to 7 days after your return arrives.",
+      },
     ],
   },
   {
@@ -116,9 +120,11 @@ const groups: { title: string; items: { q: string; a: React.ReactNode }[] }[] = 
         q: "Can I return a filter?",
         a: (
           <>
-            Yes. Returns are accepted within 30 days for filters that are new and unused. Email{" "}
-            <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a> with your order number and the reason, and we will send a
-            return authorization with instructions. Please don&apos;t send anything back before you have one. See our{" "}
+            Yes. Returns are accepted within 30 days for filters that are new and unused, with no restocking fee. Email{" "}
+            <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a> with your order number and the reason to request a
+            return authorization (RMA). We review it and reply by email: we may ask you to send the filters back, or
+            refund you and let you keep or discard them. Please don&apos;t send anything back before you have an
+            authorization. See our{" "}
             <Link href="/shipping-returns">Shipping &amp; Returns</Link> policy.
           </>
         ),

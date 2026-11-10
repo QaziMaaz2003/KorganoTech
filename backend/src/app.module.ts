@@ -13,6 +13,7 @@ import { DecimalInterceptor } from './common/interceptors/decimal.interceptor.js
 import { HealthController } from './health/health.controller.js';
 import { InquiriesModule } from './inquiries/inquiries.module.js';
 import { OrdersModule } from './orders/orders.module.js';
+import { MailModule } from './mail/mail.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { SettingsModule } from './settings/settings.module.js';
@@ -27,6 +28,7 @@ import { UsersModule } from './users/users.module.js';
     AuthModule,
     UsersModule,
     PaymentsModule,
+    MailModule,
     CustomFiltersModule,
     CatalogModule,
     CartModule,

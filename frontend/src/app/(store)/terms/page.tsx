@@ -25,7 +25,9 @@ export default function TermsPage() {
       </p>
       <h2>Shipping, cancellations and returns</h2>
       <p>
-        See our <Link href="/shipping-returns">Shipping &amp; Returns</Link> policy.
+        See our <Link href="/shipping-returns">Shipping &amp; Returns</Link> policy. Returns need a return authorization
+        from <a href="mailto:Support@KorganoTech.com">Support@KorganoTech.com</a>, refunds are approved by KorganoTech and issued to the
+        original card, and there is no restocking fee.
       </p>
       <h2>Product information</h2>
       <p>{aboutCopy.disclaimer}</p>

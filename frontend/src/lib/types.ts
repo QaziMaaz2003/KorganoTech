@@ -11,7 +11,8 @@ export type OrderStatus =
   | "CANCELLED";
 export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED";
 /** COD only appears on orders placed before card payments; it is no longer offered. */
-export type PaymentMethod = "COD" | "CARD";
+export type PaymentMethod = "COD" | "CARD" | "INVOICE";
+/** INVOICE: business accounts order now and KorganoTech invoices on delivery (Net 30). */
 
 /** A made-to-order filter as the customer specified it (inches). */
 export interface CustomSpec {
@@ -321,6 +322,8 @@ export interface StoreSettings {
   freeShippingThreshold: number | null;
   taxRate: number;
   checkoutEnabled: boolean;
+  /** True when Stripe works out sales tax on the payment page. */
+  taxAtCheckout: boolean;
   announcement: string | null;
 }
 
@@ -334,19 +337,30 @@ export interface Page<T> {
 
 // ─── Business accounts ──────────────────────────────────────────────────────
 
-/** One filter on a business's saved list, priced and checked against stock. */
-export type BusinessFilterLine = CartLine & {
-  label: string | null;
-  sortOrder: number;
-};
+export type SizeType = "NOMINAL" | "EXACT";
 
-export interface MyBusiness {
-  business: { id: string; name: string; phone: string | null; address: string | null };
-  filters: BusinessFilterLine[];
+/** One line on a business's list: a size and MERV rating, how many filters, and the agreed price per filter. */
+export interface BusinessLine {
+  id: string;
+  /** Where it is used, e.g. "Amadore - Building 1". */
+  label: string | null;
+  width: number;
+  height: number;
+  depth: number;
+  /** "12 x 16 x 1" */
+  size: string;
+  /** What the filter measures: 1/2" smaller each way for a nominal size, as given for an exact one. */
+  actualSize: string;
+  mervRating: number;
+  sizeType: SizeType;
+  quantity: number;
+  /** Null until KorganoTech sets a price; a line without a price cannot be ordered. */
+  unitPrice: number | null;
+  lineTotal: number | null;
+  sortOrder: number;
 }
 
-export interface ReorderResult {
-  added: number;
-  skipped: { filterId: string; reason: string }[];
-  cart: Cart;
+export interface MyBusiness {
+  business: { id: string; name: string; phone: string | null; address: string | null; paymentTerms: string };
+  filters: BusinessLine[];
 }

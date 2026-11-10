@@ -39,6 +39,8 @@ enum PaymentMethod {
   /// Legacy: kept so orders placed before card payments stay valid. Not offered at checkout.
   COD
   CARD
+  /// Business accounts: ordered now, invoiced manually by KorganoTech on delivery (Net 30).
+  INVOICE
 }
 
 enum PaymentStatus {
@@ -423,8 +425,11 @@ model BusinessFilter {
   variantId  String?
   customKey  String?
   customSpec Json?
-  /// Packs usually ordered; pre-fills the reorder screen.
+  /// Business lines: number of filters usually ordered (pre-fills the order screen).
+  /// Older lines (catalog or custom pack lines): packs.
   quantity   Int      @default(1)
+  /// Business lines: the agreed price per filter, set by KorganoTech. Null until priced.
+  unitPrice  Decimal? @db.Decimal(10, 2)
   sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

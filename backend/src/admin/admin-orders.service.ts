@@ -102,6 +102,11 @@ export class AdminOrdersService {
     return this.get(id);
   }
 
+  async refund(id: string, actorId: string, note?: string) {
+    await this.orders.refundPayment(id, actorId, note);
+    return this.get(id);
+  }
+
   async updateTracking(id: string, dto: UpdateTrackingDto) {
     const exists = await this.prisma.order.findUnique({ where: { id }, select: { id: true } });
     if (!exists) throw new NotFoundException('Order not found.');

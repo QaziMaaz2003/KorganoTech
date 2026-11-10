@@ -46,6 +46,7 @@ import {
   UpdateImageDto,
   UpdateInquiryDto,
   UpdateOrderStatusDto,
+  RefundDto,
   UpdatePaymentDto,
   UpdateProductDto,
   UpdateSettingsDto,
@@ -226,6 +227,12 @@ export class AdminOrdersController {
     @CurrentUser() user: AuthUser,
   ) {
     return this.orders.updatePayment(id, dto, user.id);
+  }
+
+  /** Approve a refund: the card is refunded through Stripe and the customer is emailed. */
+  @Post(':id/refund')
+  refund(@Param('id') id: string, @Body() dto: RefundDto, @CurrentUser() user: AuthUser) {
+    return this.orders.refund(id, user.id, dto.note);
   }
 
   @Patch(':id/tracking')

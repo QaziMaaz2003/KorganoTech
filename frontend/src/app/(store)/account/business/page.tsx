@@ -1,5 +1,5 @@
-import { BusinessReorder } from "@/components/account/business-reorder";
+import { BusinessOrder } from "@/components/account/business-order";
 
 export default function BusinessFiltersPage() {
-  return <BusinessReorder />;
+  return <BusinessOrder />;
 }

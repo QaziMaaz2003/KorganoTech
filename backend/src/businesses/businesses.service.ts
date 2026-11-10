@@ -11,32 +11,45 @@ import { randomBytes, randomInt } from 'node:crypto';
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CloudinaryService } from '../cloudinary/cloudinary.service.js';
-import { CartService } from '../cart/cart.service.js';
-import { CustomFilterService } from '../custom-filters/custom-filter.service.js';
-import {
-  customKey,
-  validateSpec,
-  type CustomSpec,
-} from '../custom-filters/custom-filter.config.js';
+import { OrdersService } from '../orders/orders.service.js';
+import { MailService } from '../mail/mail.service.js';
+import { businessLogin } from '../mail/mail.templates.js';
 import { paginate, toPage } from '../common/utils/format.js';
 import type {
   AddBusinessUserDto,
   BusinessFilterDto,
   BusinessListQueryDto,
+  BusinessOrderDto,
   BusinessRequestDto,
   CreateBusinessDto,
-  ReorderDto,
   UpdateBusinessDto,
   UpdateBusinessFilterDto,
 } from './dto/business.dto.js';
+import {
+  actualSize,
+  buildBusinessSheet,
+  lineKey,
+  parseBusinessSheet,
+  sizeLabel,
+  type SheetLine,
+  type SizeType,
+} from './business-sheet.js';
 
-const specOf = (s: CustomSpec): CustomSpec => ({
-  width: Number(s.width),
-  height: Number(s.height),
-  depth: Number(s.depth),
-  mervRating: Number(s.mervRating),
-  packQuantity: Number(s.packQuantity),
-});
+/** What a stored list line holds (the size lives in customSpec). */
+interface StoredSpec {
+  width: number;
+  height: number;
+  depth: number;
+  mervRating: number;
+  sizeType?: SizeType;
+}
+const specOf = (v: unknown): StoredSpec | null => {
+  if (!v || typeof v !== 'object') return null;
+  const o = v as Record<string, unknown>;
+  const [width, height, depth, mervRating] = [o.width, o.height, o.depth, o.mervRating].map(Number);
+  if (![width, height, depth, mervRating].every(Number.isFinite)) return null;
+  return { width, height, depth, mervRating, sizeType: o.sizeType === 'EXACT' ? 'EXACT' : 'NOMINAL' };
+};
 
 const userSelect = {
   id: true,
@@ -64,9 +77,9 @@ export class BusinessesService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cart: CartService,
-    private readonly customFilters: CustomFilterService,
     private readonly cloudinary: CloudinaryService,
+    private readonly orders: OrdersService,
+    private readonly mail: MailService,
   ) {}
 
   // ─── Public: request a business account ──────────────────────────────────
@@ -164,10 +177,9 @@ export class BusinessesService {
       }
       return created;
     });
-    return {
-      business: await this.get(business.id),
-      login: this.loginResult(dto.loginEmail, plan),
-    };
+    const result = this.loginResult(dto.loginEmail, plan);
+    void this.emailLogin(dto.name, result, dto.firstName, dto.lastName);
+    return { business: await this.get(business.id), login: result };
   }
 
   async update(id: string, dto: UpdateBusinessDto) {
@@ -189,7 +201,10 @@ export class BusinessesService {
     await this.mustExist(id);
     const plan = await this.planLogin(dto.email, dto.firstName, dto.lastName, id);
     await this.prisma.$transaction((tx) => this.applyLogin(tx, id, plan));
-    return { business: await this.get(id), login: this.loginResult(dto.email, plan) };
+    const business = await this.get(id);
+    const result = this.loginResult(dto.email, plan);
+    void this.emailLogin(business.name, result, dto.firstName, dto.lastName);
+    return { business, login: result };
   }
 
   async removeUser(id: string, userId: string) {
@@ -201,70 +216,49 @@ export class BusinessesService {
 
   async addFilter(id: string, dto: BusinessFilterDto) {
     await this.mustExist(id);
-    if (dto.variantId && dto.custom) {
-      throw new BadRequestException('A filter is either a catalog item or a custom size, not both.');
-    }
+    const line: SheetLine = {
+      label: dto.label || null,
+      width: dto.width,
+      height: dto.height,
+      depth: dto.depth,
+      mervRating: dto.mervRating,
+      sizeType: dto.sizeType,
+      quantity: dto.quantity,
+      unitPrice: dto.unitPrice ?? null,
+    };
+    await this.assertNew({ businessId: id, customKey: lineKey(line), label: line.label });
     const last = await this.prisma.businessFilter.aggregate({
       where: { businessId: id },
       _max: { sortOrder: true },
     });
-    const sortOrder = (last._max.sortOrder ?? -1) + 1;
-
-    if (dto.custom) {
-      const spec = specOf(dto.custom);
-      validateSpec(spec, await this.customFilters.getConfig());
-      const key = customKey(spec);
-      await this.assertNew({ businessId: id, customKey: key, label: dto.label || null });
-      await this.prisma.businessFilter.create({
-        data: {
-          businessId: id,
-          customKey: key,
-          customSpec: spec as unknown as Prisma.InputJsonValue,
-          quantity: dto.quantity,
-          label: dto.label || null,
-          sortOrder,
-        },
-      });
-    } else if (dto.variantId) {
-      const variant = await this.prisma.productVariant.findUnique({ where: { id: dto.variantId } });
-      if (!variant) throw new NotFoundException('That filter does not exist.');
-      await this.assertNew({ businessId: id, variantId: variant.id, label: dto.label || null });
-      await this.prisma.businessFilter.create({
-        data: {
-          businessId: id,
-          variantId: variant.id,
-          quantity: dto.quantity,
-          label: dto.label || null,
-          sortOrder,
-        },
-      });
-    } else {
-      throw new BadRequestException('Choose a catalog filter or enter a custom size.');
-    }
+    await this.prisma.businessFilter.create({
+      data: this.rowData(id, line, (last._max.sortOrder ?? -1) + 1),
+    });
     return this.get(id);
   }
 
   async updateFilter(id: string, filterId: string, dto: UpdateBusinessFilterDto) {
     const current = await this.ownFilter(id, filterId);
-    if (dto.label !== undefined) {
-      const label = dto.label || null;
-      if (label !== current.label) {
-        await this.assertNew(
-          {
-            businessId: id,
-            ...(current.variantId ? { variantId: current.variantId } : { customKey: current.customKey ?? undefined }),
-            label,
-          },
-          filterId,
-        );
-      }
+    const spec = specOf(current.customSpec);
+    const nextLabel = dto.label === undefined ? current.label : dto.label || null;
+    const nextType = dto.sizeType ?? spec?.sizeType ?? 'NOMINAL';
+    let customKey = current.customKey;
+    let customSpec = current.customSpec as Prisma.InputJsonValue | null;
+    if (spec && (nextType !== spec.sizeType || nextLabel !== current.label)) {
+      const next = { ...spec, sizeType: nextType };
+      customKey = lineKey(next);
+      customSpec = next as unknown as Prisma.InputJsonValue;
+      await this.assertNew({ businessId: id, customKey, label: nextLabel }, filterId);
     }
     await this.prisma.businessFilter.update({
       where: { id: filterId },
       data: {
         quantity: dto.quantity,
-        label: dto.label === undefined ? undefined : dto.label || null,
+        unitPrice: dto.unitPrice === undefined ? undefined : dto.unitPrice,
+        label: dto.label === undefined ? undefined : nextLabel,
         sortOrder: dto.sortOrder,
+        customKey,
+        customSpec: customSpec ?? undefined,
       },
     });
     return this.get(id);
@@ -286,36 +280,140 @@ export class BusinessesService {
         name: business.name,
         phone: business.phone,
         address: business.address,
+        /** Businesses are invoiced by KorganoTech on delivery. */
+        paymentTerms: 'Net 30',
       },
       filters: await this.pricedFilters(business.id),
     };
   }
 
-  /** Adds the chosen filters to the customer's cart at the quantities they picked. */
-  async reorder(userId: string, dto: ReorderDto) {
+  /** Places an invoice order for the chosen lines at their agreed price per filter. */
+  async placeOrder(userId: string, email: string, dto: BusinessOrderDto) {
     const business = await this.businessOf(userId);
     const rows = await this.prisma.businessFilter.findMany({ where: { businessId: business.id } });
-    const skipped: { filterId: string; reason: string }[] = [];
-    let added = 0;
-    for (const item of dto.items) {
+    const items = dto.items.map((item) => {
       const row = rows.find((r) => r.id === item.filterId);
-      if (!row) {
-        skipped.push({ filterId: item.filterId, reason: 'That filter is not on your list.' });
-        continue;
-      }
-      try {
-        await this.cart.addItem(
-          userId,
-          row.customSpec
-            ? { custom: specOf(row.customSpec as unknown as CustomSpec), quantity: item.quantity }
-            : { variantId: row.variantId!, quantity: item.quantity },
+      if (!row) throw new BadRequestException('One of the filters is not on your list any more. Please reload the page.');
+      const spec = specOf(row.customSpec);
+      if (!spec) throw new BadRequestException('One of the filters on your list is incomplete. Please contact us.');
+      if (row.unitPrice === null) {
+        throw new BadRequestException(
+          `${sizeLabel(spec)} (MERV ${spec.mervRating}) does not have a price yet. Please contact us to confirm it.`,
         );
-        added += 1;
-      } catch (e) {
-        skipped.push({ filterId: row.id, reason: (e as Error).message || 'Could not be added.' });
       }
+      return {
+        label: row.label,
+        spec: { ...spec, sizeType: spec.sizeType ?? ('NOMINAL' as SizeType) },
+        quantity: item.quantity,
+        unitPrice: row.unitPrice,
+      };
+    });
+    const merged = new Map<string, (typeof items)[number]>();
+    for (const i of items) {
+      const k = `${i.label ?? ''}|${lineKey(i.spec)}`;
+      const prev = merged.get(k);
+      if (prev) prev.quantity += i.quantity;
+      else merged.set(k, { ...i });
     }
-    return { added, skipped, cart: await this.cart.getCart(userId) };
+    return this.orders.placeInvoiceOrder(userId, email, business.name, [...merged.values()], dto);
+  }
+
+  // ─── Excel import / export (the standard order sheet) ────────────────────
+
+  /** The blank standard sheet, with two example rows. */
+  template() {
+    return buildBusinessSheet('Customer name', [], true);
+  }
+
+  async exportSheet(id: string) {
+    const business = await this.get(id);
+    const lines = business.filters.map((f) => {
+      const [school, ...rest] = (f.label ?? '').split(' - ');
+      const building = rest.join(' - ').replace(/^Building /i, '');
+      return {
+        school: rest.length ? school : f.label ?? '',
+        building: rest.length ? building : '',
+        label: f.label,
+        width: f.width,
+        height: f.height,
+        depth: f.depth,
+        mervRating: f.mervRating,
+        sizeType: f.sizeType,
+        quantity: f.quantity,
+        unitPrice: f.unitPrice,
+      };
+    });
+    return { name: business.name, buffer: await buildBusinessSheet(business.name, lines) };
+  }
+
+  /**
+   * Reads an uploaded standard sheet. Without apply it only reports what would change.
+   * merge updates lines that already exist (same place, size, MERV and type) and adds the new ones;
+   * replace makes the sheet the whole list.
+   */
+  async importSheet(id: string, file: Express.Multer.File | undefined, mode: 'merge' | 'replace', apply: boolean) {
+    const business = await this.get(id);
+    if (!file) throw new BadRequestException('Choose an Excel (.xlsx) file to upload.');
+    let parsed;
+    try {
+      parsed = await parseBusinessSheet(file.buffer);
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
+    }
+    const warnings = [...parsed.warnings];
+    if (parsed.customerName && parsed.customerName.trim().toLowerCase() !== business.name.trim().toLowerCase()) {
+      warnings.unshift({
+        row: 0,
+        message: `The sheet is for "${parsed.customerName}" but this business is "${business.name}".`,
+      });
+    }
+
+    const existing = await this.prisma.businessFilter.findMany({ where: { businessId: id } });
+    const keyOf = (label: string | null, customKey: string | null) => `${label ?? ''}|${customKey ?? ''}`;
+    const existingByKey = new Map(existing.map((r) => [keyOf(r.label, r.customKey), r]));
+    const sheetKeys = new Set(parsed.lines.map((l) => keyOf(l.label, lineKey(l))));
+    const toCreate = parsed.lines.filter((l) => !existingByKey.has(keyOf(l.label, lineKey(l))));
+    const toUpdate = parsed.lines.filter((l) => existingByKey.has(keyOf(l.label, lineKey(l))));
+    const toRemove = mode === 'replace' ? existing.filter((r) => !sheetKeys.has(keyOf(r.label, r.customKey))) : [];
+
+    const summary = {
+      mode,
+      applied: false,
+      customerName: parsed.customerName,
+      lines: parsed.lines.length,
+      created: toCreate.length,
+      updated: toUpdate.length,
+      removed: toRemove.length,
+      withoutPrice: parsed.lines.filter((l) => l.unitPrice === null).length,
+      errors: parsed.errors,
+      warnings,
+    };
+    if (!apply) return summary;
+    if (parsed.errors.length) {
+      throw new BadRequestException(
+        `Fix ${parsed.errors.length} row${parsed.errors.length === 1 ? '' : 's'} in the sheet first (first problem: row ${parsed.errors[0].row}, ${parsed.errors[0].message})`,
+      );
+    }
+    if (!parsed.lines.length) throw new BadRequestException('The sheet has no filter lines to import.');
+
+    await this.prisma.$transaction(async (tx) => {
+      if (toRemove.length) {
+        await tx.businessFilter.deleteMany({ where: { id: { in: toRemove.map((r) => r.id) } } });
+      }
+      for (const l of toUpdate) {
+        const row = existingByKey.get(keyOf(l.label, lineKey(l)))!;
+        await tx.businessFilter.update({
+          where: { id: row.id },
+          // A blank price in the sheet never wipes a price KorganoTech already set.
+          data: { quantity: l.quantity, ...(l.unitPrice === null ? {} : { unitPrice: l.unitPrice }) },
+        });
+      }
+      let sort = (existing.reduce((m, r) => Math.max(m, r.sortOrder), -1) ?? -1) + 1;
+      for (const l of toCreate) {
+        await tx.businessFilter.create({ data: this.rowData(id, l, sort++) });
+      }
+    });
+    return { ...summary, applied: true };
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────────────
@@ -334,28 +432,71 @@ export class BusinessesService {
     return user.business;
   }
 
-  /** The saved list with current prices and availability. */
+  /** The saved list: what each line is, how many, and its price per filter. */
   private async pricedFilters(businessId: string) {
     const rows = await this.prisma.businessFilter.findMany({
       where: { businessId },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
-    if (!rows.length) return [];
-    const priced = await this.cart.price(
-      rows.map((r) => ({
-        id: r.id,
-        variantId: r.variantId,
-        custom: r.customSpec ? specOf(r.customSpec as unknown as CustomSpec) : null,
-        quantity: r.quantity,
-      })),
-    );
-    return rows.map((r, i) => ({
-      ...priced.lines[i],
-      id: r.id,
-      label: r.label,
-      quantity: r.quantity,
-      sortOrder: r.sortOrder,
-    }));
+    return rows.flatMap((r) => {
+      const spec = specOf(r.customSpec);
+      if (!spec) return []; // a line from before invoice ordering that has no size to show
+      const sizeType = spec.sizeType ?? 'NOMINAL';
+      const unitPrice = r.unitPrice === null ? null : Number(r.unitPrice);
+      return [
+        {
+          id: r.id,
+          label: r.label,
+          width: spec.width,
+          height: spec.height,
+          depth: spec.depth,
+          size: sizeLabel(spec),
+          actualSize: actualSize({ ...spec, sizeType }),
+          mervRating: spec.mervRating,
+          sizeType,
+          quantity: r.quantity,
+          unitPrice,
+          lineTotal: unitPrice === null ? null : Math.round(unitPrice * r.quantity * 100) / 100,
+          sortOrder: r.sortOrder,
+        },
+      ];
+    });
+  }
+
+  private rowData(businessId: string, l: SheetLine, sortOrder: number): Prisma.BusinessFilterUncheckedCreateInput {
+    return {
+      businessId,
+      label: l.label,
+      customKey: lineKey(l),
+      customSpec: {
+        width: l.width,
+        height: l.height,
+        depth: l.depth,
+        mervRating: l.mervRating,
+        sizeType: l.sizeType,
+      } as Prisma.InputJsonValue,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      sortOrder,
+    };
+  }
+
+  /** Tells the customer their business login is ready. Never blocks creating the account. */
+  private async emailLogin(
+    businessName: string,
+    result: { email: string; tempPassword: string | null },
+    firstName?: string,
+    lastName?: string,
+  ) {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { email: result.email } });
+      const name = [firstName ?? user?.firstName, lastName ?? user?.lastName].filter(Boolean).join(' ') || 'there';
+      await this.mail.send(
+        businessLogin({ name, email: result.email, businessName, tempPassword: result.tempPassword, siteUrl: this.mail.siteUrl() }),
+      );
+    } catch (e) {
+      this.logger.warn(`Could not email the business login: ${(e as Error).message}`);
+    }
   }
 
   private async mustExist(id: string) {
@@ -371,7 +512,7 @@ export class BusinessesService {
 
   /** The same size may appear once per label (null counts as a label of its own). */
   private async assertNew(
-    where: { businessId: string; variantId?: string; customKey?: string; label: string | null },
+    where: { businessId: string; customKey: string; label: string | null },
     exceptId?: string,
   ) {
     const dup = await this.prisma.businessFilter.findFirst({

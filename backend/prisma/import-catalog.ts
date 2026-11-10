@@ -123,6 +123,8 @@ const REPLACEMENT: Record<number, string> = {
 const sku = (r: Row, pack: number) => `KT-${r.width}${r.height}${r.depth}-M${r.merv}-${pack}PK`;
 const slugOf = (r: Row) => `${r.size}-merv-${r.merv}-pleated-air-filter`;
 const cents = (n: number) => Math.round(n * 100) / 100;
+/** Actual size per the client: 1/2" smaller in width and length, 1/4" smaller in thickness (16x20x2 -> 15.5 x 19.5 x 1.75). */
+const actualSize = (r: Row) => `${r.width - 0.5} x ${r.height - 0.5} x ${r.depth - 0.25}`;
 
 // ─── Images ──────────────────────────────────────────────────────────────────
 
@@ -139,13 +141,18 @@ async function uploadImages(): Promise<Record<keyof typeof IMAGE_FILES, Img>> {
   for (const [key, file] of Object.entries(IMAGE_FILES) as [keyof typeof IMAGE_FILES, string][]) {
     const path = join(here, 'data', 'source', file);
     if (!existsSync(path)) throw new Error(`Missing image: ${path}`);
-    const res = await cloudinary.uploader.upload(path, {
-      public_id: `korganotech/catalog/${key}`,
-      overwrite: true,
-      resource_type: 'image',
-    });
-    out[key] = { url: res.secure_url, publicId: res.public_id, width: res.width, height: res.height };
-    console.log(`  uploaded ${file} -> ${res.secure_url}`);
+    const publicId = `korganotech/catalog/${key}`;
+    try {
+      const res = await cloudinary.uploader.upload(path, { public_id: publicId, overwrite: true, resource_type: 'image' });
+      out[key] = { url: res.secure_url, publicId: res.public_id, width: res.width, height: res.height };
+      console.log(`  uploaded ${file} -> ${res.secure_url}`);
+    } catch (e) {
+      // Re-running when the images are already on Cloudinary: reuse them if the upload itself fails.
+      if (process.env.REUSE_UPLOADED_IMAGES !== 'yes') throw e;
+      const url = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${publicId}.png`;
+      out[key] = { url, publicId, width: 1254, height: 1254 };
+      console.log(`  upload failed, reusing ${url}`);
+    }
   }
   return out;
 }
@@ -239,7 +246,7 @@ async function main() {
           width: r.width,
           height: r.height,
           depth: r.depth,
-          actualSize: null,
+          actualSize: actualSize(r),
           mervRating: r.merv,
           packQuantity: pack.qty,
           price,
@@ -249,7 +256,7 @@ async function main() {
           lowStockThreshold: 0,
           isActive: true,
         },
-        update: { price, compareAtPrice: null, stock: 100000, lowStockThreshold: 0, isActive: true },
+        update: { price, compareAtPrice: null, stock: 100000, lowStockThreshold: 0, isActive: true, actualSize: actualSize(r) },
       });
     }
     if (n % 20 === 0) console.log(`  ${n}/${rows.length}`);

@@ -151,7 +151,7 @@ function OrderRow({ order: o }: { order: OrderSummary }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={o.status} />
-          <PaymentBadge status={o.paymentStatus} />
+          <PaymentBadge status={o.paymentStatus} method={o.paymentMethod} />
         </div>
         <p className="w-24 text-right font-bold tabular-nums">{money(o.total)}</p>
       </Link>
@@ -266,7 +266,7 @@ export function MyOrderDetail({ number }: { number: string }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusBadge status={order.status} className="text-sm" />
-          <PaymentBadge status={order.paymentStatus} className="text-sm" />
+          <PaymentBadge status={order.paymentStatus} method={order.paymentMethod} className="text-sm" />
         </div>
       </div>
 
@@ -305,6 +305,8 @@ export function MyOrderDetail({ number }: { number: string }) {
                   ? "Refunded to your card"
                   : order.status === "CANCELLED"
                     ? "No payment due"
+                    : order.paymentMethod === "INVOICE"
+                      ? "No payment now. KorganoTech invoices you on delivery (Net 30)."
                     : order.paymentMethod === "COD"
                       ? `Pay ${money(order.total)} in cash on delivery`
                       : sync.isPending
@@ -315,7 +317,7 @@ export function MyOrderDetail({ number }: { number: string }) {
               <PayNowButton order={order} pending={payNow.isPending} onClick={() => payNow.mutate()} className="mt-4 w-full" />
             ) : null}
             <div className="mt-4 border-t border-lavender pt-4">
-              <OrderTotals cart={order} />
+              <OrderTotals cart={order} invoice={order.paymentMethod === "INVOICE"} />
             </div>
           </section>
           <section className="surface-card p-6">

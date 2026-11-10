@@ -36,6 +36,8 @@ export class SettingsService {
       freeShippingThreshold: s.freeShippingThreshold,
       taxRate: s.taxRate,
       checkoutEnabled: s.checkoutEnabled,
+      /** True when Stripe works out sales tax on the payment page (so the cart cannot show it yet). */
+      taxAtCheckout: process.env.STRIPE_TAX_ENABLED === 'true',
       announcement: s.announcement,
     };
   }

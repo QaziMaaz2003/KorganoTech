@@ -1,19 +1,23 @@
 import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsEmail,
+  IsIn,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
   Max,
   MaxLength,
   Min,
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { CustomSpecDto } from '../../custom-filters/dto/custom-filter.dto.js';
+import { CheckoutDto } from '../../orders/dto/orders.dto.js';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto.js';
 
 const trim = ({ value }: { value: unknown }) =>
@@ -108,45 +112,65 @@ export class AddBusinessUserDto {
   @IsOptional() @Transform(trim) @IsString() @MaxLength(60) lastName?: string;
 }
 
-export class BusinessFilterDto {
-  @IsOptional() @IsString() @MaxLength(40) variantId?: string;
+const SIZE_TYPES = ['NOMINAL', 'EXACT'] as const;
 
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => CustomSpecDto)
-  custom?: CustomSpecDto;
+/** One line on a business's list: a size, MERV rating, how many filters and the agreed price per filter. */
+export class BusinessFilterDto {
+  @Type(() => Number) @IsNumber() @Min(1) @Max(200) width: number;
+  @Type(() => Number) @IsNumber() @Min(1) @Max(200) height: number;
+  @Type(() => Number) @IsNumber() @Min(0.25) @Max(20) depth: number;
+  @Type(() => Number) @IsInt() @Min(1) @Max(16) mervRating: number;
+  @IsIn(SIZE_TYPES) sizeType: (typeof SIZE_TYPES)[number];
 
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(99)
+  @Max(100000)
   quantity: number;
+
+  /** Agreed price for one filter. Can be added or changed later. */
+  @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) @Max(100000) unitPrice?: number;
 
   @IsOptional() @Transform(trim) @IsString() @MaxLength(80) label?: string;
 }
 
 export class UpdateBusinessFilterDto {
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(99) quantity?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100000) quantity?: number;
+  /** Send null to clear the price. */
+  @IsOptional() @Type(() => Number) @ValidateIf((_o, v) => v !== null) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) @Max(100000) unitPrice?: number | null;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(80) label?: string;
+  @IsOptional() @IsIn(SIZE_TYPES) sizeType?: (typeof SIZE_TYPES)[number];
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(10000) sortOrder?: number;
 }
 
-export class ReorderItemDto {
+export class OrderItemDto {
   @IsString() @MaxLength(40) filterId: string;
 
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(99)
+  @Max(100000)
   quantity: number;
 }
 
-export class ReorderDto {
+/** A business places an order for some of the lines on its list. Delivery address as at checkout. */
+export class BusinessOrderDto extends CheckoutDto {
   @IsArray()
-  @ArrayMaxSize(100)
+  @ArrayMinSize(1, { message: 'Choose at least one filter to order.' })
+  @ArrayMaxSize(500)
   @ValidateNested({ each: true })
-  @Type(() => ReorderItemDto)
-  items: ReorderItemDto[];
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
+}
+
+export class ImportSheetDto {
+  /** merge: update matching lines and add new ones. replace: the sheet becomes the whole list. */
+  @IsOptional() @IsIn(['merge', 'replace']) mode?: 'merge' | 'replace';
+  /** false = preview only (default); true = save. Sent as a form field, so a string. */
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  apply?: boolean;
 }
 
 export class BusinessListQueryDto extends PaginationQueryDto {}

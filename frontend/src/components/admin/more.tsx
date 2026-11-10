@@ -253,7 +253,7 @@ export function AdminCustomerDetail({ id }: { id: string }) {
                       <td className={td}><Link href={`/admin/orders/${o.id}`} className="font-semibold text-primary hover:underline">{o.orderNumber}</Link></td>
                       <td className={cn(td, "text-muted-foreground")}>{date(o.placedAt)}</td>
                       <td className={td}><StatusBadge status={o.status} /></td>
-                      <td className={td}><PaymentBadge status={o.paymentStatus} /></td>
+                      <td className={td}><PaymentBadge status={o.paymentStatus} method={o.paymentMethod} /></td>
                       <td className={cn(td, "text-right font-semibold tabular-nums")}>{money(o.total)}</td>
                     </tr>
                   ))}

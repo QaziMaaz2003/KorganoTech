@@ -15,6 +15,8 @@ import type {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { StripeService } from '../payments/stripe.service.js';
+import { MailService } from '../mail/mail.service.js';
+import { orderConfirmation, orderShipped, refundIssued } from '../mail/mail.templates.js';
 import { CustomFilterService } from '../custom-filters/custom-filter.service.js';
 import {
   CUSTOM_PRODUCT_NAME,
@@ -62,6 +64,7 @@ export class OrdersService {
     private readonly settings: SettingsService,
     private readonly stripe: StripeService,
     private readonly customFilters: CustomFilterService,
+    private readonly mail: MailService,
   ) {}
 
   // ─── Checkout ────────────────────────────────────────────────────────────
@@ -273,6 +276,107 @@ export class OrdersService {
     }
   }
 
+  /**
+   * A business account's order: recorded and confirmed straight away, with no card payment.
+   * KorganoTech invoices it manually on delivery (Net 30) and marks it paid when the invoice is settled.
+   * Lines are priced per filter from the business's saved list, and have no stock.
+   */
+  async placeInvoiceOrder(
+    userId: string,
+    email: string,
+    businessName: string,
+    items: {
+      label: string | null;
+      spec: { width: number; height: number; depth: number; mervRating: number; sizeType: 'NOMINAL' | 'EXACT' };
+      quantity: number;
+      unitPrice: Prisma.Decimal | number;
+    }[],
+    dto: CheckoutDto,
+  ) {
+    const settings = await this.settings.get();
+    if (!settings.checkoutEnabled) {
+      throw new BadRequestException('Ordering is temporarily unavailable.');
+    }
+    if (!items.length) throw new BadRequestException('Choose at least one filter to order.');
+    const address = await this.resolveAddress(userId, dto);
+
+    const lines: Prisma.OrderItemCreateWithoutOrderInput[] = items.map((i) => {
+      const size = `${i.spec.width} x ${i.spec.height} x ${i.spec.depth}`;
+      const unit = ZERO.add(i.unitPrice);
+      const key = `${i.spec.width}X${i.spec.height}X${i.spec.depth}-M${i.spec.mervRating}-${i.spec.sizeType === 'EXACT' ? 'E' : 'N'}`;
+      return {
+        productName: 'Pleated Air Filter',
+        variantLabel: [i.label, size, `MERV ${i.spec.mervRating}`, i.spec.sizeType === 'EXACT' ? 'Exact size' : 'Nominal size']
+          .filter(Boolean)
+          .join(' · '),
+        sku: `BIZ-${key}`,
+        unitPrice: unit,
+        quantity: i.quantity,
+        lineTotal: unit.mul(i.quantity),
+        isCustom: true,
+        customSpec: i.spec as unknown as Prisma.InputJsonValue,
+      };
+    });
+    const subtotal = lines.reduce((sum, l) => sum.add(l.lineTotal as Prisma.Decimal), ZERO);
+    const note = `Invoice order for ${businessName} — KorganoTech invoices on delivery (Net 30)`;
+
+    const order = await this.prisma.$transaction(
+      async (tx) => {
+        const created = await tx.order.create({
+          data: {
+            user: { connect: { id: userId } },
+            status: 'CONFIRMED',
+            confirmedAt: new Date(),
+            paymentMethod: 'INVOICE',
+            paymentStatus: 'UNPAID',
+            currency: settings.currency,
+            subtotal,
+            // Shipping and any tax are added by KorganoTech on the invoice.
+            shippingFee: ZERO,
+            tax: ZERO,
+            total: subtotal,
+            email,
+            phone: address.phone,
+            shipFullName: address.fullName,
+            shipPhone: address.phone,
+            shipLine1: address.line1,
+            shipLine2: address.line2 || null,
+            shipCity: address.city,
+            shipState: address.state,
+            shipPostalCode: address.postalCode,
+            shipCountry: address.country || 'United States',
+            customerNote: dto.note || null,
+            items: { create: lines },
+            history: { create: { status: 'CONFIRMED', note, changedById: userId } },
+          },
+          include: orderDetailInclude,
+        });
+        if (dto.address && dto.saveAddress) {
+          const hasAny = await tx.address.count({ where: { userId } });
+          await tx.address.create({
+            data: {
+              userId,
+              fullName: dto.address.fullName,
+              phone: dto.address.phone,
+              line1: dto.address.line1,
+              line2: dto.address.line2 || null,
+              city: dto.address.city,
+              state: dto.address.state,
+              postalCode: dto.address.postalCode,
+              country: dto.address.country || 'United States',
+              label: dto.address.label || null,
+              isDefault: hasAny === 0,
+            },
+          });
+        }
+        return created;
+      },
+      { maxWait: 10_000, timeout: 30_000 },
+    );
+    void this.emailConfirmation(order.id);
+    return withLabel(order);
+  }
+
   private async resolveAddress(userId: string, dto: CheckoutDto) {
     if (dto.addressId) {
       const saved = await this.prisma.address.findFirst({
@@ -286,6 +390,81 @@ export class OrdersService {
     }
     if (dto.address) return dto.address;
     throw new BadRequestException('Please provide a delivery address.');
+  }
+
+  // ─── Emails ──────────────────────────────────────────────────────────────
+
+  private async loadForEmail(orderId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true, user: { select: { firstName: true } } },
+    });
+    if (!order) return null;
+    return { order, name: order.user?.firstName || order.shipFullName.split(' ')[0] || 'there' };
+  }
+
+  /** Order confirmation (paid card order, or a received invoice order). Never throws. */
+  private async emailConfirmation(orderId: string) {
+    try {
+      const loaded = await this.loadForEmail(orderId);
+      if (!loaded) return;
+      const { order, name } = loaded;
+      await this.mail.send(
+        orderConfirmation({
+          orderNumber: formatOrderNumber(order.number),
+          name,
+          email: order.email,
+          items: order.items.map((i) => ({ name: i.productName, label: i.variantLabel, quantity: i.quantity, lineTotal: i.lineTotal })),
+          subtotal: order.subtotal,
+          shippingFee: order.shippingFee,
+          tax: order.tax,
+          total: order.total,
+          invoice: order.paymentMethod === 'INVOICE',
+          siteUrl: this.mail.siteUrl(),
+        }),
+      );
+    } catch (e) {
+      this.logger.warn(`Could not email the order confirmation: ${(e as Error).message}`);
+    }
+  }
+
+  private async emailShipped(orderId: string) {
+    try {
+      const loaded = await this.loadForEmail(orderId);
+      if (!loaded) return;
+      const { order, name } = loaded;
+      await this.mail.send(
+        orderShipped({
+          orderNumber: formatOrderNumber(order.number),
+          name,
+          email: order.email,
+          carrier: order.carrier,
+          trackingNumber: order.trackingNumber,
+          siteUrl: this.mail.siteUrl(),
+        }),
+      );
+    } catch (e) {
+      this.logger.warn(`Could not email the shipping notice: ${(e as Error).message}`);
+    }
+  }
+
+  private async emailRefund(orderId: string) {
+    try {
+      const loaded = await this.loadForEmail(orderId);
+      if (!loaded) return;
+      const { order, name } = loaded;
+      await this.mail.send(
+        refundIssued({
+          orderNumber: formatOrderNumber(order.number),
+          name,
+          email: order.email,
+          amount: order.total,
+          siteUrl: this.mail.siteUrl(),
+        }),
+      );
+    } catch (e) {
+      this.logger.warn(`Could not email the refund notice: ${(e as Error).message}`);
+    }
   }
 
   // ─── Card payment (Stripe) ───────────────────────────────────────────────
@@ -374,7 +553,7 @@ export class OrdersService {
     try {
       const session = await this.stripe.getSession(order.stripeSessionId);
       if (session.payment_status === 'paid') {
-        await this.markPaid(order.id, this.paymentIntentId(session));
+        await this.markPaid(order.id, this.paymentIntentId(session), this.taxFrom(session));
       } else if (session.status === 'expired') {
         await this.cancelUnpaid(order.id, 'Payment was not completed in time');
       }
@@ -394,6 +573,13 @@ export class OrdersService {
     }
   }
 
+  /** Sales tax Stripe worked out for this payment (cents), when Stripe Tax is on. */
+  private taxFrom(session: Stripe.Checkout.Session): number | null {
+    if (!this.stripe.taxEnabled) return null;
+    const cents = session.total_details?.amount_tax;
+    return typeof cents === 'number' ? cents : null;
+  }
+
   private paymentIntentId(session: Stripe.Checkout.Session): string | null {
     const pi = session.payment_intent;
     return typeof pi === 'string' ? pi : (pi?.id ?? null);
@@ -407,7 +593,7 @@ export class OrdersService {
         const session = event.data.object;
         if (session.payment_status !== 'paid') return; // wait for async confirmation
         const orderId = session.metadata?.orderId ?? session.client_reference_id;
-        if (orderId) await this.markPaid(orderId, this.paymentIntentId(session));
+        if (orderId) await this.markPaid(orderId, this.paymentIntentId(session), this.taxFrom(session));
         return;
       }
       case 'checkout.session.expired':
@@ -428,7 +614,7 @@ export class OrdersService {
   }
 
   /** Marks an order paid and confirms it. If it was already cancelled, the money is returned. */
-  async markPaid(orderId: string, paymentIntentId: string | null) {
+  async markPaid(orderId: string, paymentIntentId: string | null, taxCents: number | null = null) {
     const outcome = await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({ where: { id: orderId } });
       if (!order || order.paymentStatus !== 'UNPAID') return 'noop' as const;
@@ -442,6 +628,10 @@ export class OrdersService {
           paymentExpiresAt: null,
           stripePaymentIntentId: paymentIntentId ?? order.stripePaymentIntentId,
           ...(order.status === 'PENDING' ? { status: 'CONFIRMED', confirmedAt: now } : {}),
+          // Stripe Tax: the tax is worked out on Stripe's page, so record it and the real total here.
+          ...(taxCents !== null
+            ? { tax: ZERO.add(taxCents).div(100), total: order.subtotal.add(order.shippingFee).add(ZERO.add(taxCents).div(100)) }
+            : {}),
         },
       });
       await tx.orderStatusHistory.create({
@@ -460,6 +650,34 @@ export class OrdersService {
     if (outcome === 'refund' && paymentIntentId) {
       await this.refundOrder(orderId, paymentIntentId, 'Refunded — the order had already been cancelled');
     }
+    if (outcome === 'paid') void this.emailConfirmation(orderId);
+  }
+
+  /**
+   * An admin approves a refund (for example after a return): the full payment goes back to the card
+   * through Stripe, the order is marked refunded and the customer is emailed a confirmation.
+   */
+  async refundPayment(orderId: string, actorId: string, note?: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found.');
+    if (order.paymentMethod !== 'CARD' || !order.stripePaymentIntentId) {
+      throw new BadRequestException('Only orders paid by card can be refunded here. Refund other orders outside the site and mark them refunded.');
+    }
+    if (order.paymentStatus === 'REFUNDED') throw new BadRequestException('This order has already been refunded.');
+    if (order.paymentStatus !== 'PAID') throw new BadRequestException('This order has not been paid, so there is nothing to refund.');
+    try {
+      await this.stripe.refund(order.stripePaymentIntentId);
+    } catch (e) {
+      this.logger.error(`Refund failed for order ${order.number}: ${(e as Error).message}`);
+      throw new BadRequestException('Stripe could not issue the refund. Check the payment in the Stripe dashboard.');
+    }
+    await this.prisma.$transaction([
+      this.prisma.order.update({ where: { id: orderId }, data: { paymentStatus: 'REFUNDED' } }),
+      this.prisma.orderStatusHistory.create({
+        data: { orderId, status: order.status, note: note?.trim() || 'Refund approved — payment returned to the card', changedById: actorId },
+      }),
+    ]);
+    void this.emailRefund(orderId);
   }
 
   /** Cancels an order that was never paid, releasing its stock. */
@@ -482,6 +700,7 @@ export class OrdersService {
           data: { orderId, status: order.status, note, changedById: null },
         }),
       ]);
+      void this.emailRefund(orderId);
     } catch (e) {
       this.logger.error(`Refund failed for order ${orderId}: ${(e as Error).message}`);
       const order = await this.prisma.order.findUnique({ where: { id: orderId } });
@@ -640,6 +859,7 @@ export class OrdersService {
     if (refundIntent) {
       await this.refundOrder(orderId, refundIntent, 'Payment refunded to the customer');
     }
+    if (next === 'SHIPPED') void this.emailShipped(orderId);
   }
 
   async setPaymentStatus(

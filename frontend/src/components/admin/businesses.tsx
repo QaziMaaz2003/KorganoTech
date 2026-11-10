@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Building2, Check, Copy, Loader2, Plus, Ruler, Search, Trash2, UserPlus } from "lucide-react";
-import { del, get, patch, post, qs } from "@/lib/client-api";
+import { Building2, Check, Copy, Download, Loader2, Plus, Trash2, Upload, UserPlus } from "lucide-react";
+import { api, del, get, patch, post, qs } from "@/lib/client-api";
 import type {
   BusinessDetail,
   BusinessLoginResult,
   BusinessRow,
-  InventoryRow,
   Paged,
+  SheetImportSummary,
 } from "@/lib/admin-types";
-import type { CustomFilterOptions } from "@/lib/types";
+import type { BusinessLine, SizeType } from "@/lib/types";
 import { date, money } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
@@ -385,18 +385,30 @@ function Logins({ b }: { b: BusinessDetail }) {
   );
 }
 
-function FilterRow({ businessId, f }: { businessId: string; f: BusinessDetail["filters"][number] }) {
+function FilterRow({ businessId, f }: { businessId: string; f: BusinessLine }) {
   const qc = useQueryClient();
   const [qty, setQty] = useState(String(f.quantity));
+  const [price, setPrice] = useState(f.unitPrice === null ? "" : String(f.unitPrice));
   const [label, setLabel] = useState(f.label ?? "");
-  const dirty = Number(qty) !== f.quantity || label !== (f.label ?? "");
+  const [type, setType] = useState<SizeType>(f.sizeType);
+  const dirty =
+    Number(qty) !== f.quantity || price !== (f.unitPrice === null ? "" : String(f.unitPrice)) || label !== (f.label ?? "") || type !== f.sizeType;
   const apply = (res: BusinessDetail) => {
     qc.setQueryData([...KEY, businessId], res);
     qc.invalidateQueries({ queryKey: KEY });
   };
   const save = useMutation({
-    mutationFn: () => patch<BusinessDetail>(`/admin/businesses/${businessId}/filters/${f.id}`, { quantity: Number(qty), label }),
-    onSuccess: (res) => { apply(res); toast.success("Filter updated."); },
+    mutationFn: () =>
+      patch<BusinessDetail>(`/admin/businesses/${businessId}/filters/${f.id}`, {
+        quantity: Number(qty),
+        unitPrice: price === "" ? null : Number(price),
+        label,
+        sizeType: type,
+      }),
+    onSuccess: (res) => {
+      apply(res);
+      toast.success("Line updated.");
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const remove = useMutation({
@@ -404,28 +416,35 @@ function FilterRow({ businessId, f }: { businessId: string; f: BusinessDetail["f
     onSuccess: apply,
     onError: (e: Error) => toast.error(e.message),
   });
-  const c = f.custom;
+  const total = price === "" ? null : Number(price) * (Number(qty) || 0);
   return (
     <tr>
       <td className={td}>
-        <p className="font-semibold text-primary">{f.product?.name ?? (f.isCustom ? "Custom-size filter" : "Filter")}</p>
-        <p className="text-xs text-muted-foreground">
-          {f.variant ? `${f.variant.label} · ${f.variant.sku}` : c ? `${c.width}×${c.height}×${c.depth} · MERV ${c.mervRating} · ${c.packQuantity}-pack` : ""}
-        </p>
-        {f.issue ? <p className="text-xs font-semibold text-destructive">{f.issue}</p> : null}
+        <input aria-label="School and building" placeholder="School - Building" className={cn(inputCls, "min-w-44")} value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} />
       </td>
       <td className={td}>
-        <input aria-label="Label" placeholder="e.g. Front office" className={cn(inputCls, "min-w-36")} value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} />
+        <p className="font-semibold text-primary whitespace-nowrap">{f.size}</p>
+        <p className="text-xs text-muted-foreground whitespace-nowrap">actual {f.actualSize}</p>
+      </td>
+      <td className={cn(td, "whitespace-nowrap")}>MERV {f.mervRating}</td>
+      <td className={td}>
+        <NativeSelect aria-label="Nominal or exact" value={type} onChange={(e) => setType(e.target.value as SizeType)}>
+          <option value="NOMINAL">Nominal</option>
+          <option value="EXACT">Exact</option>
+        </NativeSelect>
       </td>
       <td className={td}>
-        <input aria-label="Quantity" type="number" min={1} max={99} className={cn(inputCls, "w-20")} value={qty} onChange={(e) => setQty(e.target.value)} />
+        <input aria-label="Quantity" type="number" min={1} max={100000} className={cn(inputCls, "w-24")} value={qty} onChange={(e) => setQty(e.target.value)} />
       </td>
-      <td className={cn(td, "tabular-nums")}>{money(f.unitPrice)}</td>
+      <td className={td}>
+        <input aria-label="Price per filter" type="number" min={0} step="0.01" placeholder="Not set" className={cn(inputCls, "w-28")} value={price} onChange={(e) => setPrice(e.target.value)} />
+      </td>
+      <td className={cn(td, "tabular-nums whitespace-nowrap")}>{total === null ? "—" : money(total)}</td>
       <td className={cn(td, "text-right whitespace-nowrap")}>
         {dirty ? (
           <button type="button" className={btn.secondary} disabled={save.isPending} onClick={() => save.mutate()}>Save</button>
         ) : null}
-        <button type="button" aria-label="Remove filter" className={cn(btn.ghost, "hover:bg-destructive/10 hover:text-destructive")} onClick={() => remove.mutate()}>
+        <button type="button" aria-label="Remove line" className={cn(btn.ghost, "hover:bg-destructive/10 hover:text-destructive")} onClick={() => remove.mutate()}>
           <Trash2 className="size-4" />
         </button>
       </td>
@@ -433,111 +452,163 @@ function FilterRow({ businessId, f }: { businessId: string; f: BusinessDetail["f
   );
 }
 
-function AddFilter({ b }: { b: BusinessDetail }) {
+function AddLine({ b }: { b: BusinessDetail }) {
   const qc = useQueryClient();
-  const [mode, setMode] = useState<"catalog" | "custom">("catalog");
-  const [q, setQ] = useState("");
-  const [qty, setQty] = useState("1");
-  const [label, setLabel] = useState("");
-  const [custom, setCustom] = useState({ width: "", height: "", depth: "1", mervRating: "11", packQuantity: "1" });
-
-  const found = useQuery({
-    queryKey: ["admin", "inventory", "pick", q],
-    queryFn: () => get<Paged<InventoryRow>>(`/admin/inventory${qs({ q, pageSize: 8 })}`),
-    enabled: mode === "catalog" && q.trim().length >= 2,
-  });
-  const cfg = useQuery({
-    queryKey: ["custom-filters", "config"],
-    queryFn: () => get<CustomFilterOptions>("/custom-filters/config"),
-    enabled: mode === "custom",
-  });
-
+  const [v, setV] = useState({ label: "", width: "", height: "", depth: "1", mervRating: "11", sizeType: "NOMINAL", quantity: "1", unitPrice: "" });
+  const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setV((p) => ({ ...p, [k]: e.target.value }));
   const add = useMutation({
-    mutationFn: (body: Record<string, unknown>) => post<BusinessDetail>(`/admin/businesses/${b.id}/filters`, body),
+    mutationFn: () =>
+      post<BusinessDetail>(`/admin/businesses/${b.id}/filters`, {
+        label: v.label || undefined,
+        width: Number(v.width),
+        height: Number(v.height),
+        depth: Number(v.depth),
+        mervRating: Number(v.mervRating),
+        sizeType: v.sizeType,
+        quantity: Number(v.quantity),
+        unitPrice: v.unitPrice === "" ? undefined : Number(v.unitPrice),
+      }),
     onSuccess: (res) => {
       qc.setQueryData([...KEY, b.id], res);
       qc.invalidateQueries({ queryKey: KEY });
-      toast.success("Filter added to the list.");
-      setLabel("");
+      toast.success("Line added to the list.");
+      setV((p) => ({ ...p, width: "", height: "", quantity: "1" }));
     },
     onError: (e: Error) => toast.error(e.message),
   });
-  const common = { quantity: Number(qty) || 1, label: label || undefined };
+  return (
+    <form
+      className="mt-5 rounded-xl border border-lavender bg-muted/40 p-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        add.mutate();
+      }}
+    >
+      <p className="mb-3 font-semibold text-primary">Add a line</p>
+      <div className="grid gap-3 sm:grid-cols-4 lg:grid-cols-8">
+        <input aria-label="New line: school and building" placeholder="School - Building" className={cn(inputCls, "sm:col-span-2")} value={v.label} onChange={set("label")} maxLength={80} />
+        <input required aria-label="New line: width" placeholder="Width" type="number" step="any" min={1} className={inputCls} value={v.width} onChange={set("width")} />
+        <input required aria-label="New line: height" placeholder="Height" type="number" step="any" min={1} className={inputCls} value={v.height} onChange={set("height")} />
+        <input required aria-label="New line: depth" placeholder="Depth" type="number" step="any" min={0.25} className={inputCls} value={v.depth} onChange={set("depth")} />
+        <input required aria-label="New line: MERV" placeholder="MERV" type="number" min={1} max={16} className={inputCls} value={v.mervRating} onChange={set("mervRating")} />
+        <NativeSelect aria-label="New line: nominal or exact" value={v.sizeType} onChange={set("sizeType")}>
+          <option value="NOMINAL">Nominal</option>
+          <option value="EXACT">Exact</option>
+        </NativeSelect>
+        <input required aria-label="New line: quantity" placeholder="Qty" type="number" min={1} className={inputCls} value={v.quantity} onChange={set("quantity")} />
+        <input aria-label="New line: price per filter" placeholder="Price/filter" type="number" step="0.01" min={0} className={inputCls} value={v.unitPrice} onChange={set("unitPrice")} />
+        <button type="submit" className={cn(btn.secondary, "sm:col-span-2 lg:col-span-1")} disabled={add.isPending}>
+          {add.isPending ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />} Add
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function ExcelPanel({ b }: { b: BusinessDetail }) {
+  const qc = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [mode, setMode] = useState<"merge" | "replace">("merge");
+  const [summary, setSummary] = useState<SheetImportSummary | null>(null);
+
+  const run = useMutation({
+    mutationFn: (apply: boolean) => {
+      const fd = new FormData();
+      fd.append("file", file!);
+      fd.append("mode", mode);
+      fd.append("apply", String(apply));
+      return api<SheetImportSummary>(`/admin/businesses/${b.id}/import`, { method: "POST", body: fd });
+    },
+    onSuccess: (res) => {
+      setSummary(res);
+      if (res.applied) {
+        toast.success(`Imported ${res.lines} line${res.lines === 1 ? "" : "s"}.`);
+        qc.invalidateQueries({ queryKey: [...KEY, b.id] });
+        qc.invalidateQueries({ queryKey: KEY });
+        setFile(null);
+        if (fileRef.current) fileRef.current.value = "";
+      }
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   return (
     <div className="mt-5 rounded-xl border border-lavender bg-muted/40 p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="font-semibold text-primary">Add a filter</p>
-        <div className="inline-flex rounded-lg border border-border bg-white p-0.5 text-sm font-semibold">
-          {(["catalog", "custom"] as const).map((m) => (
-            <button key={m} type="button" onClick={() => setMode(m)} className={cn("rounded-md px-3 py-1.5", mode === m ? "bg-gradient-brand text-white" : "text-muted-foreground")}>
-              {m === "catalog" ? "From catalog" : "Custom size"}
-            </button>
-          ))}
-        </div>
+      <p className="font-semibold text-primary">Excel list</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Fill in the standard sheet (School, Building, Filter size, Nominal or Exact, MERV rating, Quantity, Price/filter), then upload it.
+        Quantity is a number of filters. You can also export this list, change it in Excel and upload it again.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <a href="/api/admin/businesses/template" className={btn.secondary}><Download className="size-4" /> Blank template</a>
+        <a href={`/api/admin/businesses/${b.id}/export`} className={btn.secondary}><Download className="size-4" /> Export this list</a>
       </div>
-      <div className="grid gap-3 sm:grid-cols-[1fr_7rem]">
-        <input aria-label="Label" placeholder="Label (optional), e.g. Front office" className={inputCls} value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} />
-        <input aria-label="Quantity" type="number" min={1} max={99} className={inputCls} value={qty} onChange={(e) => setQty(e.target.value)} />
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-lavender pt-4">
+        <input
+          ref={fileRef}
+          type="file"
+          aria-label="Excel file"
+          accept=".xlsx"
+          className="text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3.5 file:py-2 file:text-sm file:font-semibold file:text-primary"
+          onChange={(e) => {
+            setFile(e.target.files?.[0] ?? null);
+            setSummary(null);
+          }}
+        />
+        <label className="flex items-center gap-2 text-sm">
+          <input type="radio" name={`mode-${b.id}`} checked={mode === "merge"} onChange={() => { setMode("merge"); setSummary(null); }} className="accent-[var(--brand)]" />
+          Update and add
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="radio" name={`mode-${b.id}`} checked={mode === "replace"} onChange={() => { setMode("replace"); setSummary(null); }} className="accent-[var(--brand)]" />
+          Replace the whole list
+        </label>
+        <button type="button" className={btn.secondary} disabled={!file || run.isPending} onClick={() => run.mutate(false)}>
+          {run.isPending && !summary ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} Preview
+        </button>
       </div>
 
-      {mode === "catalog" ? (
-        <div className="mt-3">
-          <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input className={cn(inputCls, "pl-9")} placeholder="Search by size, product or SKU (e.g. 16x25x1)" value={q} onChange={(e) => setQ(e.target.value)} />
-          </div>
-          {found.data?.items.length ? (
-            <ul className="mt-2 divide-y divide-lavender overflow-hidden rounded-lg border border-lavender bg-white">
-              {found.data.items.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-                  <span className="min-w-0">
-                    <span className="block truncate font-semibold">{r.product.name}</span>
-                    <span className="block truncate text-xs text-muted-foreground">{r.label} · {r.sku} · {r.stock} in stock · {money(r.price)}</span>
-                  </span>
-                  <button type="button" className={btn.secondary} disabled={add.isPending} onClick={() => add.mutate({ variantId: r.id, ...common })}>
-                    <Plus className="size-4" /> Add
-                  </button>
-                </li>
+      {summary ? (
+        <div className="mt-4 rounded-lg bg-white p-4 text-sm" role="status">
+          <p className="font-semibold text-primary">
+            {summary.applied ? "Imported." : "Preview, nothing saved yet."}{" "}
+            {summary.created} new, {summary.updated} updated{summary.removed ? `, ${summary.removed} removed` : ""} ({summary.lines} lines in the sheet).
+          </p>
+          {summary.withoutPrice ? (
+            <p className="mt-1 text-amber-800">{summary.withoutPrice} line{summary.withoutPrice === 1 ? "" : "s"} have no price yet and can&apos;t be ordered until you add one.</p>
+          ) : null}
+          {summary.errors.length ? (
+            <ul className="mt-2 space-y-1 text-destructive">
+              {summary.errors.slice(0, 8).map((e, i) => (
+                <li key={i}>Row {e.row}: {e.message}</li>
               ))}
+              {summary.errors.length > 8 ? <li>…and {summary.errors.length - 8} more.</li> : null}
             </ul>
-          ) : q.trim().length >= 2 && !found.isFetching ? (
-            <p className="mt-2 text-sm text-muted-foreground">No matching filters.</p>
+          ) : null}
+          {summary.warnings.length ? (
+            <ul className="mt-2 space-y-1 text-muted-foreground">
+              {summary.warnings.slice(0, 6).map((w, i) => (
+                <li key={i}>{w.row ? `Row ${w.row}: ` : ""}{w.message}</li>
+              ))}
+              {summary.warnings.length > 6 ? <li>…and {summary.warnings.length - 6} more notes.</li> : null}
+            </ul>
+          ) : null}
+          {!summary.applied && !summary.errors.length && summary.lines > 0 ? (
+            <button
+              type="button"
+              className={cn(btn.primary, "mt-3")}
+              disabled={run.isPending}
+              onClick={() => {
+                if (summary.mode === "replace" && !confirm(`Replace this business's whole list with the ${summary.lines} lines in the sheet?`)) return;
+                run.mutate(true);
+              }}
+            >
+              {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} Apply import
+            </button>
           ) : null}
         </div>
-      ) : (
-        <form
-          className="mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-6"
-          onSubmit={(e) => {
-            e.preventDefault();
-            add.mutate({
-              custom: {
-                width: Number(custom.width),
-                height: Number(custom.height),
-                depth: Number(custom.depth),
-                mervRating: Number(custom.mervRating),
-                packQuantity: Number(custom.packQuantity),
-              },
-              ...common,
-            });
-          }}
-        >
-          <input required aria-label="Width" placeholder="Width (in)" type="number" step="any" min={1} className={inputCls} value={custom.width} onChange={(e) => setCustom((c) => ({ ...c, width: e.target.value }))} />
-          <input required aria-label="Height" placeholder="Height (in)" type="number" step="any" min={1} className={inputCls} value={custom.height} onChange={(e) => setCustom((c) => ({ ...c, height: e.target.value }))} />
-          <NativeSelect aria-label="Depth" value={custom.depth} onChange={(e) => setCustom((c) => ({ ...c, depth: e.target.value }))}>
-            {(cfg.data?.depths ?? [1, 2, 4]).map((d) => <option key={d} value={d}>{d}&quot; deep</option>)}
-          </NativeSelect>
-          <NativeSelect aria-label="MERV rating" value={custom.mervRating} onChange={(e) => setCustom((c) => ({ ...c, mervRating: e.target.value }))}>
-            {(cfg.data?.mervRatings ?? [11, 13]).map((m) => <option key={m} value={m}>MERV {m}</option>)}
-          </NativeSelect>
-          <NativeSelect aria-label="Pack size" value={custom.packQuantity} onChange={(e) => setCustom((c) => ({ ...c, packQuantity: e.target.value }))}>
-            {(cfg.data?.packs ?? [{ quantity: 1, discount: 0 }]).map((p) => <option key={p.quantity} value={p.quantity}>{p.quantity}-pack</option>)}
-          </NativeSelect>
-          <button type="submit" className={btn.secondary} disabled={add.isPending}>
-            {add.isPending ? <Loader2 className="size-4 animate-spin" /> : <Ruler className="size-4" />} Add
-          </button>
-        </form>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -557,37 +628,54 @@ export function AdminBusinessDetail({ id }: { id: string }) {
     );
   }
 
+  const unpriced = b.filters.filter((f) => f.unitPrice === null).length;
+  const listTotal = b.filters.reduce((n, f) => n + (f.lineTotal ?? 0), 0);
+
   return (
     <div className="space-y-6">
       <PageHeader
         back={{ href: "/admin/businesses", label: "Business accounts" }}
         title={b.name}
-        description={`Created ${date(b.createdAt)} · ${b.users.length} ${b.users.length === 1 ? "login" : "logins"} · ${b.filters.length} saved ${b.filters.length === 1 ? "filter" : "filters"}`}
+        description={`Created ${date(b.createdAt)} · ${b.users.length} ${b.users.length === 1 ? "login" : "logins"} · ${b.filters.length} saved ${b.filters.length === 1 ? "line" : "lines"} · invoiced on delivery, Net 30`}
       />
       <Details key={b.id + b.name} b={b} />
       <Logins b={b} />
-      <Panel title="Filter list" bodyClassName="p-0 sm:p-5">
+      <Panel title="Filter list and prices" bodyClassName="p-0 sm:p-5">
         {b.filters.length ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-lavender">
-                <tr>
-                  <th className={th}>Filter</th>
-                  <th className={th}>Label</th>
-                  <th className={th}>Qty</th>
-                  <th className={th}>Price</th>
-                  <th className={th} />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-lavender">
-                {b.filters.map((f) => <FilterRow key={`${f.id}:${f.quantity}:${f.label}`} businessId={b.id} f={f} />)}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-lavender">
+                  <tr>
+                    <th className={th}>School / building</th>
+                    <th className={th}>Size</th>
+                    <th className={th}>MERV</th>
+                    <th className={th}>Type</th>
+                    <th className={th}>Qty</th>
+                    <th className={th}>Price/filter</th>
+                    <th className={th}>Total</th>
+                    <th className={th} />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-lavender">
+                  {b.filters.map((f) => (
+                    <FilterRow key={`${f.id}:${f.quantity}:${f.unitPrice}:${f.label}:${f.sizeType}`} businessId={b.id} f={f} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="px-5 pt-3 text-xs text-muted-foreground sm:px-0">
+              List value at these quantities: <span className="font-semibold text-foreground">{money(listTotal)}</span>
+              {unpriced ? <> · <span className="font-semibold text-amber-800">{unpriced} line{unpriced === 1 ? "" : "s"} without a price</span> (the customer cannot order those)</> : null}
+            </p>
+          </>
         ) : (
-          <p className="p-5 text-sm text-muted-foreground sm:p-0">No filters yet. Add the sizes this business orders below — they&apos;ll see them when they sign in.</p>
+          <p className="p-5 text-sm text-muted-foreground sm:p-0">No filters yet. Upload the standard Excel sheet below, or add lines one at a time. The customer sees them when they sign in.</p>
         )}
-        <div className="p-5 pt-0 sm:p-0"><AddFilter b={b} /></div>
+        <div className="p-5 pt-0 sm:p-0">
+          <ExcelPanel b={b} />
+          <AddLine b={b} />
+        </div>
       </Panel>
     </div>
   );
