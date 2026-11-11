@@ -292,7 +292,7 @@ const pillars = [
   { title: "Our mission", body: aboutCopy.mission },
   { title: "What we make", body: aboutCopy.about[0] },
   { title: "Our commitment", body: aboutCopy.commitment[0] },
-  { title: "Why it matters", body: aboutCopy.motivation[2] },
+  { title: "Why it matters", body: aboutCopy.motivation[0] },
 ];
 
 export function Trusted() {

@@ -3,6 +3,11 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { QueryProductsDto } from './dto/query-products.dto.js';
 
+// Pathogen and Environmental are switched off: the store sells traditional filters only.
+// They stay in the database and the admin, but are never returned by the public catalog.
+// To bring them back, empty this list: const HIDDEN_CATEGORY_SLUGS: string[] = [];
+const HIDDEN_CATEGORY_SLUGS: string[] = ['pathogen', 'environmental'];
+
 const imageOrder: Prisma.ProductImageOrderByWithRelationInput[] = [
   { isPrimary: 'desc' },
   { sortOrder: 'asc' },
@@ -51,6 +56,7 @@ export class CatalogService {
 
   async listCategories() {
     const categories = await this.prisma.category.findMany({
+      where: { slug: { notIn: HIDDEN_CATEGORY_SLUGS } },
       orderBy: { sortOrder: 'asc' },
       include: {
         _count: { select: { products: { where: { status: 'ACTIVE' } } } },
@@ -64,7 +70,7 @@ export class CatalogService {
 
   async getCategory(slug: string) {
     const category = await this.prisma.category.findUnique({ where: { slug } });
-    if (!category) throw new NotFoundException('Category not found.');
+    if (!category || HIDDEN_CATEGORY_SLUGS.includes(category.slug)) throw new NotFoundException('Category not found.');
     const products = await this.prisma.product.findMany({
       where: { categoryId: category.id, status: 'ACTIVE' },
       include: listInclude,
@@ -79,8 +85,11 @@ export class CatalogService {
   // ─── Products ───────────────────────────────────────────────────────────
 
   async listProducts(query: QueryProductsDto) {
-    const where: Prisma.ProductWhereInput = { status: 'ACTIVE' };
-    if (query.category) where.category = { slug: query.category };
+    const where: Prisma.ProductWhereInput = {
+      status: 'ACTIVE',
+      category: { slug: { notIn: HIDDEN_CATEGORY_SLUGS } },
+    };
+    if (query.category) where.category = { slug: { equals: query.category, notIn: HIDDEN_CATEGORY_SLUGS } };
     if (query.type) where.filterType = { equals: query.type, mode: 'insensitive' };
     if (query.purchasable) where.isPurchasable = true;
     if (query.featured) where.isFeatured = true;
@@ -182,7 +191,7 @@ export class CatalogService {
 
   async getProduct(slug: string) {
     const product = await this.prisma.product.findFirst({
-      where: { slug, status: 'ACTIVE' },
+      where: { slug, status: 'ACTIVE', category: { slug: { notIn: HIDDEN_CATEGORY_SLUGS } } },
       include: {
         category: true,
         images: { orderBy: imageOrder },
@@ -194,6 +203,7 @@ export class CatalogService {
     const related = await this.prisma.product.findMany({
       where: {
         status: 'ACTIVE',
+        category: { slug: { notIn: HIDDEN_CATEGORY_SLUGS } },
         id: { not: product.id },
         OR: [{ categoryId: product.categoryId }, { isFeatured: true }],
       },
@@ -247,7 +257,11 @@ export class CatalogService {
         width: { not: null },
         height: { not: null },
         depth: { not: null },
-        product: { status: 'ACTIVE', isPurchasable: true },
+        product: {
+          status: 'ACTIVE',
+          isPurchasable: true,
+          category: { slug: { notIn: HIDDEN_CATEGORY_SLUGS } },
+        },
       },
       select: { size: true, width: true, height: true, depth: true, price: true, packQuantity: true },
     });

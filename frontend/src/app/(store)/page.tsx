@@ -6,7 +6,7 @@ import {
   BulkCompare,
   Guide,
   ShopByMerv,
-  ShopByProduct,
+  // ShopByProduct,
   SizesSection,
   SizesSkeleton,
   Trusted,
@@ -37,7 +37,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      <ShopByProduct />
+      {/* <ShopByProduct /> (lists the Pathogen and Environmental programs; re-enable together with them in lib/site.ts) */}
       <ShopByMerv />
       <Guide />
       <WhereCleanAirMatters />

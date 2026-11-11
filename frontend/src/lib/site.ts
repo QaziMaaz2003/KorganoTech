@@ -30,26 +30,27 @@ export const programs = [
     image: "/images/filter-hvac.jpg",
     blurb: "Reliable filtration solutions designed for everyday HVAC applications.",
   },
-  {
-    slug: "pathogen",
-    href: "/pathogen-air-filters",
-    name: "Pathogen Air Filters",
-    short: "Pathogen Air Filters",
-    status: "Under Development",
-    available: false,
-    image: "/images/filter-pathogen.jpg",
-    blurb: "A nanotechnology-based filter designed to capture and neutralize airborne pathogens.",
-  },
-  {
-    slug: "environmental",
-    href: "/environmental-air-filters",
-    name: "Environmental Air Filters",
-    short: "Environmental Air Filters",
-    status: "Under Development",
-    available: false,
-    image: "/images/filter-environmental.jpg",
-    blurb: "Next-generation filtration technology being developed for environmental and landfill applications.",
-  },
+  // Pathogen / Environmental (Clean Air Technology) is switched off: the store sells traditional filters only. Uncomment to bring it back.
+  //   {
+  //     slug: "pathogen",
+  //     href: "/pathogen-air-filters",
+  //     name: "Pathogen Air Filters",
+  //     short: "Pathogen Air Filters",
+  //     status: "Under Development",
+  //     available: false,
+  //     image: "/images/filter-pathogen.jpg",
+  //     blurb: "A nanotechnology-based filter designed to capture and neutralize airborne pathogens.",
+  //   },
+  //   {
+  //     slug: "environmental",
+  //     href: "/environmental-air-filters",
+  //     name: "Environmental Air Filters",
+  //     short: "Environmental Air Filters",
+  //     status: "Under Development",
+  //     available: false,
+  //     image: "/images/filter-environmental.jpg",
+  //     blurb: "Next-generation filtration technology being developed for environmental and landfill applications.",
+  //   },
 ] as const;
 
 // ─── Original korganotech.com copy ──────────────────────────────────────────
@@ -85,11 +86,11 @@ export const aboutCopy = {
     "Our mission is to enhance indoor air quality in schools, poultry farms, senior centers, and other high-risk environments.",
   about: [
     "KorganoTech specializes in manufacturing high-performance MERV 11 and MERV 13 air filters using traditional melt blown filtration media. These Air Filters are available to purchase at Walmart.com.",
-    "KorganoTech is also developing a nanotechnology-based air filtration system to neutralizes and deactivates captured pathogens without electricity and ensure a cleaner, and safer air. These filters are not currently available for purchase.",
+    // "KorganoTech is also developing a nanotechnology-based air filtration system to neutralizes and deactivates captured pathogens without electricity and ensure a cleaner, and safer air. These filters are not currently available for purchase.",
   ],
   motivation: [
-    "At the onset of the COVID-19 pandemic, many of us relied on traditional air filters to keep us safe by providing clean air. However, published research shows that these filters are largely ineffective against airborne pathogens such as viruses, bacteria, and other microorganisms. While they may capture particles, traditional filters do not have the ability to deactivate or destroy pathogens—unless paired with additional technologies like UV purification or heat sterilization.",
-    "Over time, trapped pathogens can accumulate and potentially be re-released into the air, contaminating homes, buildings, and vehicles. This critical gap in air safety inspired us to develop KorganoTech Pathogen Air Filters, with the mission to protect lives, reduce costs, and improve public health.",
+    //     "At the onset of the COVID-19 pandemic, many of us relied on traditional air filters to keep us safe by providing clean air. However, published research shows that these filters are largely ineffective against airborne pathogens such as viruses, bacteria, and other microorganisms. While they may capture particles, traditional filters do not have the ability to deactivate or destroy pathogens—unless paired with additional technologies like UV purification or heat sterilization.",
+    //     "Over time, trapped pathogens can accumulate and potentially be re-released into the air, contaminating homes, buildings, and vehicles. This critical gap in air safety inspired us to develop KorganoTech Pathogen Air Filters, with the mission to protect lives, reduce costs, and improve public health.",
     "Today, clean air matters more than ever because airborne diseases and viral outbreaks have had devastating effects on both public health and the global economy. We believe that investing in advanced air purification is no longer a luxury—it’s a necessity.",
   ],
   commitment: [
@@ -106,6 +107,11 @@ export const mainNav = [
   { label: "About Us", href: "/about" },
   { label: "Resources", href: "/resources" },
 ];
+
+// export const technologyNav = programs.filter((p) => p.slug !== "hvac").map((p) => ({
+//   ...p,
+//   navLabel: p.slug === "pathogen" ? "Pathogen Air Filter" : "Environmental Filters",
+// }));
 
 export const footerNav = [
   {
@@ -137,6 +143,7 @@ export const footerNav = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
+      // { label: "Clean Air Technology", href: "/technology" },
       { label: "Contact Sales", href: "/contact" },
       { label: "My Account", href: "/account" },
       { label: "Track an Order", href: "/account/orders" },

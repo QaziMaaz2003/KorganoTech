@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowRight, Building2, HeartHandshake, Lightbulb, Target } from "lucide-react";
+import { ArrowRight, Building2, HeartHandshake, Target /* Lightbulb (for the Motivation section) */ } from "lucide-react";
 import { aboutCopy, brand } from "@/lib/site";
 import { PageHero } from "@/components/content/page-hero";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -44,6 +44,7 @@ export default function AboutPage() {
         ))}
       </section>
 
+      {/* Motivation section (about the pathogen filters), switched off with them:
       <section aria-labelledby="motivation" className="bg-gradient-soft">
         <div className="container-page grid gap-10 py-20 lg:grid-cols-[1fr_1.5fr]">
           <div>
@@ -59,6 +60,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      */}
 
       <section className="container-page grid gap-6 py-16 lg:grid-cols-[1.3fr_1fr]">
         <div className="surface-card p-7">
@@ -82,7 +84,7 @@ export default function AboutPage() {
         <div className="flex flex-col justify-between rounded-[1.75rem] bg-gradient-brand p-8 text-white">
           <div>
             <h2 className="text-2xl font-extrabold tracking-tight">Work with KorganoTech</h2>
-            <p className="mt-3 text-white/80">Ask about bulk orders, custom sizes and landfill demonstration projects.</p>
+            <p className="mt-3 text-white/80">Ask about bulk orders and custom sizes.</p>
           </div>
           <ButtonLink href="/contact" variant="light" className="mt-6 self-start">
             Contact us <ArrowRight className="size-4" />
